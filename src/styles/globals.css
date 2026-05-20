@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --obsidian: #0a0a0f;
+  --blood-dark: #1a0505;
+  --gold-dim: #b8860b;
+  --gold-bright: #ffd700;
+  --ember: #c0392b;
+  --frost: #a8d8ea;
+  --mist: #8fa8b8;
+  --parchment: #f4e4c1;
+  --shadow: #1e1e2e;
+  --crimson: #8b0000;
+  --twilight: #2d1b4e;
+  --forest-dark: #0d1f0d;
+  --stone: #3a3a4a;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes textGlow {
+  0%, 100% { text-shadow: 0 0 10px rgba(184,134,11,0.5); }
+  50% { text-shadow: 0 0 20px rgba(255,215,0,0.8), 0 0 40px rgba(184,134,11,0.4); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.1); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.1); }
+  70% { transform: scale(1); }
+}
+
+@keyframes crimson-pulse {
+  0%, 100% { background-color: rgba(139,0,0,0.3); }
+  50% { background-color: rgba(139,0,0,0.6); }
+}
+
+@keyframes notifSlide {
+  0% { transform: translateX(100%); opacity: 0; }
+  15% { transform: translateX(0); opacity: 1; }
+  85% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+.notif-anim {
+  animation: notifSlide 3s ease-in-out forwards;
+}
+
+@keyframes bossBarPulse {
+  0%, 100% { box-shadow: 0 0 15px rgba(220,20,60,0.5), inset 0 0 10px rgba(0,0,0,0.3); }
+  50% { box-shadow: 0 0 30px rgba(220,20,60,0.9), inset 0 0 10px rgba(0,0,0,0.3); }
+}
+
+.boss-bar-fill {
+  animation: bossBarPulse 1.5s ease-in-out infinite;
+}
+
+.gold-shimmer {
+  background: linear-gradient(90deg, #b8860b, #ffd700, #ffe066, #ffd700, #b8860b);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+.dialogue-box {
+  background: linear-gradient(135deg, rgba(10,10,20,0.97), rgba(20,15,30,0.97));
+  border: 1px solid rgba(184,134,11,0.4);
+  box-shadow:
+    0 0 40px rgba(0,0,0,0.8),
+    inset 0 0 60px rgba(184,134,11,0.05);
+}
+
+.btn-fantasy {
+  background: linear-gradient(135deg, #1a0e05, #2d1a08);
+  border: 1px solid var(--gold-dim);
+  color: var(--parchment);
+  font-family: 'Cinzel', serif;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-fantasy::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(184,134,11,0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.btn-fantasy:hover {
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 20px rgba(184,134,11,0.4);
+  color: var(--gold-bright);
+}
+
+.btn-fantasy:hover::before {
+  opacity: 1;
+}
+
+.btn-fantasy:active {
+  transform: scale(0.97);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(10,10,15,0.8);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gold-dim);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-bright);
+}
+
+#game-canvas canvas {
+  display: block;
+}
+
+.tooltip {
+  background: linear-gradient(135deg, rgba(10,10,20,0.98), rgba(20,10,30,0.98));
+  border: 1px solid rgba(184,134,11,0.5);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.8), 0 0 20px rgba(184,134,11,0.1);
+}
+
+.vignette {
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.8) 100%);
+  pointer-events: none;
+}
+
+* { cursor: default; }
+button, [role="button"], a { cursor: pointer; }
+
+.hk-hud-text {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(0,0,0,0.8);
+}
