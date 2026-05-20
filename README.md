@@ -104,3 +104,5 @@ Game ini dibangun dengan teknologi web modern tingkat tinggi untuk menjamin perf
 
 ---
 *Dibuat dengan cinta untuk menemani petualangan sang ksatria terbuang oleh Adikk & Kak Celynn.* ❤️🛡️
+
+![Ending Scene](./public/assets/images/ending.png)

@@ -70,8 +70,7 @@ const DialogueSystem: React.FC = () => {
       charIndexRef.current++;
       setDisplayText(fullTextRef.current.slice(0, charIndexRef.current));
       if (!currentLine.isNarration) {
-        const ch = fullTextRef.current[charIndexRef.current - 1];
-        if (ch === ' ' || charIndexRef.current === 1) playBlip();
+        playBlip();
       }
       if (charIndexRef.current >= fullTextRef.current.length) {
         finishTyping();
