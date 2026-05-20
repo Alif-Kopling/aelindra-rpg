@@ -53,11 +53,6 @@ Seorang anak kecil bernama **Tam** menjadi orang pertama yang percaya kepadanya:
 Di desa tersebut, Edric juga memberikan sebuah pedang legendaris bernama **The Forsaken Blade**.
 
 ---
-<<<<<<< HEAD
-*Dibuat dengan cinta untuk menemani petualangan sang ksatria terbuang oleh Adikk & Kak Celynn.* ❤️🛡️
-
-![Ending Scene](./public/assets/images/ending.png)
-=======
 
 ### 4. Rahasia Kegelapan
 
@@ -99,6 +94,9 @@ Bertahun-tahun kemudian, sebuah patung didirikan di pusat ibu kota dengan tulisa
 
 > **“Ksatria yang dibenci dunia... yang menyelamatkan semua orang.”**
 
+
+![Ending Scene](./public/assets/images/ending.png)
+=======
 ---
 
 # Gameplay & Mekanik
