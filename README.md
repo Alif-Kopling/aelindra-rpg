@@ -1,106 +1,229 @@
-# Aelindra: The Forsaken Knight 🗡️✨
-*A Dark Fantasy Pixel Art Action RPG built with React & Phaser 3*
+# Aelindra: The Forsaken Knight
+
+*Game Action RPG 2D dark fantasy bergaya pixel art yang dibangun menggunakan React & Phaser 3.*
 
 ---
 
-## 📖 Latar Belakang & Lore Cerita (The Lore & Story)
+## Gambaran Umum
 
-Di Kerajaan **Aelindra**, di mana cahaya lilin hampir tak pernah bisa mencapai sudut-sudut terdalam aula kastil, hiduplah seorang ksatria yang sangat setia. Namanya adalah **Alden**. Ia mencintai rajanya, **Raja Aldric**, lebih dari ia mencintai namanya sendiri. Namun, pada suatu malam kelam di saat bintang-bintang menolak untuk bersinar, semua yang ia bela dan lindungi direnggut darinya.
+**Aelindra: The Forsaken Knight** adalah game action RPG side-scrolling yang berfokus pada cerita emosional, pertarungan intens, dan atmosfer dunia fantasi kelam. Pemain akan mengikuti perjalanan **Alden**, seorang ksatria kerajaan yang difitnah sebagai pembunuh rajanya sendiri.
 
-### 🎭 Alur Cerita Utama (The Story Arc)
-
-1. **Tragedi Pengkhianatan**: 
-   Alden menemukan sang raja tewas bersimbah darah di kamarnya. Tiba-tiba, seorang petinggi kerajaan bernama **Valther** memfitnah Alden sebagai pembunuh raja. Putri raja, **Evelyne**, yang diselimuti kesedihan mendalam, mempercayai fitnah tersebut dan memerintahkan Alden untuk dijatuhi hukuman mati di keesokan paginya.
-   
-2. **Pelarian di Keheningan**: 
-   Sebelum lonceng eksekusi berbunyi, **Old Edric**, seorang pandai besi tua yang percaya pada kesetiaan Alden, memotong rantai penjara Alden di kegelapan malam. Ia menyuruh Alden lari untuk bertahan hidup dan mencari kebenaran.
-   
-3. **Pemberontak yang Melindungi**: 
-   Dalam pelariannya di **Harrowmere Village**, Alden menggunakan kekuatannya untuk melindungi para penduduk dari serangan mayat hidup. Di sini, seorang anak kecil bernama **Tam** menjadi satu-satunya yang percaya padanya: *"Orang jahat tidak akan menyelamatkan ibuku dari monster."* Edric juga memberikan senjata khusus untuknya, **The Forsaken Blade**.
-   
-4. **Membongkar Rahasia Gelap**: 
-   Di **Fogbound Forest**, Alden bertemu dengan seorang biarawati pengembara (**Wandering Nun**). Terungkaplah kebenaran mengerikan bahwa Valther bersekutu dengan kegelapan kuno di bawah kastil. Raja Aldric harus dibunuh untuk menghancurkan segel pertama dari kekuatan kegelapan tersebut.
-   
-5. **Raja yang Hampa & Penyesalan**: 
-   Alden kembali to **Aelindra Castle Ruins** dan terpaksa bertarung melawan **The Blind King**—arwah hampa sang raja yang telah dirasuki kegelapan. Di saat yang sama, Putri Evelyne menemukan buku harian ayahnya yang membuktikan pengkhianatan Valther. Evelyne menemui Alden dan memohon maaf atas kesalahannya.
-   
-6. **Pertempuran Akhir & Segel Kematian**: 
-   Alden turun ke **Sunken Catacombs** dan menerobos **Ruined Battlefields**, mengalahkan **Ashen Knight**, hingga akhirnya berhadapan langsung dengan **Valther**.
-
-### 💀 Ending Tragis & Kepahlawanan (The Ending)
-Valther berhasil dikalahkan dan kegelapan kuno kembali disegel. Namun, luka-luka di tubuh Alden akibat pertempuran tersebut terlalu dalam. Di bawah langit merah yang perlahan mereda, Alden mengembusasn napas terakhirnya di pangkuan Putri Evelyne. 
-
-Pesan terakhir Alden kepada Evelyne sebelum ia pergi selamanya:
-> *"Evelyne. Kerajaan ini milikmu sekarang... dan kau akan menjadi ratu yang luar biasa. Katakan pada Tam... bahwa pahlawan yang ia percayai... itu nyata."*
-
-Bertahun-tahun kemudian, sebuah patung megah didirikan di tengah ibu kota dengan bunga yang tak pernah layu di kakinya, bertuliskan:
-> **"Ksatria yang dibenci dunia... yang menyelamatkan semua orang."**
+Dengan perpaduan combat cepat, sinematik bergaya visual novel, serta dunia penuh misteri dan kehancuran, game ini menghadirkan kisah tentang pengkhianatan, penebusan dosa, dan pengorbanan terakhir seorang pahlawan.
 
 ---
 
-## 🎮 Konsep & Mekanik Gameplay (Gameplay Mechanics)
+# Lore & Cerita Dunia
 
-Game ini mengusung genre **2D Side-Scrolling Action RPG** dengan kontrol yang responsif dan *feel* pertarungan yang sangat *juicy*:
+## Kerajaan Aelindra
 
-### ⚔️ Sistem Pertarungan Kombo (3-Hit Combo System)
-Pemain bisa melancarkan 3 jenis tebasan berbeda yang berurutan secara dinamis dengan klik mouse kiri:
-1. **Swing 1 (Tebasan Horizontal - Cyan)**: Mengayun cepat ke depan, menyerang musuh terdekat.
-2. **Swing 2 (Tebasan Vertikal - Orange)**: Alden melompat kecil dan menebas dari atas kepala untuk menghantam pertahanan musuh.
-3. **Swing 3 (Tusukan Emas - Finisher Gold)**: Alden melesat maju (*lunge*) dengan dorongan pedang berkecepatan tinggi, memicu guncangan layar (*screen shake*) dan percikan partikel api emas.
+Di kerajaan **Aelindra**, cahaya lilin hampir tidak pernah mampu mencapai sudut tergelap aula kastil. Di balik kemegahan kerajaan, tersembunyi kekuatan kuno yang perlahan bangkit dari kedalaman.
 
-### 💨 Gerakan Khusus & Ultimate
-*   **Dash (Melesat)**: Menghindari serangan musuh dengan efek bayangan biru (*ghost trail*) dan memberikan status kebal (*invincibility frames*) sesaat.
-*   **Forsaken Slash (Ultimate)**: Ketika energi amarah Alden penuh (100%), lepaskan tebasan mematikan berlapis petir emas yang membersihkan seluruh musuh di layar.
+Di tengah tragedi tersebut berdiri seorang ksatria setia bernama **Alden**, prajurit kerajaan yang mengabdikan hidupnya untuk melindungi Raja **Aldric** dan rakyat Aelindra.
+
+Namun, satu malam mengubah segalanya.
 
 ---
 
-## 🗺️ Tahapan Dunia / Stage (The 5 Stages)
+## Alur Cerita Utama
 
-Petualangan Alden terbagi menjadi 5 wilayah dengan atmosfer visual, tantangan, dan backsong yang berbeda:
-1.  **Harrowmere Village**: Desa rintik hujan yang suram tempat Alden bersembunyi. (*Stage 1 Backsong*)
-2.  **Fogbound Forest**: Hutan pinus berkabut tebal yang dihuni serigala jurang (*Hollow Wolf*). (*Stage 2 Backsong*)
-3.  **Aelindra Castle Ruins**: Reruntuhan kastil penuh badai petir, tempat bertarung melawan boss **The Blind King**. (*Stage 3 Backsong*)
-4.  **Sunken Catacombs**: Gua bawah tanah yang lembap dengan pilar batu dan lumut hijau menyala. (*Stage 4 Backsong*)
-5.  **Ruined Battlefields**: Dataran gersang berdebu dengan langit merah membara, tempat pertarungan akhir melawan **Ashen Knight** & **Valther**. (*Stage 5 Backsong*)
+### 1. Pengkhianatan
 
-### 🎬 Cutscene & Alur Cerita
-- **Prologue Cinematic**: Pembukaan visual novel-style dengan 17 slide narasi + typewriter text + rain effect + *Prologue Backsong*.
-- **In-Game Dialogue System**: Dialog interaktif dengan sistem ketik otomatis, cocok untuk percakapan NPC, narasi, dan adegan bos.
+Alden menemukan Raja Aldric tewas bersimbah darah di ruang kerajaan. Sebelum ia sempat menjelaskan apa yang terjadi, seorang petinggi kerajaan bernama **Valther** menuduhnya sebagai pelaku pembunuhan.
 
-### 🎵 Sistem Audio & BGM
-- **Prologue**: *cutschene-song.mp3* — diputar otomatis saat cutscene pembuka.
-- **Stage Backsongs**: Setiap stage punya backsong sendiri yang berganti otomatis saat pemain pindah zona.
-- **Ending**: *Ending-Backsong.mp3* — backsong epik saat adegan penutup.
-- **SFX**: Efek tebasan pedang, pukulan kritis, langkah kaki, suara monster, dan dialog blip.
-- **Volume Control**: Slider Master, Music, SFX, dan Ambient di pause menu — semua terintegrasi dan tersimpan.
+Putri kerajaan, **Evelyne**, yang dipenuhi kesedihan dan amarah, mempercayai fitnah tersebut dan memerintahkan Alden dihukum mati saat fajar tiba.
 
 ---
 
-## 💻 Spesifikasi & Teknologi (Tech Stack)
+### 2. Pelarian dari Penjara
 
-Game ini dibangun dengan teknologi web modern tingkat tinggi untuk menjamin performa 60 FPS:
-*   **Core Logic**: [React 18](https://react.dev/) & [Phaser 3](https://phaser.io/) (Framework Game HTML5 terbaik)
-*   **Global State**: [Zustand](https://github.com/pmndrs/zustand) & [Immer](https://github.com/immerjs/immer) (Manajemen HP, stamina, inventory, quest, dan dialog cerita)
-*   **Audio**: HTML Audio API + BGM Manager utility untuk backsong per-stage, SFX via Phaser sound system
-*   **Styling**: Vanilla CSS & TailwindCSS (Antarmuka menu HUD yang premium)
-*   **Build Tool**: [Vite](https://vitejs.dev/) & TypeScript (Kompilasi super cepat dan aman dari bug)
+Pada malam sebelum eksekusi dilaksanakan, seorang pandai besi tua bernama **Old Edric** membebaskan Alden secara diam-diam dari penjara kerajaan.
+
+Dipaksa melarikan diri dari tanah yang dulu ia lindungi, Alden memulai perjalanan untuk mencari kebenaran di balik kematian sang raja.
 
 ---
 
-## 🕹️ Cara Menjalankan Proyek (How to Run)
+### 3. Ksatria yang Terbuang
 
-1. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
-2. **Jalankan Development Server**:
-   ```bash
-   npm run dev
-   ```
-3. **Build untuk Produksi**:
-   ```bash
-   npm run build
-   ```
+Dalam persembunyiannya di **Harrowmere Village**, Alden melindungi warga desa dari serangan mayat hidup dan monster kegelapan.
+
+Seorang anak kecil bernama **Tam** menjadi orang pertama yang percaya kepadanya:
+
+> “Orang jahat tidak akan menyelamatkan ibuku dari monster.”
+
+Di desa tersebut, Edric juga memberikan sebuah pedang legendaris bernama **The Forsaken Blade**.
 
 ---
-*Dibuat dengan cinta untuk menemani petualangan sang ksatria terbuang oleh Adikk & Kak Celynn.* ❤️🛡️
+
+### 4. Rahasia Kegelapan
+
+Di dalam **Fogbound Forest**, Alden bertemu dengan seorang biarawati pengembara yang mengungkap kebenaran mengerikan.
+
+Valther ternyata telah membuat perjanjian dengan kekuatan kuno yang tersegel di bawah Kastil Aelindra. Pembunuhan Raja Aldric merupakan bagian dari ritual untuk menghancurkan segel pertama.
+
+---
+
+### 5. Raja yang Terkutuk
+
+Alden kembali ke reruntuhan kastil dan menghadapi **The Blind King**, arwah Raja Aldric yang telah dirasuki kegelapan.
+
+Pada saat yang sama, Evelyne menemukan buku harian ayahnya yang membuktikan pengkhianatan Valther. Menyadari kesalahannya, ia mencari Alden dan memohon maaf.
+
+---
+
+### 6. Pertempuran Terakhir
+
+Alden turun ke **Sunken Catacombs** lalu melintasi **Ruined Battlefields** demi menghentikan kehancuran kerajaan.
+
+Setelah mengalahkan **Ashen Knight**, ia akhirnya berhadapan langsung dengan Valther dalam pertarungan terakhir yang menentukan nasib Aelindra.
+
+---
+
+## Ending
+
+Valther berhasil dikalahkan dan kegelapan kuno kembali disegel.
+
+Namun luka yang diterima Alden selama pertempuran terlalu parah untuk diselamatkan.
+
+Di bawah langit merah yang perlahan mereda, Alden mengembuskan napas terakhirnya di pangkuan Evelyne sambil berkata:
+
+> “Evelyne... kerajaan ini milikmu sekarang.  
+> Kau akan menjadi ratu yang luar biasa.  
+> Dan katakan pada Tam... bahwa pahlawan yang ia percayai... itu nyata.”
+
+Bertahun-tahun kemudian, sebuah patung didirikan di pusat ibu kota dengan tulisan:
+
+> **“Ksatria yang dibenci dunia... yang menyelamatkan semua orang.”**
+
+---
+
+# Gameplay & Mekanik
+
+## Sistem Combat
+
+Game ini menghadirkan combat side-scrolling yang responsif, cepat, dan sinematik dengan fokus pada combo attack serta efek visual yang memuaskan.
+
+### 3-Hit Combo System
+
+Pemain dapat melancarkan tiga serangan berantai secara dinamis:
+
+1. **Horizontal Slash**  
+   Tebasan cepat ke depan untuk menyerang musuh jarak dekat.
+
+2. **Vertical Strike**  
+   Tebasan vertikal dari udara untuk menghancurkan pertahanan lawan.
+
+3. **Golden Thrust (Finisher)**  
+   Serangan tusukan berkecepatan tinggi dengan efek screen shake dan partikel emas.
+
+---
+
+## Skill & Ability
+
+### Dash
+
+Gerakan menghindar cepat dengan efek ghost trail serta invincibility frame sementara.
+
+### Forsaken Slash (Ultimate)
+
+Ketika rage meter mencapai 100%, Alden melepaskan tebasan petir raksasa yang mampu menghancurkan seluruh musuh di layar.
+
+---
+
+# Stage & Dunia
+
+Petualangan Alden terbagi menjadi lima wilayah utama dengan suasana visual dan tantangan yang berbeda.
+
+| Stage | Lokasi | Deskripsi |
+|---|---|---|
+| 1 | **Harrowmere Village** | Desa hujan tempat Alden memulai pelariannya. |
+| 2 | **Fogbound Forest** | Hutan berkabut yang dipenuhi monster bayangan. |
+| 3 | **Aelindra Castle Ruins** | Reruntuhan kastil penuh badai petir dan kutukan. |
+| 4 | **Sunken Catacombs** | Lorong bawah tanah kuno yang lembap dan gelap. |
+| 5 | **Ruined Battlefields** | Medan perang tandus tempat pertarungan terakhir terjadi. |
+
+---
+
+# Sistem Cutscene & Narasi
+
+## Prologue Cinematic
+
+- Opening visual novel-style
+- 17 slide narasi sinematik
+- Typewriter text animation
+- Rain ambience effect
+- Background music khusus prologue
+
+## Dialogue System
+
+Sistem dialog interaktif untuk:
+
+- Percakapan NPC
+- Narasi cerita
+- Intro boss battle
+- Adegan emosional
+
+---
+
+# Audio & Sound Design
+
+## Background Music
+
+- Setiap stage memiliki backsound unik
+- Transisi musik otomatis antar area
+- Ending theme sinematik pada penutupan cerita
+
+## Sound Effects
+
+- Efek tebasan pedang
+- Critical hit impact
+- Footstep system
+- Monster ambience
+- Dialogue blip sound
+
+## Audio Settings
+
+Pause menu menyediakan pengaturan:
+
+- Master Volume
+- Music Volume
+- SFX Volume
+- Ambient Volume
+
+Semua pengaturan tersimpan otomatis.
+
+---
+
+# Teknologi yang Digunakan
+
+Game ini dibangun menggunakan teknologi web modern untuk menghasilkan performa stabil dan pengalaman bermain yang responsif.
+
+## Core Technology
+
+- React 18
+- Phaser 3
+- TypeScript
+- Vite
+
+## State Management
+
+- Zustand
+- Immer
+
+## Styling & UI
+
+- TailwindCSS
+- Vanilla CSS
+
+## Audio System
+
+- HTML Audio API
+- Phaser Sound System
+
+---
+
+
+# Cara Main Game nya
+```bash
+npm install
+npm run build
+npm run dev
