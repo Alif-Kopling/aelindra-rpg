@@ -103,32 +103,45 @@ Bertahun-tahun kemudian, sebuah patung didirikan di pusat ibu kota dengan tulisa
 
 ## Sistem Combat
 
-Game ini menghadirkan combat side-scrolling yang responsif, cepat, dan sinematik dengan fokus pada combo attack serta efek visual yang memuaskan.
+Game ini menghadirkan combat side-scrolling yang responsif, cepat, dan sinematik dengan fokus pada combo attack, impact yang terasa berat, serta efek visual yang memuaskan.
 
-### 3-Hit Combo System
+### 3-Hit Branching Combo System
 
-Pemain dapat melancarkan tiga serangan berantai secara dinamis:
+Pemain dapat melancarkan kombinasi serangan unik:
 
-1. **Horizontal Slash**  
-   Tebasan cepat ke depan untuk menyerang musuh jarak dekat.
+1. **Light Slash 1 & 2**
+   Tebasan cepat dengan sistem *Hit-Stop* yang membuat setiap pukulan terasa sangat berdampak.
 
-2. **Vertical Strike**  
-   Tebasan vertikal dari udara untuk menghancurkan pertahanan lawan.
+2. **Cyclone Slash (Finisher)**
+   Pada hit ke-3, pemain melepaskan serangan berputar (AoE) 360 derajat yang luas. Finisher ini memberikan efek **Bleed (DoT)** selama 5 detik pada musuh yang terkena.
 
-3. **Golden Thrust (Finisher)**  
-   Serangan tusukan berkecepatan tinggi dengan efek screen shake dan partikel emas.
+### Status Effects
+
+* **Stun (1s)**: Terjadi jika pemain mendaratkan serangan **Critical Hit**. Musuh akan terdiam total, memberikan celah untuk menghabisi mereka.
+* **Bleed (5s)**: Efek kerusakan berkala dari *Cyclone Slash* yang menguras HP musuh secara perlahan.
 
 ---
 
-## Skill & Ability
+## Tactical Movement & Combat Feel
 
-### Dash
+### Shift Dash
+Pemain dapat melakukan dash dengan tombol **Shift** atau **Space**. Dash ini adalah maneuver taktis tingkat tinggi yang mengonsumsi **35 Stamina** (tinggi), memberikan *invincibility frames* saat digunakan untuk menghindari serangan mematikan.
 
-Gerakan menghindar cepat dengan efek ghost trail serta invincibility frame sementara.
+### Hit-Stop System
+Dunia game akan berhenti sejenak (freeze) selama 80-120ms saat serangan pemain mengenai musuh atau boss, menciptakan pengalaman pertarungan yang visceral, berat, dan presisi.
 
-### Forsaken Slash (Ultimate)
+### Surgical Hitboxes
+Serangan pemain menggunakan *attack hitbox* yang presisi (75x60px) untuk memastikan combat terasa adil. Pemain harus berada di posisi yang tepat; tidak ada lagi damage yang masuk ke musuh hanya dengan "memukul angin".
 
-Ketika rage meter mencapai 100%, Alden melepaskan tebasan petir raksasa yang mampu menghancurkan seluruh musuh di layar.
+---
+
+## Final Boss: The Ashen Knight (Stage 5)
+
+Pertarungan klimaks yang epik melawan Ashen Knight dengan sistem 3-Fase yang menantang:
+
+1. **Fase I (100% - 20% HP)**: Pertarungan awal dengan pola serangan dasar yang agresif.
+2. **Transisi Fase II**: Boss menjadi kebal, muncul peringatan **"PHASE II: UNYIELDING WILL"**, heal ke 2500 HP, dan buff statistik.
+3. **Fase III (Climax)**: Boss menjadi lebih besar, heal ke 2000 HP, dan melepaskan **Ashen Storm** (hujan proyektil) serta *Void Teleport* secara terus-menerus.
 
 ---
 
