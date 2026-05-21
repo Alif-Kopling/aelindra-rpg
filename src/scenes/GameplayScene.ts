@@ -73,7 +73,12 @@ export class GameplayScene extends Phaser.Scene {
   private map!: MapSystem;
   private platformGroup!: Phaser.Physics.Arcade.StaticGroup;
   private currentZone = 'village';
-  private zonePortals: { zone: Phaser.GameObjects.Zone; targetZone: string; label: Phaser.GameObjects.Text }[] = [];
+  private zonePortals: {
+    zone: Phaser.GameObjects.Zone;
+    targetZone: string;
+    label: Phaser.GameObjects.Text;
+    gfx: Phaser.GameObjects.Graphics;
+  }[] = [];
   private enemyGroup!: Phaser.Physics.Arcade.Group;
   private spawnTimer = 0;
   private maxEnemies = 5;
@@ -85,6 +90,7 @@ export class GameplayScene extends Phaser.Scene {
   private roundEnemyKilled = 0;
   private roundActive = false;
   private portalVisible = false;
+  private transitioningZone = false;
   private combatOverlapsInitialized = false;
   private mapWidth = 60;
   private mapHeight = 23;
@@ -141,8 +147,21 @@ export class GameplayScene extends Phaser.Scene {
     this.npcs.forEach(n => n.destroy());
     this.enemies = [];
     this.npcs = [];
-    this.zonePortals.forEach(p => { p.zone.destroy(); p.label.destroy(); });
+    this.zonePortals.forEach(p => {
+      p.zone.destroy();
+      p.label.destroy();
+      p.gfx.destroy();
+    });
     this.zonePortals = [];
+
+    if (this.boss) {
+      this.boss.destroy();
+      this.boss = null;
+    }
+
+    if (this.map) {
+      this.map.destroy();
+    }
 
     this.map = new MapSystem(this, {
       theme: zoneData.theme,
@@ -265,7 +284,7 @@ export class GameplayScene extends Phaser.Scene {
       (_hitbox, _enemy) => {
         if (!this.player.isCurrentlyAttacking()) return;
         const enemy = _enemy as Enemy;
-        const enemyId = (enemy as any).uuid || `${enemy.x},${enemy.y}`;
+        const enemyId = enemy.getEnemyId();
 
         // Ensure each enemy is only hit ONCE per sword swing
         if (this.player.hasHit(enemyId)) return;
@@ -303,7 +322,6 @@ export class GameplayScene extends Phaser.Scene {
           this.enemies = this.enemies.filter(e => e !== enemy);
           this.enemyGroup.remove(enemy);
           store.updateQuestObjective('defend_village', 'kill_undead', 1);
-          store.incrementKillCount();
           this.onEnemyKilled();
         }
       }
@@ -324,11 +342,14 @@ export class GameplayScene extends Phaser.Scene {
     const startCombat = () => {
       if (round.boss) {
         this.spawnBoss(round.boss, this.mapWidth * 32, this.mapHeight * 32, 32);
-      }
-      if (round.enemies.length > 0) {
+        this.roundActive = true;
+        this.roundEnemyTotal = 1;
+        this.roundEnemyKilled = 0;
+      } else if (round.enemies.length > 0) {
         this.spawnRoundEnemies(round);
         this.roundActive = true;
       } else {
+        // Story-only round (dialogue beat, no combat)
         this.roundActive = false;
         this.time.delayedCall(300, () => this.onRoundCleared());
       }
@@ -501,6 +522,11 @@ export class GameplayScene extends Phaser.Scene {
   }
 
   private spawnBoss(config: BossConfig, W: number, H: number, TILE: number) {
+    if (this.boss) {
+      this.boss.destroy();
+      this.boss = null;
+    }
+
     const bx = Math.floor(this.mapWidth / 2) * TILE;
     const by = (this.mapHeight - 3) * TILE;
 
@@ -533,11 +559,13 @@ export class GameplayScene extends Phaser.Scene {
   }
 
   private createPortal(x: number, y: number, targetZone: string, TILE: number) {
-    const portal = this.add.zone(x * TILE, y * TILE, 3 * TILE, 4 * TILE);
-    this.physics.add.existing(portal, true); // Make it a static body so gravity does not drag it down
+    const portalX = x * TILE + TILE / 2;
+    const portalY = (this.mapHeight - 3) * TILE;
+    const portal = this.add.zone(portalX, portalY, 4 * TILE, 3 * TILE);
+    this.physics.add.existing(portal, true);
 
-    const label = this.add.text(x * TILE, y * TILE - 30, `→ ${this.getZoneName(targetZone)}`, {
-      fontSize: '10px',
+    const label = this.add.text(portalX, portalY - 50, `→ ${this.getZoneName(targetZone)}`, {
+      fontSize: '12px',
       fontFamily: 'Cinzel, serif',
       color: '#ffd700',
       stroke: '#000',
@@ -547,27 +575,37 @@ export class GameplayScene extends Phaser.Scene {
     label.setOrigin(0.5);
 
     const portalGfx = this.add.graphics();
-    portalGfx.lineStyle(3, 0xffd700, 1.0); // No transparency
-    portalGfx.strokeCircle(x * TILE, y * TILE, TILE);
+    portalGfx.lineStyle(3, 0xffd700, 1.0);
+    portalGfx.strokeCircle(portalX, portalY, TILE * 1.2);
     portalGfx.setDepth(8);
     this.tweens.add({
       targets: portalGfx,
-      alpha: 1.0, // No transparency
-      yoyo: false,
+      alpha: { from: 0.4, to: 1 },
+      yoyo: true,
       repeat: -1,
-      duration: 1200,
+      duration: 900,
     });
 
     this.physics.add.overlap(this.player, portal as any, () => {
+      if (this.transitioningZone || useGameStore.getState().dialogue.isOpen) return;
       this.transitionToZone(targetZone);
     });
 
-    this.zonePortals.push({ zone: portal, targetZone, label });
+    this.zonePortals.push({ zone: portal, targetZone, label, gfx: portalGfx });
   }
 
   private transitionToZone(zoneId: string) {
-    if (this.currentZone === zoneId) return;
-    
+    if (this.transitioningZone || this.currentZone === zoneId) return;
+
+    this.transitioningZone = true;
+    this.portalVisible = false;
+    this.zonePortals.forEach(p => {
+      p.zone.destroy();
+      p.label.destroy();
+      p.gfx.destroy();
+    });
+    this.zonePortals = [];
+
     const store = useGameStore.getState();
     if (this.currentZone === 'battlefield' && zoneId === 'village') {
       store.completeCycle();
@@ -578,7 +616,10 @@ export class GameplayScene extends Phaser.Scene {
     this.cameras.main.fadeOut(600, 0, 0, 0);
     this.time.delayedCall(700, () => {
       this.buildZone(this.getZoneData(zoneId));
-      this.time.delayedCall(300, () => this.advanceToNextRound());
+      this.time.delayedCall(300, () => {
+        this.advanceToNextRound();
+        this.transitioningZone = false;
+      });
       this.cameras.main.fadeIn(600, 0, 0, 0);
     });
   }
@@ -640,7 +681,11 @@ export class GameplayScene extends Phaser.Scene {
     });
 
     this.events.on('boss-died', (data: { bossId: string }) => {
+      if (this.boss) {
+        this.boss.destroy();
+      }
       this.boss = null;
+      this.roundEnemyKilled = 1;
       const store = useGameStore.getState();
       store.gainExp(500);
       store.addGold(200);
@@ -757,7 +802,7 @@ export class GameplayScene extends Phaser.Scene {
             routinePoints: [{ x: 260, y: 480 }, { x: 350, y: 480 }],
           },
         ],
-        nextZone: { x: 55, y: 20, zone: 'forest' },
+        nextZone: { x: 50, y: 20, zone: 'forest' },
       },
       forest: {
         theme: 'forest',
@@ -785,7 +830,7 @@ export class GameplayScene extends Phaser.Scene {
             accentColor: 0xecf0f1,
           },
         ],
-        nextZone: { x: 55, y: 20, zone: 'castle' },
+        nextZone: { x: 50, y: 20, zone: 'castle' },
       },
       castle: {
         theme: 'castle',
@@ -824,7 +869,7 @@ export class GameplayScene extends Phaser.Scene {
           speed: 120,
           scale: 2.5,
         },
-        nextZone: { x: 55, y: 20, zone: 'catacombs' },
+        nextZone: { x: 50, y: 20, zone: 'catacombs' },
       },
       catacombs: {
         theme: 'catacombs',
@@ -838,7 +883,7 @@ export class GameplayScene extends Phaser.Scene {
           },
         ],
         npcs: [],
-        nextZone: { x: 55, y: 20, zone: 'cathedral' },
+        nextZone: { x: 50, y: 20, zone: 'cathedral' },
       },
       cathedral: {
         theme: 'cathedral',
@@ -875,7 +920,7 @@ export class GameplayScene extends Phaser.Scene {
           attack: 48,
           speed: 120,
         },
-        nextZone: { x: 55, y: 20, zone: 'mountain' },
+        nextZone: { x: 50, y: 20, zone: 'mountain' },
       },
       mountain: {
         theme: 'mountain',
@@ -912,7 +957,7 @@ export class GameplayScene extends Phaser.Scene {
           attack: 52,
           speed: 130,
         },
-        nextZone: { x: 55, y: 20, zone: 'battlefield' },
+        nextZone: { x: 50, y: 20, zone: 'battlefield' },
       },
       battlefield: {
         theme: 'battlefield',
@@ -936,7 +981,7 @@ export class GameplayScene extends Phaser.Scene {
           attack: 40,
           speed: 150,
         },
-        nextZone: { x: 55, y: 20, zone: 'village' },
+        nextZone: { x: 50, y: 20, zone: 'village' },
       },
     };
 

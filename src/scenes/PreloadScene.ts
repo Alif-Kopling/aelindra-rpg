@@ -13,7 +13,15 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('enemy_beast_sprite', 'assets/images/beast_enemy.png');
     this.load.image('enemy_corrupted_sprite', 'assets/images/corrupted_enemy.png');
     this.load.image('boss_blind_king_sprite', 'assets/images/blind_king_boss.png');
+    this.load.image('boss_ashen_knight_sprite', 'assets/images/boss_ashen_knight.png');
     this.load.image('anim_boss_vs_mc', 'assets/images/animation/pict-animasi-boss-vs-mc.png');
+
+    this.load.image('scene_intro_1', 'assets/images/animation/scene1-before-tragedy.jpeg');
+    this.load.image('scene_intro_3', 'assets/images/animation/scene3-The-Tragedy.jpeg');
+    this.load.image('scene_intro_4', 'assets/images/animation/scene4-evelyn-marah-kepada-mc.png');
+    this.load.image('scene_intro_5', 'assets/images/animation/scene5-mc-dipenjara-atas-fitnah.jpeg');
+    this.load.image('scene_intro_6', 'assets/images/animation/scene6-mc-diselamatkan-oleh-seseorang.jpeg');
+    this.load.image('scene_intro_escape', 'assets/images/animation/last-scene-mc-kabur-dari-penjara.jpeg');
 
     // Load background assets
     this.load.image('bg_village', 'assets/images/village bg.jpeg');

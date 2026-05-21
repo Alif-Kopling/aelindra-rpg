@@ -454,6 +454,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
+  getEnemyId(): string {
+    return this.id;
+  }
+
   private die() {
     this.isDead = true;
     this.aiState = 'dead' as AIState;

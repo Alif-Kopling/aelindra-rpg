@@ -35,8 +35,20 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   private arenaLeft = 0;
   private arenaRight = 1920;
 
+  private static spriteKeyForBoss(id: string): string {
+    const map: Record<string, string> = {
+      blind_king: 'boss_blind_king_sprite',
+      ashen_knight: 'boss_ashen_knight_sprite',
+    };
+    return map[id] || 'boss_blind_king_sprite';
+  }
+
+  private getSpriteKey(): string {
+    return Boss.spriteKeyForBoss(this.config.id);
+  }
+
   constructor(scene: Phaser.Scene, x: number, y: number, config: BossConfig) {
-    const spriteKey = 'boss_blind_king_sprite';
+    const spriteKey = Boss.spriteKeyForBoss(config.id);
     const textureToUse = scene.textures.exists(spriteKey) ? spriteKey : 'pixel';
     super(scene, x, y, textureToUse);
     this.config = config;
@@ -150,7 +162,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
 
     this.timeAccumulator += delta;
 
-    const spriteKey = 'boss_blind_king_sprite';
+    const spriteKey = this.getSpriteKey();
     if (this.scene.textures.exists(spriteKey)) {
       if (this.texture.key !== spriteKey) {
         this.setTexture(spriteKey);

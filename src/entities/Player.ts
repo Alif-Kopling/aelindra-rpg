@@ -490,6 +490,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const body = this.body as Phaser.Physics.Arcade.Body;
     const dir = this.facingRight ? 1 : -1;
 
+    this.resetHitTracking();
+
     body.setVelocityX(dir * 300);
     body.setVelocityY(-100);
 
@@ -845,8 +847,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       body.setVelocityY(-140);
       this.spawnSlashEffect(1);
     } else {
-      // 3rd hit branching: Cyclone Slash
-      body.setVelocityX(dir * 480);
+      // 3rd hit branching: Cyclone Slash (shorter lunge so hits don't sweep the whole map)
+      body.setVelocityX(dir * 260);
       this.spawnCycloneEffect();
       this.scene.cameras.main.shake(150, 0.01);
     }
@@ -923,6 +925,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.spawnUltimateEffect();
 
+    this.resetHitTracking();
+    this.isAttacking = true;
+    store.setPlayerAttacking(true);
+    const hb = this.attackHitbox.body as Phaser.Physics.Arcade.Body;
+    hb.enable = true;
+    this.scene.time.delayedCall(350, () => {
+      hb.enable = false;
+      this.isAttacking = false;
+      store.setPlayerAttacking(false);
+    });
+
     store.addNotification({
       type: 'warning',
       title: 'FORSAKEN SLASH',
@@ -944,16 +957,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const hb = this.attackHitbox.body as Phaser.Physics.Arcade.Body;
     if (!hb) return;
 
-    // Define surgical hitbox width and height
-    let w = 75;
-    let h = 60;
+    // Melee hitbox — kept narrow so one swing does not hit the whole screen
+    const finisherSwing = this.isAttacking && (this.comboCount - 1) % 3 === 2;
+    let w = finisherSwing ? 52 : 40;
+    let h = finisherSwing ? 46 : 42;
 
     if (this.isChargedAttack) {
-      w = 110;
-      h = 80;
+      w = 58;
+      h = 50;
     } else if (this.isUltimate) {
-      w = 200;
-      h = 120;
+      w = 72;
+      h = 54;
     }
 
     hb.setSize(w, h);

@@ -147,6 +147,8 @@ export interface DialogueLine {
   emotion?: 'neutral' | 'angry' | 'sad' | 'happy' | 'shocked' | 'determined' | 'loving';
   choices?: DialogueChoice[];
   isNarration?: boolean;
+  /** Optional full-screen scene art (under public/assets/images/animation/) */
+  sceneImage?: string;
 }
 
 export interface DialogueChoice {

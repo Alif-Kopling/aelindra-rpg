@@ -9,6 +9,8 @@ const PORTRAIT_COLORS: Record<string, { bg: string; border: string; emoji: strin
   blacksmith: { bg: '#2a1a0a', border: '#8b6914', emoji: '🔨', img: '/assets/images/npc-blacksmith.png' },
   nun:        { bg: '#0a0a1a', border: '#9370db', emoji: '✝️', img: '/assets/images/npc-thenun.png' },
   boy:        { bg: '#1a2a10', border: '#32cd32', emoji: '🌟', img: '/assets/images/npc-villages-boy.png' },
+  blind_king: { bg: '#1a1028', border: '#9b59b6', emoji: '♔', img: '/assets/images/blind_king_boss.png' },
+  ashen_knight:{ bg: '#141820', border: '#7f8c8d', emoji: '💀', img: '/assets/images/boss_ashen_knight.png' },
   default:    { bg: '#0a0a14', border: '#b8860b', emoji: '👤' },
 };
 
@@ -132,19 +134,36 @@ const DialogueSystem: React.FC = () => {
   const textColor = EMOTION_COLORS[emotion] || EMOTION_COLORS.neutral;
   const portrait = currentLine.portrait || 'default';
   const portraitData = PORTRAIT_COLORS[portrait] || PORTRAIT_COLORS.default;
+  const sceneImage = currentLine.sceneImage
+    ? `/assets/images/animation/${currentLine.sceneImage}`
+    : null;
 
   return (
     <div
       className="absolute inset-0 flex flex-col justify-end pb-6 pointer-events-none"
       style={{ zIndex: 80 }}
     >
+      {sceneImage && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `url('${sceneImage}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'brightness(0.55) contrast(1.05)',
+            opacity: 0.95,
+            transition: 'opacity 0.5s ease',
+          }}
+        />
+      )}
+
       {/* Overlay */}
       <div
         className="absolute inset-0 pointer-events-auto"
         style={{
-          background: isNarration
-            ? 'rgba(0,0,0,0.85)'
-            : 'rgba(0,0,0,0.55)',
+          background: sceneImage
+            ? (isNarration ? 'rgba(0,0,0,0.72)' : 'rgba(0,0,0,0.45)')
+            : (isNarration ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.55)'),
           transition: 'background 0.4s ease',
         }}
         onClick={handleAdvance}

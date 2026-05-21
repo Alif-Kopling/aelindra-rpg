@@ -19,6 +19,8 @@ const PORTRAIT_COLORS: Record<string, { bg: string; border: string; emoji: strin
   blacksmith: { bg: '#2a1a0a', border: '#8b6914', emoji: '🔨', img: '/assets/images/npc-blacksmith.png' },
   nun:        { bg: '#0a0a1a', border: '#9370db', emoji: '✝️', img: '/assets/images/npc-thenun.png' },
   boy:        { bg: '#1a2a10', border: '#32cd32', emoji: '🌟', img: '/assets/images/npc-villages-boy.png' },
+  blind_king: { bg: '#1a1028', border: '#9b59b6', emoji: '♔', img: '/assets/images/blind_king_boss.png' },
+  ashen_knight:{ bg: '#141820', border: '#7f8c8d', emoji: '💀', img: '/assets/images/boss_ashen_knight.png' },
   default:    { bg: '#0a0a14', border: '#b8860b', emoji: '👤' },
 };
 
@@ -49,21 +51,21 @@ const PROLOGUE_CINEMATIC: CinematicLine[] = [
     emotion: 'sad',
   },
   {
-    image: 'Scene2-evelyn-and-mc.jpeg',
+    image: 'Scene2-evelyn-and-mc.png',
     speaker: 'Princess Evelyne',
     portrait: 'evelyne',
     text: 'Alden, please... dengerin ayah. Jangan kejar bayangan di gelap malam ini.',
     emotion: 'sad',
   },
   {
-    image: 'Scene2-evelyn-and-mc.jpeg',
+    image: 'Scene2-evelyn-and-mc.png',
     speaker: 'Alden',
     portrait: 'alden',
     text: 'Gue jagain raja dengan nyawa gue, Putri. Dan gue lindungin lo juga.',
     emotion: 'determined',
   },
   {
-    image: 'Scene2-evelyn-and-mc.jpeg',
+    image: 'Scene2-evelyn-and-mc.png',
     speaker: 'King Aldric',
     portrait: 'king',
     text: '...Lo selalu gitu, nak. Makanya gue percaya lo di atas yang lain.',
