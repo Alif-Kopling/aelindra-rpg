@@ -296,11 +296,106 @@ export class GameplayScene extends Phaser.Scene {
 
     if (round.preDialogue) {
       store.openDialogue(round.preDialogue as any, () => {
-        this.time.delayedCall(300, startCombat);
+        if (round.boss && round.boss.id === 'ashen_knight') {
+          this.playBossCinematic(() => {
+            this.time.delayedCall(300, startCombat);
+          });
+        } else {
+          this.time.delayedCall(300, startCombat);
+        }
       });
     } else {
       startCombat();
     }
+  }
+
+  private playBossCinematic(onComplete: () => void) {
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    
+    // Create cinematic layer
+    const overlay = this.add.rectangle(0, 0, width, height, 0x000000)
+      .setOrigin(0)
+      .setScrollFactor(0)
+      .setDepth(900)
+      .setAlpha(0);
+
+    const img = this.add.image(width / 2, height / 2, 'anim_boss_vs_mc')
+      .setScrollFactor(0)
+      .setDepth(901)
+      .setAlpha(0);
+
+    // Initial scale to fit the screen width, then slightly larger for pan effect
+    const scaleX = width / img.width;
+    const scaleY = height / img.height;
+    const baseScale = Math.max(scaleX, scaleY) * 1.1; // crop effect
+    img.setScale(baseScale);
+
+    // Letterbox bars
+    const barHeight = height * 0.15;
+    const topBar = this.add.rectangle(0, -barHeight, width, barHeight, 0x000000)
+      .setOrigin(0)
+      .setScrollFactor(0)
+      .setDepth(902);
+    
+    const bottomBar = this.add.rectangle(0, height, width, barHeight, 0x000000)
+      .setOrigin(0)
+      .setScrollFactor(0)
+      .setDepth(902);
+
+    // Fade in overlay and image
+    this.tweens.add({
+      targets: [overlay, img],
+      alpha: 1,
+      duration: 800,
+      onComplete: () => {
+        // Animate letterbox in
+        this.tweens.add({
+          targets: topBar,
+          y: 0,
+          duration: 500,
+          ease: 'Power2'
+        });
+        this.tweens.add({
+          targets: bottomBar,
+          y: height - barHeight,
+          duration: 500,
+          ease: 'Power2'
+        });
+
+        // Dramatic slow pan and slight zoom
+        this.tweens.add({
+          targets: img,
+          scale: baseScale * 1.3,
+          y: img.y - 40,
+          duration: 3500,
+          ease: 'Sine.easeInOut',
+          onComplete: () => {
+            // Flash and end
+            const flash = this.add.rectangle(0, 0, width, height, 0xffffff)
+              .setOrigin(0)
+              .setScrollFactor(0)
+              .setDepth(903)
+              .setAlpha(0);
+
+            this.tweens.add({
+              targets: flash,
+              alpha: 1,
+              duration: 150,
+              yoyo: true,
+              onComplete: () => {
+                overlay.destroy();
+                img.destroy();
+                topBar.destroy();
+                bottomBar.destroy();
+                flash.destroy();
+                onComplete();
+              }
+            });
+          }
+        });
+      }
+    });
   }
 
   private spawnRoundEnemies(round: ZoneRound) {

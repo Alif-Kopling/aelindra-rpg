@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="128" height="128" style="image-rendering: pixelated; shape-rendering: crispEdges;">
+  <!-- Background: Deep Royal Blue & Velvet Navy Gradient in 64-bit Pixel Blocks -->
+  <rect width="64" height="64" fill="#040817" />
+  <rect x="2" y="2" width="60" height="60" fill="#0c1533" />
+  <rect x="4" y="4" width="56" height="56" fill="#070c20" />
+
+  <!-- Sparkling Golden Royal Stars/Glints in BG -->
+  <path d="M 12,12 H 14 V 14 H 12 Z M 52,10 H 54 V 12 H 52 Z" fill="#e8c451" opacity="0.7" />
+  <path d="M 10,24 H 11 V 26 H 10 Z M 53,26 H 54 V 28 H 53 Z" fill="#ffe28a" opacity="0.6" />
+  <path d="M 40,6 H 42 V 8 H 40 Z M 22,5 H 24 V 7 H 22 Z" fill="#e8c451" opacity="0.5" />
+  <!-- A cross sparkle -->
+  <path d="M 15,7 H 16 V 10 H 15 Z M 14,8 H 17 V 9 H 14 Z" fill="#ffe28a" opacity="0.5" />
+
+  <!-- Back Hair (Grand White Locks Shadow) -->
+  <path d="M 12,24 H 52 V 46 H 12 Z" fill="#dce0eb" />
+  <path d="M 10,28 H 54 V 40 H 10 Z" fill="#bdc2d4" />
+  <path d="M 8,32 H 56 V 36 H 8 Z" fill="#a0a5b8" />
+
+  <!-- Character Crown (Intricate 64-bit Gold & Royal Velvet) -->
+  <!-- Red Velvet Cap under crown -->
+  <path d="M 19,10 H 45 V 17 H 19 Z" fill="#750616" />
+  <path d="M 22,8 H 42 V 11 H 22 Z" fill="#990b20" />
+  
+  <!-- Crown Arches & Peaks (Gold) -->
+  <!-- Left Peaks -->
+  <rect x="14" y="6" width="3" height="11" fill="#cca43b" />
+  <rect x="15" y="5" width="1" height="1" fill="#ffeb7a" />
+  <rect x="18" y="9" width="2" height="8" fill="#cca43b" />
+  <!-- Center Peaks -->
+  <rect x="30" y="3" width="4" height="14" fill="#cca43b" />
+  <rect x="31" y="2" width="2" height="1" fill="#ffeb7a" />
+  <rect x="27" y="7" width="3" height="10" fill="#b08412" />
+  <rect x="34" y="7" width="3" height="10" fill="#cca43b" />
+  <!-- Right Peaks -->
+  <rect x="47" y="6" width="3" height="11" fill="#cca43b" />
+  <rect x="48" y="5" width="1" height="1" fill="#ffeb7a" />
+  <rect x="44" y="9" width="2" height="8" fill="#b08412" />
+  
+  <!-- Rubies/Emeralds on Crown Peaks -->
+  <rect x="14" y="5" width="3" height="1" fill="#ff0033" />
+  <rect x="47" y="5" width="3" height="1" fill="#ff0033" />
+  <rect x="30" y="2" width="4" height="1" fill="#ff0033" />
+  <rect x="18" y="8" width="2" height="1" fill="#00b4d8" />
+  <rect x="44" y="8" width="2" height="1" fill="#00b4d8" />
+  
+  <!-- Crown Base Rim -->
+  <path d="M 14,16 H 50 V 20 H 14 Z" fill="#cca43b" />
+  <path d="M 16,17 H 48 V 18 H 16 Z" fill="#ffeb7a" />
+  <path d="M 14,19 H 50 V 20 H 14 Z" fill="#9c720a" />
+  <!-- Alternating Jewels on rim -->
+  <rect x="18" y="17" width="2" height="2" fill="#ff0033" />
+  <rect x="24" y="17" width="2" height="2" fill="#00b4d8" />
+  <rect x="31" y="17" width="2" height="2" fill="#ff0033" />
+  <rect x="38" y="17" width="2" height="2" fill="#00b4d8" />
+  <rect x="44" y="17" width="2" height="2" fill="#ff0033" />
+
+  <!-- Face Base (Noble Wise Elderly Skin) -->
+  <path d="M 20,20 H 44 V 38 H 20 Z" fill="#fdebe2" />
+  <path d="M 22,18 H 42 V 40 H 22 Z" fill="#fdebe2" />
+  <!-- Skin Shading (Cheeks & Wrinkles) -->
+  <rect x="19" y="28" width="4" height="8" fill="#ebd1c2" />
+  <rect x="41" y="28" width="4" height="8" fill="#ebd1c2" />
+  <rect x="23" y="36" width="18" height="4" fill="#ebd1c2" />
+  <!-- Forehead wrinkles -->
+  <rect x="25" y="22" width="14" height="1" fill="#dcb39e" opacity="0.8" />
+  <rect x="27" y="24" width="10" height="1" fill="#dcb39e" opacity="0.8" />
+
+  <!-- Wise Closed Eyes (Grandfatherly Smiley Wrinkles) -->
+  <!-- Closed eye lines -->
+  <path d="M 23,29 Q 27,27 30,29" fill="none" stroke="#5c4033" stroke-width="1.5" stroke-linecap="round" />
+  <path d="M 41,29 Q 37,27 34,29" fill="none" stroke="#5c4033" stroke-width="1.5" stroke-linecap="round" />
+  <!-- Crow's feet wrinkles -->
+  <rect x="21" y="29" width="2" height="1" fill="#a8745d" />
+  <rect x="41" y="29" width="2" height="1" fill="#a8745d" />
+  <rect x="22" y="31" width="1" height="1" fill="#a8745d" />
+  <rect x="41" y="31" width="1" height="1" fill="#a8745d" />
+
+  <!-- Bushy White Eyebrows (Grand 64-bit volume) -->
+  <path d="M 21,25 H 31 V 28 H 21 Z" fill="#ffffff" />
+  <path d="M 33,25 H 43 V 28 H 33 Z" fill="#ffffff" />
+  <path d="M 22,24 H 29 V 26 H 22 Z" fill="#ffffff" />
+  <path d="M 35,24 H 42 V 26 H 35 Z" fill="#ffffff" />
+  <!-- Shading on eyebrows -->
+  <rect x="21" y="27" width="10" height="1" fill="#d5dae8" />
+  <rect x="33" y="27" width="10" height="1" fill="#d5dae8" />
+
+  <!-- Bulbous Elderly Nose -->
+  <path d="M 30,27 H 34 V 35 H 30 Z" fill="#ebd1c2" />
+  <path d="M 29,32 H 35 V 35 H 29 Z" fill="#d09f8c" />
+  <rect x="31" y="34" width="2" height="1" fill="#ab7b66" />
+
+  <!-- Flowing White Beard & Detailed Mustache (Magnificent 64-bit Style) -->
+  <!-- Mustache -->
+  <path d="M 24,36 H 40 V 39 H 24 Z" fill="#ffffff" />
+  <path d="M 22,37 H 42 V 39 H 22 Z" fill="#ffffff" />
+  <path d="M 26,35 H 38 V 37 H 26 Z" fill="#ffffff" />
+  <!-- Mustache Shading -->
+  <rect x="23" y="38" width="18" height="1" fill="#e1e6f2" />
+  <rect x="25" y="39" width="14" height="1" fill="#bdc3d4" />
+
+  <!-- Grand Beard Base & Flow (Layered for Depth) -->
+  <!-- Deep shadow layers (grey/blue) -->
+  <path d="M 16,38 C 16,52 22,58 32,60 C 42,58 48,52 48,38 C 42,44 38,46 32,46 C 26,46 22,44 16,38 Z" fill="#b0b7cb" />
+  <!-- Medium white/grey layer -->
+  <path d="M 18,39 C 18,50 24,56 32,58 C 40,56 46,50 46,39 C 41,43 37,44 32,44 C 27,44 23,43 18,39 Z" fill="#d5dae8" />
+  <!-- Pure White highlights and strands -->
+  <path d="M 20,40 C 20,48 26,53 32,55 C 38,53 44,48 44,40 C 39,42 35,43 32,43 C 29,43 25,42 20,40 Z" fill="#ffffff" />
+  <!-- Additional flowing pixel strands on the sides -->
+  <rect x="14" y="35" width="3" height="8" fill="#ffffff" />
+  <rect x="15" y="37" width="2" height="10" fill="#d5dae8" />
+  <rect x="47" y="35" width="3" height="8" fill="#ffffff" />
+  <rect x="47" y="37" width="2" height="10" fill="#b0b7cb" />
+  <!-- Center beard lock -->
+  <rect x="31" y="44" width="2" height="14" fill="#ffffff" />
+  <rect x="30" y="46" width="4" height="10" fill="#ffffff" />
+  <rect x="31" y="48" width="2" height="10" fill="#d5dae8" />
+
+  <!-- Royal Blue Robe & Grand Gold Shoulders (64-bit Grid) -->
+  <!-- Robe Base Structure -->
+  <path d="M 10,48 H 54 V 64 H 10 Z" fill="#14224c" />
+  <path d="M 14,48 H 50 V 64 H 14 Z" fill="#1c2d67" />
+  
+  <!-- Outer Gold Epaulets / Shoulder Armor plates -->
+  <path d="M 8,48 H 18 V 64 H 6 Q 6,56 8,48 Z" fill="#cca43b" />
+  <path d="M 46,48 H 56 Q 58,56 58,64 H 46 Z" fill="#cca43b" />
+  <!-- Shiny Gold Highlights -->
+  <path d="M 9,47 H 16 V 49 H 9 Z" fill="#ffea7a" />
+  <path d="M 48,47 H 55 V 49 H 48 Z" fill="#ffea7a" />
+  <!-- Epaulet Shadow details -->
+  <path d="M 7,51 H 11 V 64 H 7 Z" fill="#9c720a" />
+  <path d="M 53,51 H 57 V 64 H 53 Z" fill="#9c720a" />
+
+  <!-- Crimson Inner Sash -->
+  <path d="M 24,48 H 40 V 64 H 24 Z" fill="#8c1223" />
+  <!-- Gold Medallion on Sash -->
+  <rect x="30" y="52" width="4" height="4" fill="#cca43b" />
+  <rect x="31" y="53" width="2" height="2" fill="#ffe28a" />
+  <circle cx="32" cy="54" r="0.8" fill="#ff0033" />
+
+  <!-- Shadow below chin and collar -->
+  <path d="M 16,46 H 48 V 48 H 16 Z" fill="#080c1d" />
+</svg>

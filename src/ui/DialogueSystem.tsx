@@ -4,8 +4,8 @@ import { useGameStore } from '../store/gameStore';
 const PORTRAIT_COLORS: Record<string, { bg: string; border: string; emoji: string; img?: string }> = {
   alden:      { bg: '#1a2a3a', border: '#4169e1', emoji: '⚔️', img: '/assets/images/knight_player.png' },
   evelyne:    { bg: '#2a1a2a', border: '#da70d6', emoji: '👑', img: '/assets/images/evelyn-princess.png' },
-  valther:    { bg: '#1a0505', border: '#8b0000', emoji: '🗡️' },
-  king:       { bg: '#2a2010', border: '#b8860b', emoji: '♔' },
+  valther:    { bg: '#1a0505', border: '#8b0000', emoji: '🗡️', img: '/assets/images/valther.svg' },
+  king:       { bg: '#2a2010', border: '#b8860b', emoji: '♔', img: '/assets/images/king.svg' },
   blacksmith: { bg: '#2a1a0a', border: '#8b6914', emoji: '🔨', img: '/assets/images/npc-blacksmith.png' },
   nun:        { bg: '#0a0a1a', border: '#9370db', emoji: '✝️', img: '/assets/images/npc-thenun.png' },
   boy:        { bg: '#1a2a10', border: '#32cd32', emoji: '🌟', img: '/assets/images/npc-villages-boy.png' },

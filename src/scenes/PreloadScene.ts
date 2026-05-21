@@ -13,6 +13,7 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('enemy_beast_sprite', 'assets/images/beast_enemy.png');
     this.load.image('enemy_corrupted_sprite', 'assets/images/corrupted_enemy.png');
     this.load.image('boss_blind_king_sprite', 'assets/images/blind_king_boss.png');
+    this.load.image('anim_boss_vs_mc', 'assets/images/animation/pict-animasi-boss-vs-mc.png');
 
     // Load background assets
     this.load.image('bg_village', 'assets/images/village bg.jpeg');

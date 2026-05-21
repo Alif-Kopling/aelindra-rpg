@@ -201,7 +201,8 @@ export const BATTLEFIELD_BOSS_PRE: DialogueLine[] = [
   { speaker: 'Alden', portrait: 'alden', text: 'Nggak. Gue udah kehilangan terlalu banyak buat kalah sama bayangan pake muka orang mati.', emotion: 'determined' },
   { speaker: 'Ashen Knight', text: 'Lo udah kalah, ksatria cilik. Lo kalah sejak lo cinta sama kerajaan yang nggak bakal pernah balas cinta lo.', emotion: 'angry' },
   { speaker: 'Alden', portrait: 'alden', text: 'Mungkin. Tapi gue nggak berjuang buat kerajaannya. Gue berjuang buat orang-orang DI DALEMNYA.', emotion: 'determined' },
-  { speaker: '— Narrator —', text: 'Alden angkat pedangnya satu kali terakhir. Beratnya setiap teman yang jatuh, setiap sumpah yang patah, setiap luka — disalurin ke satu momen.', emotion: 'determined', isNarration: true },
+  { speaker: '— Narrator —', text: 'Saat kegelapan mutlak Ashen Knight hampir menelan sisa jiwanya, Jimat Ksatria dari Tam di dadanya mendadak terasa hangat. Di saat yang sama, Pedupaan Suci dari Wandering Nun memancarkan cahaya keemasan lembut, menghalau kabut hitam di sekelilingnya.', emotion: 'loving', isNarration: true },
+  { speaker: '— Narrator —', text: 'Alden mengangkat Forsaken Blade pemberian Edric satu kali terakhir. Beratnya setiap teman yang jatuh, setiap sumpah yang patah, setiap luka — disalurin ke satu tebasan mahadahsyat.', emotion: 'determined', isNarration: true },
   { speaker: 'Alden', portrait: 'alden', text: 'Demi Aelindra. Demi semua yang nggak bisa gue selametin. GUE AKHIRI INI.', emotion: 'determined' },
 ];
 
@@ -217,6 +218,7 @@ export const BATTLEFIELD_BOSS_POST: DialogueLine[] = [
 export const ENDING_SCENE: DialogueLine[] = [
   { speaker: '— Narrator —', text: 'Kegelapan tersegel. Yang kuno — akhirnya bungkam.', isNarration: true, emotion: 'neutral' },
   { speaker: '— Narrator —', text: 'Tapi luka yang dibawa Alden... terlalu dalem. Bahkan buat ksatria yang udah selamat dari semuanya.', isNarration: true, emotion: 'sad' },
+  { speaker: '— Narrator —', text: 'Di tengah kesunyian medan perang, langkah kaki terburu-buru memecah keheningan. Evelyne, yang menyusul dengan rasa cemas yang tak tertahankan, jatuh terduduk di samping ksatria itu.', isNarration: true, emotion: 'sad' },
   { speaker: 'Princess Evelyne', portrait: 'evelyne', text: '*berlutut di sampingnya, tangan nahan lukanya* Alden. Alden, jangan pergi. Please. Tabibnya dateng—', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: '...Nggak apa-apa. Gue... gue nggak dingin. Aneh ya.', emotion: 'sad' },
   { speaker: 'Princess Evelyne', portrait: 'evelyne', text: '*air mata jatuh* Jangan berani-beraninya lo nerima ini. Lawan.', emotion: 'sad' },
