@@ -33,6 +33,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private lastComboTime = 0;
   private invincibleTimer = 0;
   private staminaRegenTimer = 0;
+  private canDoubleJump = false;
+  private isPlunging = false;
   private currentFrame = 0;
   private frameTimer = 0;
   private currentAnim = 'idle';

@@ -28,144 +28,130 @@ const TitleScreen: React.FC = () => {
     <div
       className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden"
       style={{
-        background: 'radial-gradient(ellipse at 50% 60%, #0d0510 0%, #050208 50%, #000005 100%)',
+        background: 'radial-gradient(ellipse at 50% 50%, #1a0520 0%, #08030a 50%, #000000 100%)',
       }}
     >
-      {/* Ambient particles */}
+      <style>
+        {`
+          @keyframes particleFall {
+            0% { transform: translateY(0); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.2; }
+            100% { transform: translateY(-100vh); opacity: 0; }
+          }
+          @keyframes nameReveal {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          .vignette {
+            background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.8) 100%);
+          }
+        `}
+      </style>
+
+      {/* Atmospheric Particles */}
       {PARTICLES.map((p) => (
         <div
           key={p.id}
           className="absolute rounded-full"
           style={{
             left: `${p.x}%`,
-            bottom: -20,
+            bottom: -50,
             width: p.size,
             height: p.size,
             background: p.color,
+            opacity: 0.3,
             animation: `particleFall ${p.duration}s linear ${p.delay}s infinite`,
-            boxShadow: `0 0 ${p.size * 2}px ${p.color}`,
+            boxShadow: `0 0 ${p.size * 3}px ${p.color}`,
           }}
         />
       ))}
 
-      {/* Background castle silhouette */}
+      {/* Background Castle Silhouette */}
       <CastleSilhouette />
 
       {/* Title block */}
-      <div className="relative z-10 flex flex-col items-center" style={{ marginBottom: 60 }}>
+      <div className="relative z-10 flex flex-col items-center" style={{ marginBottom: 40 }}>
         {/* Kingdom name */}
         <div
           style={{
             fontFamily: 'Cinzel Decorative, serif',
-            fontSize: 11,
-            letterSpacing: '8px',
-            color: '#8fa8b8',
-            opacity: phase !== 'initial' ? 1 : 0,
-            transition: 'opacity 1s ease',
-            marginBottom: 12,
+            fontSize: 12,
+            letterSpacing: '12px',
+            color: '#c8a862',
+            opacity: phase !== 'initial' ? 0.8 : 0,
+            transition: 'opacity 1.5s ease',
+            marginBottom: 16,
             textTransform: 'uppercase',
+            textShadow: '0 0 10px rgba(200,168,98,0.3)',
           }}
         >
-          ✦ Kingdom of Aelindra ✦
+          AELINDRA · THE FORSAKEN
         </div>
 
         {/* Main title */}
         <div
           style={{
             fontFamily: 'Cinzel Decorative, serif',
-            fontSize: 'clamp(36px, 7vw, 72px)',
+            fontSize: 'clamp(48px, 10vw, 96px)',
             fontWeight: 900,
-            lineHeight: 1,
-            letterSpacing: '4px',
-            background: 'linear-gradient(180deg, #ffd700 0%, #b8860b 40%, #8b6914 70%, #5c4a1e 100%)',
+            lineHeight: 0.9,
+            letterSpacing: '8px',
+            background: 'linear-gradient(180deg, #fff 0%, #ffd700 40%, #b8860b 70%, #5c4a1e 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            textShadow: 'none',
-            filter: 'drop-shadow(0 0 20px rgba(184,134,11,0.5))',
-            animation: phase !== 'initial' ? 'nameReveal 1.2s ease-out forwards' : 'none',
-            opacity: phase !== 'initial' ? 1 : 0,
-            transition: 'opacity 0.5s',
-            textAlign: 'center',
+            filter: 'drop-shadow(0 0 30px rgba(200,168,98,0.6))',
+            animation: phase !== 'initial' ? 'nameReveal 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards' : 'none',
+            opacity: 0,
           }}
         >
-          AELINDRA
+          KNIGHT
         </div>
-
-        {/* Subtitle */}
-        <div
-          style={{
-            fontFamily: 'Cinzel, serif',
-            fontSize: 'clamp(12px, 2vw, 18px)',
-            letterSpacing: '6px',
-            color: '#8fa8b8',
-            marginTop: 10,
-            opacity: phase === 'subtitle' || phase === 'menu' ? 1 : 0,
-            transform: phase === 'subtitle' || phase === 'menu' ? 'translateY(0)' : 'translateY(10px)',
-            transition: 'opacity 0.8s ease, transform 0.8s ease',
-          }}
-        >
-          The Forsaken Knight
-        </div>
-
-        {/* Decorative line */}
-        <div
-          style={{
-            width: phase === 'menu' ? 400 : 0,
-            height: 1,
-            background: 'linear-gradient(90deg, transparent, #b8860b, transparent)',
-            marginTop: 16,
-            transition: 'width 1s ease',
-          }}
-        />
 
         {/* Tagline */}
-        {phase === 'menu' && (
-          <div
-            style={{
-              fontFamily: 'Lora, serif',
-              fontStyle: 'italic',
-              fontSize: 12,
-              color: '#6a5a4a',
-              marginTop: 10,
-              letterSpacing: '1px',
-              animation: 'fadeIn 1s ease-out forwards',
-            }}
-          >
-            "The world hated him. He saved it anyway."
-          </div>
-        )}
+        <div
+          style={{
+            fontFamily: 'Lora, serif',
+            fontStyle: 'italic',
+            fontSize: 'clamp(14px, 2vw, 18px)',
+            color: '#a09080',
+            marginTop: 20,
+            letterSpacing: '2px',
+            opacity: phase === 'menu' ? 1 : 0,
+            transition: 'opacity 1s ease',
+          }}
+        >
+          "The world hated him. He saved it anyway."
+        </div>
       </div>
 
       {/* Menu buttons */}
       <div
-        className="relative z-10 flex flex-col items-center gap-3"
+        className="relative z-10 flex flex-col items-center gap-4 mt-8"
         style={{
           opacity: menuVisible ? 1 : 0,
           transform: menuVisible ? 'translateY(0)' : 'translateY(20px)',
-          transition: 'opacity 0.8s ease, transform 0.8s ease',
+          transition: 'opacity 1s ease, transform 1s ease',
         }}
       >
-        <TitleButton label="▶  Begin the Journey" primary onClick={() => setScreen('prologue')} />
-        <TitleButton label="⚔  Continue" onClick={() => {
+        <TitleButton label="✦ BEGIN THE JOURNEY ✦" primary onClick={() => setScreen('prologue')} />
+        <TitleButton label="✦ CONTINUE ✦" onClick={() => {
           const save = localStorage.getItem('aelindra_save_0');
-          if (save) {
-            useGameStore.getState().loadGame(0);
-          } else {
-            useGameStore.getState().addNotification({
-              type: 'warning', title: 'No Save Found', message: 'Start a new journey first.', icon: '💾',
-            });
-          }
+          if (save) { useGameStore.getState().loadGame(0); } 
+          else { useGameStore.getState().addNotification({ type: 'warning', title: 'No Save Found', message: 'Start a new journey.', icon: '💾' }); }
         }} />
-        <TitleButton label="⚙  Settings" onClick={() => {}} />
       </div>
 
-      {/* Version + credits */}
+      {/* Version */}
       <div
-        className="absolute bottom-4"
-        style={{ fontFamily: 'Cinzel, serif', fontSize: 9, color: '#3a3040', letterSpacing: '1px' }}
+        className="absolute bottom-6"
+        style={{ fontFamily: 'Cinzel, serif', fontSize: 10, color: '#4a3a30', letterSpacing: '2px' }}
       >
-        v1.0.0 · A Dark Fantasy Pixel RPG · Built with Phaser + React
+        FORSAKEN EDITION v1.0.0
       </div>
 
       {/* Vignette */}

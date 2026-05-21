@@ -36,12 +36,12 @@ export const VILLAGE_ROUND1_POST: DialogueLine[] = [
 ];
 
 export const VILLAGE_ROUND2_POST: DialogueLine[] = [
-  { speaker: 'Tam (Village Boy)', portrait: 'boy', text: 'Kak Alden! Lo nggak papa!', emotion: 'happy' },
-  { speaker: 'Alden', portrait: 'alden', text: 'Tam... lo harusnya di dalem.', emotion: 'neutral' },
-  { speaker: 'Tam (Village Boy)', portrait: 'boy', text: 'Gue bawa ini buat lo. Mama bilang ini punya kakek buyut dia — jimat ksatria. Buat pelindung.', emotion: 'determined' },
-  { speaker: 'Alden', portrait: 'alden', text: '*nerima jimatnya pelan* ...Makasih, Tam. Bakal gue bawa terus.', emotion: 'sad' },
-  { speaker: 'Tam (Village Boy)', portrait: 'boy', text: 'Lo bakal ngelawan orang jahat itu, kan? Lo bakal bikin semuanya bener lagi?', emotion: 'determined' },
-  { speaker: 'Alden', portrait: 'alden', text: 'Gue sumpah.', emotion: 'determined' },
+  { speaker: 'Tam (Village Boy)', portrait: 'boy', text: 'Kak Alden! Kakak nggak papa!', emotion: 'happy' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Tam... kamu harusnya di dalem.', emotion: 'neutral' },
+  { speaker: 'Tam (Village Boy)', portrait: 'boy', text: 'Aku bawa ini buat Kakak. Mama bilang ini punya kakek buyut aku — jimat ksatria. Buat pelindung.', emotion: 'determined' },
+  { speaker: 'Alden', portrait: 'alden', text: '*nerima jimatnya pelan* ...Makasih, Tam. Bakal aku bawa terus.', emotion: 'sad' },
+  { speaker: 'Tam (Village Boy)', portrait: 'boy', text: 'Kakak bakal ngelawan orang jahat itu, kan? Kakak bakal bikin semuanya bener lagi?', emotion: 'determined' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Aku sumpah.', emotion: 'determined' },
   { speaker: 'Old Edric', portrait: 'blacksmith', text: 'Jalan ke hutan udah kebuka sekarang. Tapi Alden... hati-hati. Hutan Fogbound punya mulut sendiri — dan lagi bisik-bisik.', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: 'Gue pernah selamat dari yang lebih ganas dari bisikan.', emotion: 'determined' },
   { speaker: 'Old Edric', portrait: 'blacksmith', text: 'Oh ya? Pergilah. Dan balik hidup-hidup — atau gue seret lo balik sendiri.', emotion: 'happy' },

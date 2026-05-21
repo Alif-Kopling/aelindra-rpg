@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 
-type PauseTab = 'main' | 'settings' | 'save' | 'quests';
+type PauseTab = 'main' | 'settings' | 'controls' | 'save' | 'quests';
 
 const PauseMenu: React.FC = () => {
   const { isPaused, togglePause, settings, updateSettings, saveGame, loadGame, saveSlots, quests, player, setScreen } = useGameStore();
@@ -48,7 +48,7 @@ const PauseMenu: React.FC = () => {
 
         {/* Tab nav */}
         <div className="flex border-b" style={{ borderColor: 'rgba(184,134,11,0.2)' }}>
-          {(['main', 'settings', 'save', 'quests'] as PauseTab[]).map((t) => (
+          {(['main', 'settings', 'controls', 'save', 'quests'] as PauseTab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -75,6 +75,9 @@ const PauseMenu: React.FC = () => {
           )}
           {tab === 'settings' && (
             <SettingsTab settings={settings} updateSettings={updateSettings} />
+          )}
+          {tab === 'controls' && (
+            <ControlsTab />
           )}
           {tab === 'save' && (
             <SaveTab saveSlots={saveSlots} saveGame={saveGame} loadGame={loadGame} />
@@ -252,6 +255,32 @@ const SaveTab: React.FC<{ saveSlots: any[]; saveGame: (slot: number) => void; lo
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const ControlsTab: React.FC = () => {
+  const controls = [
+    { title: 'MOVEMENT', keys: [{ key: 'WASD', desc: 'Move Character' }, { key: 'SPACE / SHIFT', desc: 'High-Stamina Dash' }, { key: 'W / SPACE', desc: 'Jump / Double Jump' }] },
+    { title: 'COMBAT', keys: [{ key: 'L / MOUSE 1', desc: 'Light Attack' }, { key: 'CHARGE', desc: 'Heavy / Critical Attack' }, { key: 'RIGHT CLICK', desc: 'Forsaken Slash (Ult)' }] },
+    { title: 'ACTIONS', keys: [{ key: 'E', desc: 'Interact / Dialogue' }, { key: 'TAB', desc: 'Inventory' }, { key: 'ESC', desc: 'Pause Menu' }] },
+  ];
+
+  return (
+    <div className="flex flex-col gap-6">
+      {controls.map((cat) => (
+        <div key={cat.title}>
+          <div style={{ fontFamily: 'Cinzel, serif', fontSize: 10, color: '#b8860b', letterSpacing: '2px', marginBottom: 8 }}>{cat.title}</div>
+          <div className="flex flex-col gap-2">
+            {cat.keys.map(k => (
+              <div key={k.key} className="flex justify-between items-center" style={{ background: 'rgba(20,15,10,0.6)', padding: '6px 10px', borderRadius: 3 }}>
+                <span style={{ fontFamily: 'Cinzel, serif', fontSize: 11, color: '#f4e4c1', fontWeight: 600 }}>{k.key}</span>
+                <span style={{ fontFamily: 'Lora, serif', fontSize: 10, color: '#8fa8b8', fontStyle: 'italic' }}>{k.desc}</span>
+              </div>
+            ))}
           </div>
         </div>
       ))}

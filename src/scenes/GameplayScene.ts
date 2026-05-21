@@ -253,7 +253,13 @@ export class GameplayScene extends Phaser.Scene {
 
         // Apply Status Effects
         if (isCritical) {
-          enemy.applyStun(1000); // 1s stun
+          if (store.player.stats.stamina >= 15) {
+            store.drainStamina(15);
+            enemy.applyStun(1000);
+          } else {
+            // If no stamina, treat as normal hit or reduce crit dmg? 
+            // For now, let's just not stun and keep normal damage
+          }
         }
         if (this.player.getComboCount() % 3 === 0) {
           enemy.applyBleed(5000); // 5s bleed
@@ -564,6 +570,21 @@ export class GameplayScene extends Phaser.Scene {
           break;
         }
       }
+    });
+
+    this.events.on('boss-summon-minion', (data: { x: number; y: number }) => {
+      const minionConfig: EnemyConfig = {
+        key: 'enemy_corrupted',
+        name: 'Ashen Soldier',
+        stats: { hp: 80, attack: 20, defense: 0, speed: 100, exp: 0, gold: 0 },
+        frameCount: 4,
+        scale: 1.5,
+      };
+      const enemy = new Enemy(this, data.x, data.y, minionConfig);
+      enemy.setTarget(this.player);
+      this.enemies.push(enemy);
+      this.enemyGroup.add(enemy);
+      this.physics.add.collider(enemy, this.platformGroup);
     });
 
     this.events.on('boss-attack', (data: { boss: Boss; damage: number; type: string; radius?: number }) => {

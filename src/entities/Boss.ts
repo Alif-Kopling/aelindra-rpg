@@ -212,6 +212,20 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
+  private summonMinions() {
+    const scene = this.scene;
+    // Roar audio
+    if (scene.cache.audio.exists('boss_roar')) {
+      scene.sound.play('boss_roar', { volume: 0.8 });
+    }
+
+    // Summon 3 Ashen Soldiers at random positions
+    for (let i = 0; i < 3; i++) {
+      const x = Phaser.Math.Between(50, this.arenaRight - 50);
+      scene.events.emit('boss-summon-minion', { x, y: this.y });
+    }
+  }
+
   private phase3AI(_delta: number) {
     if (!this.target) return;
     const isAshen = this.config.id === 'ashen_knight';
@@ -221,10 +235,11 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
       const roll = Math.random();
       if (isAshen) {
         this.attackTimer = 600;
-        if (roll < 0.2) this.voidTeleport();
-        else if (roll < 0.4) this.ashenStorm();
-        else if (roll < 0.6) this.swordRain();
-        else if (roll < 0.8) this.darkWave();
+        if (roll < 0.15) this.voidTeleport();
+        else if (roll < 0.3) this.ashenStorm();
+        else if (roll < 0.45) this.swordRain();
+        else if (roll < 0.6) this.summonMinions();
+        else if (roll < 0.75) this.darkWave();
         else this.projectileBarrage();
       } else {
         if (roll < 0.25) {

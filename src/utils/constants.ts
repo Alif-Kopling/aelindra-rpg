@@ -5,10 +5,10 @@ export const TILE_SIZE = 32;
 export const DEBUG_HITBOXES = false;
 
 export const PLAYER_DEFAULTS = {
-  maxHp: 150,
+  maxHp: 120,
   maxStamina: 100,
   maxMana: 80,
-  attack: 18,
+  attack: 15,
   defense: 8,
   speed: 200,
 };
