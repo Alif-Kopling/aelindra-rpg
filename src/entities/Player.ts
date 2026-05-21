@@ -19,6 +19,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     Space: Phaser.Input.Keyboard.Key;
     E: Phaser.Input.Keyboard.Key;
     L: Phaser.Input.Keyboard.Key;
+    Shift: Phaser.Input.Keyboard.Key;
   };
 
   private attackKey!: Phaser.Input.Pointer;
@@ -104,6 +105,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       Space: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
       E: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.E),
       L: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.L),
+      Shift: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT),
     };
   }
 
@@ -236,9 +238,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       body.setVelocityY(body.velocity.y * 0.5);
     }
 
-    if (Phaser.Input.Keyboard.JustDown(this.keys.Space) &&
+    if ((Phaser.Input.Keyboard.JustDown(this.keys.Space) || Phaser.Input.Keyboard.JustDown(this.keys.Shift)) &&
         this.dashCooldown <= 0 &&
-        stats.stamina >= 20 && vx !== 0 && !this.isDashing) {
+        stats.stamina >= 35 && vx !== 0 && !this.isDashing) {
       this.startDash(vx, store);
     }
 
@@ -483,7 +485,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const arc = this.scene.add.graphics();
     arc.lineStyle(8, 0xffd700, 1);
     arc.beginPath();
-    arc.arc(cx, cy, 50, dir > 0 ? -Math.PI / 2 : Math.PI / 2, dir > 0 ? Math.PI / 2 : -Math.PI / 2, false);
+    // Sweep from bottom (PI/2) to top (-PI/2). Counter-clockwise if facing right, clockwise if facing left.
+    arc.arc(cx, cy, 50, Math.PI / 2, -Math.PI / 2, dir > 0);
     arc.strokePath();
     arc.setDepth(25);
 
@@ -756,29 +759,65 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const body = this.body as Phaser.Physics.Arcade.Body;
     const dir = this.facingRight ? 1 : -1;
 
+    this.resetHitTracking(); // Clear hits for the new swing
+
     if (comboStep === 0) {
       body.setVelocityX(dir * 180);
+      this.spawnSlashEffect(0);
     } else if (comboStep === 1) {
       body.setVelocityX(dir * 120);
       body.setVelocityY(-140);
+      this.spawnSlashEffect(1);
     } else {
+      // 3rd hit branching: Cyclone Slash
       body.setVelocityX(dir * 480);
+      this.spawnCycloneEffect();
+      this.scene.cameras.main.shake(150, 0.01);
     }
 
     const hb = this.attackHitbox.body as Phaser.Physics.Arcade.Body;
     hb.enable = true;
 
-    this.scene.time.delayedCall(180, () => {
+    this.scene.time.delayedCall(220, () => {
       hb.enable = false;
     });
+  }
 
-    if (comboStep === 2) {
-      this.scene.cameras.main.shake(120, 0.007);
-    } else if (this.comboCount >= 3) {
-      this.scene.cameras.main.shake(80, 0.004);
-    }
+  private spawnCycloneEffect() {
+    const dir = this.facingRight ? 1 : -1;
+    const g = this.scene.add.graphics();
+    g.setDepth(25);
+    g.lineStyle(6, 0x00ffff, 1);
+    
+    // Large spinning circular slash
+    g.strokeCircle(this.x, this.y, 80);
+    
+    this.scene.tweens.add({
+      targets: g,
+      scaleX: 1.5,
+      scaleY: 1.5,
+      alpha: 0,
+      rotation: Math.PI * 2 * dir,
+      duration: 250,
+      ease: 'Cubic.easeOut',
+      onComplete: () => g.destroy(),
+    });
 
-    this.spawnSlashEffect(comboStep);
+    // Outer shockwave
+    const ring = this.scene.add.graphics();
+    ring.lineStyle(2, 0xffffff, 0.8);
+    ring.strokeCircle(this.x, this.y, 40);
+    ring.setDepth(24);
+    this.scene.tweens.add({
+      targets: ring,
+      scaleX: 4,
+      scaleY: 4,
+      alpha: 0,
+      duration: 300,
+      onComplete: () => ring.destroy(),
+    });
+
+    this.spawnParticles(this.x, this.y, 0x00ffff, 15, 1.8);
   }
 
   private startDash(vx: number, store: ReturnType<typeof useGameStore.getState>) {
@@ -787,7 +826,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.dashCooldown = DASH_COOLDOWN;
     this.invincibleTimer = INVINCIBILITY_FRAMES;
     store.setPlayerDashing(true);
-    store.drainStamina(20);
+    store.drainStamina(35);
 
     this.dashDirX = vx > 0 ? 1 : -1;
     this.spawnDashTrail();

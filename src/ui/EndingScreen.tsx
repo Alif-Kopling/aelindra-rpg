@@ -57,13 +57,41 @@ const EndingScreen: React.FC = () => {
 
   return (
     <div
-      className="absolute inset-0 overflow-y-auto flex flex-col items-center"
+      className="absolute inset-0 overflow-y-auto flex flex-col items-center custom-scrollbar"
       style={{
         background: bgColors[bgPhase],
         transition: 'background 8s ease',
         zIndex: 100,
       }}
     >
+      <style>
+        {`
+          @keyframes ember-float {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            20% { opacity: 0.8; }
+            100% { transform: translateY(-100vh) translateX(var(--tx)); opacity: 0; }
+          }
+          @keyframes textGlow {
+            0%, 100% { text-shadow: 0 0 20px rgba(200,168,98,0.2); }
+            50% { text-shadow: 0 0 40px rgba(200,168,98,0.6); }
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+          }
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(200, 168, 98, 0.2);
+            border-radius: 2px;
+          }
+        `}
+      </style>
+
       {/* Background Image Overlay */}
       <div 
         className="fixed inset-0 pointer-events-none transition-all duration-[4000ms]"
@@ -71,27 +99,28 @@ const EndingScreen: React.FC = () => {
           backgroundImage: `url('/assets/images/ending-bg-dialog.jpeg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          opacity: bgPhase === 'dark' ? 0.2 : bgPhase === 'dawn' ? 0.3 : 0.4,
+          opacity: bgPhase === 'dark' ? 0.15 : bgPhase === 'dawn' ? 0.25 : 0.35,
           zIndex: 0,
         }}
       />
 
       {/* Ember particles in bright phase */}
       {bgPhase === 'bright' && (
-        <div className="fixed inset-0 pointer-events-none">
-          {Array.from({ length: 20 }, (_, i) => (
+        <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 5 }}>
+          {Array.from({ length: 30 }, (_, i) => (
             <div
               key={i}
               style={{
                 position: 'absolute',
-                width: 4,
-                height: 4,
+                width: Phaser_math_between(2, 5),
+                height: Phaser_math_between(2, 5),
                 borderRadius: '50%',
                 background: '#ffa040',
                 left: `${Math.random() * 100}%`,
-                bottom: -10,
-                animation: `ember-float ${4 + Math.random() * 4}s linear ${Math.random() * 4}s infinite`,
-                '--tx': `${Phaser_math_between(-30, 30)}px`,
+                bottom: -20,
+                filter: 'blur(1px)',
+                animation: `ember-float ${6 + Math.random() * 6}s linear ${Math.random() * 5}s infinite`,
+                '--tx': `${Phaser_math_between(-100, 100)}px`,
               } as any}
             />
           ))}
@@ -99,36 +128,42 @@ const EndingScreen: React.FC = () => {
       )}
 
       {/* Cinematic bars */}
-      <div className="fixed top-0 left-0 right-0 z-20" style={{ height: 70, background: '#000000' }} />
-      <div className="fixed bottom-0 left-0 right-0 z-20" style={{ height: 70, background: '#000000' }} />
+      <div className="fixed top-0 left-0 right-0 z-50" style={{ height: '12vh', background: 'linear-gradient(to bottom, #000 70%, transparent)' }} />
+      <div className="fixed bottom-0 left-0 right-0 z-50" style={{ height: '12vh', background: 'linear-gradient(to top, #000 70%, transparent)' }} />
 
       {/* Content */}
       <div
         className="relative z-10 text-center"
-        style={{ maxWidth: 640, padding: '100px 40px', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 28 }}
+        style={{ 
+          maxWidth: 700, 
+          padding: '20vh 40px 30vh 40px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: 24 
+        }}
       >
         {ENDING_LINES.map((line, i) => (
           <div
             key={i}
             style={{
               fontFamily: line.alden ? 'Lora, serif' : line.emphasis ? 'Cinzel, serif' : 'Lora, serif',
-              fontSize: line.emphasis ? 'clamp(16px, 2.5vw, 22px)' : line.alden ? 'clamp(14px, 2vw, 18px)' : 'clamp(12px, 1.8vw, 16px)',
+              fontSize: line.emphasis ? 'clamp(18px, 3vw, 24px)' : line.alden ? 'clamp(15px, 2.2vw, 19px)' : 'clamp(13px, 2vw, 17px)',
               fontStyle: (!line.emphasis && !line.alden) ? 'italic' : line.alden ? 'italic' : 'normal',
               fontWeight: line.emphasis ? 700 : 400,
-              letterSpacing: line.emphasis ? '3px' : '0.5px',
-              color: line.alden ? '#8fa8b8' : line.emphasis ? '#f4e4c1' : '#8a7a6a',
-              textShadow: line.emphasis ? '0 0 20px rgba(244,228,193,0.3)' : 'none',
+              letterSpacing: line.emphasis ? '4px' : '0.8px',
+              color: line.alden ? '#a0b0c0' : line.emphasis ? '#f4e4c1' : '#b0a090',
+              textShadow: line.emphasis ? '0 0 25px rgba(244,228,193,0.4)' : '0 2px 4px rgba(0,0,0,0.5)',
               lineHeight: 1.8,
               opacity: visibleLines.has(i) ? 1 : 0,
-              transform: visibleLines.has(i) ? 'translateY(0)' : 'translateY(12px)',
-              transition: 'opacity 1.5s ease, transform 1.5s ease',
+              transform: visibleLines.has(i) ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 2s cubic-bezier(0.4, 0, 0.2, 1), transform 2s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
             {line.text === '— — —' ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-                <div style={{ width: 80, height: 1, background: 'linear-gradient(to right, transparent, #4a3a2a)' }} />
-                <span>✦</span>
-                <div style={{ width: 80, height: 1, background: 'linear-gradient(to left, transparent, #4a3a2a)' }} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, margin: '20px 0' }}>
+                <div style={{ width: 100, height: 1, background: 'linear-gradient(to right, transparent, #8b6914, transparent)' }} />
+                <span style={{ color: '#8b6914', fontSize: 18 }}>✦</span>
+                <div style={{ width: 100, height: 1, background: 'linear-gradient(to right, transparent, #8b6914, transparent)' }} />
               </div>
             ) : line.text}
           </div>
@@ -138,21 +173,23 @@ const EndingScreen: React.FC = () => {
         {bgPhase === 'bright' && (
           <div
             style={{
-              marginTop: 40,
+              marginTop: 60,
+              paddingTop: 60,
+              borderTop: '1px solid rgba(200,168,98,0.1)',
               opacity: bgPhase === 'bright' ? 1 : 0,
-              transition: 'opacity 3s ease',
+              transition: 'opacity 4s ease',
             }}
           >
-            <div style={{ fontSize: 60, marginBottom: 16, filter: 'drop-shadow(0 0 20px rgba(255,200,100,0.4))' }}>
-              🗽
+            <div style={{ fontSize: 72, marginBottom: 24, filter: 'drop-shadow(0 0 30px rgba(255,200,100,0.5))' }}>
+              ⚔️
             </div>
             <div style={{
               fontFamily: 'Cinzel Decorative, serif',
-              fontSize: 'clamp(20px, 4vw, 36px)',
+              fontSize: 'clamp(24px, 5vw, 42px)',
               fontWeight: 900,
               color: '#c8a862',
-              letterSpacing: '4px',
-              textShadow: '0 0 30px rgba(200,168,98,0.4)',
+              letterSpacing: '6px',
+              textShadow: '0 0 40px rgba(200,168,98,0.5)',
               animation: 'textGlow 3s ease-in-out infinite',
             }}>
               {player.name}
@@ -160,16 +197,17 @@ const EndingScreen: React.FC = () => {
             <div style={{
               fontFamily: 'Lora, serif',
               fontStyle: 'italic',
-              fontSize: 14,
-              color: '#8a7a6a',
-              marginTop: 8,
-              letterSpacing: '2px',
+              fontSize: 16,
+              color: '#a09080',
+              marginTop: 12,
+              letterSpacing: '3px',
+              textTransform: 'uppercase',
             }}>
-              The Forsaken Knight · Hero of Aelindra
+              The Forsaken Knight · Savior of Aelindra
             </div>
 
             {/* Flowers */}
-            <div style={{ fontSize: 24, marginTop: 16, letterSpacing: 8 }}>🌸 🌼 🌷 🌸 🌼</div>
+            <div style={{ fontSize: 32, marginTop: 32, letterSpacing: 12, opacity: 0.8 }}>🌸 🌼 🌷 🌼 🌸</div>
           </div>
         )}
       </div>
@@ -177,25 +215,26 @@ const EndingScreen: React.FC = () => {
       {/* Return button after everything */}
       {finished && (
         <div
-          className="fixed bottom-20 left-1/2 z-30"
+          className="fixed bottom-[15vh] left-1/2 z-[100]"
           style={{
             transform: 'translateX(-50%)',
-            animation: 'fadeIn 2s ease-out',
+            animation: 'fadeIn 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards',
           }}
         >
           <button
             onClick={() => setScreen('title')}
-            className="btn-fantasy py-4 px-12 rounded-sm"
+            className="btn-fantasy py-4 px-16 rounded-sm transition-all duration-300 hover:scale-110 active:scale-95"
             style={{
               fontFamily: 'Cinzel, serif',
-              fontSize: 14,
-              letterSpacing: '3px',
+              fontSize: 15,
+              letterSpacing: '4px',
               color: '#c8a862',
-              borderColor: 'rgba(200,168,98,0.5)',
-              boxShadow: '0 0 30px rgba(200,168,98,0.2)',
+              background: 'rgba(10, 5, 0, 0.8)',
+              border: '1px solid rgba(200,168,98,0.4)',
+              boxShadow: '0 0 40px rgba(0,0,0,0.6), inset 0 0 20px rgba(200,168,98,0.1)',
             }}
           >
-            ✦ Return to Title ✦
+            ✦ ASCEND TO TITLE ✦
           </button>
         </div>
       )}

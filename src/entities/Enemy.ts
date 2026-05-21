@@ -37,7 +37,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private id: string;
   private lootDropped = false;
   private timeAccumulator = 0;
+  private isStunned = false;
+  private bleedTimer = 0;
+
   constructor(scene: Phaser.Scene, x: number, y: number, config: EnemyConfig) {
+
     const spriteKey = `${config.key}_sprite`;
     const textureToUse = scene.textures.exists(spriteKey) ? spriteKey : 'pixel';
     super(scene, x, y, textureToUse);
@@ -150,9 +154,26 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   update(delta: number) {
     if (this.isDead) return;
 
+    // Handle Status Effects
+    if (this.bleedTimer > 0) {
+      this.bleedTimer -= delta;
+      if (this.timeAccumulator % 1000 < delta) { // Every 1s
+        this.takeDamage(5); // Bleed DoT
+        this.spawnDamageNumber(5, false);
+      }
+    }
+
     this.attackCooldown = Math.max(0, this.attackCooldown - delta);
     this.staggerTimer = Math.max(0, this.staggerTimer - delta);
     this.frameTimer += delta;
+
+    if (this.isStunned) {
+      this.staggerTimer = 0; // Stun overrides stagger
+      // Visual feedback for stun: slightly blue/grey tint
+      this.setTint(0x8888ff);
+      this.updateHpBar();
+      return;
+    }
 
     if (this.staggerTimer > 0) {
       this.updateHpBar();
@@ -481,6 +502,23 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       y: loot.y - 20,
       duration: 400,
       ease: 'Power2',
+    });
+  }
+
+  applyBleed(duration: number) {
+    this.bleedTimer = duration;
+    this.setTint(0xff00ff); // Purple tint for bleed
+    this.scene.time.delayedCall(duration, () => {
+      if (!this.isDead) this.clearTint();
+    });
+  }
+
+  applyStun(duration: number) {
+    this.isStunned = true;
+    this.staggerTimer = 0;
+    this.scene.time.delayedCall(duration, () => {
+      this.isStunned = false;
+      this.clearTint();
     });
   }
 

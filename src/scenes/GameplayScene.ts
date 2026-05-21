@@ -249,6 +249,15 @@ export class GameplayScene extends Phaser.Scene {
         
         const killed = enemy.takeDamage(dmg, comboCount, isCritical);
         this.player.registerHit(enemyId);
+        this.triggerHitStop(isCritical ? 120 : 80);
+
+        // Apply Status Effects
+        if (isCritical) {
+          enemy.applyStun(1000); // 1s stun
+        }
+        if (this.player.getComboCount() % 3 === 0) {
+          enemy.applyBleed(5000); // 5s bleed
+        }
 
         if (killed) {
           this.enemies = this.enemies.filter(e => e !== enemy);
@@ -511,10 +520,23 @@ export class GameplayScene extends Phaser.Scene {
     });
   }
 
+  private isHitStopping = false;
+
+  triggerHitStop(duration: number = 80) {
+    if (this.isHitStopping) return;
+    this.isHitStopping = true;
+    this.physics.world.pause();
+    
+    this.time.delayedCall(duration, () => {
+      this.physics.world.resume();
+      this.isHitStopping = false;
+    });
+  }
+
   update(time: number, delta: number) {
     const store = useGameStore.getState();
 
-    if (store.dialogue.isOpen || store.isPaused) return;
+    if (store.dialogue.isOpen || store.isPaused || this.isHitStopping) return;
 
     this.player.update(delta);
 
@@ -755,7 +777,7 @@ export class GameplayScene extends Phaser.Scene {
         },
         {
           preDialogue: CASTLE_BOSS_PRE,
-          boss: { id: 'blind_king', name: 'The Blind King', title: 'Former Ruler, Now Hollow', maxHp: 800, phases: 2, attack: 35, speed: 120, scale: 2.5 },
+          boss: { id: 'blind_king', name: 'The Blind King', title: 'Former Ruler, Now Hollow', maxHp: 1200, phases: 3, attack: 45, speed: 125, scale: 2.5 },
           postDialogue: CASTLE_BOSS_POST,
           enemies: [],
         },
@@ -789,7 +811,7 @@ export class GameplayScene extends Phaser.Scene {
         },
         {
           preDialogue: BATTLEFIELD_BOSS_PRE,
-          boss: { id: 'ashen_knight', name: 'Ashen Knight', title: 'Once a Guardian, Now Dust', maxHp: 600, phases: 2, attack: 40, speed: 150 },
+          boss: { id: 'ashen_knight', name: 'Ashen Knight', title: 'Once a Guardian, Now Dust', maxHp: 3000, phases: 3, attack: 55, speed: 160 },
           postDialogue: BATTLEFIELD_BOSS_POST,
           enemies: [],
         },

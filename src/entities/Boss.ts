@@ -17,6 +17,7 @@ type BossAIState = 'intro' | 'idle' | 'phase1' | 'phase2' | 'phase3' | 'enrage' 
 export class Boss extends Phaser.Physics.Arcade.Sprite {
   private config: BossConfig;
   private hp: number;
+  private maxHp: number;
   private aiState: BossAIState = 'intro';
   private phase = 1;
   private attackTimer = 0;
@@ -40,6 +41,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, textureToUse);
     this.config = config;
     this.hp = config.maxHp;
+    this.maxHp = config.maxHp;
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -196,46 +198,193 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
 
   private phase2AI(_delta: number) {
     if (!this.target) return;
-    this.moveHorizontally(100);
+    const isAshen = this.config.id === 'ashen_knight';
+    this.moveHorizontally(isAshen ? 130 : 100);
 
     if (this.attackTimer <= 0) {
-      this.attackTimer = 1500;
+      this.attackTimer = isAshen ? 1000 : 1500;
       Math.random() < 0.5 ? this.basicAttack() : this.projectileBarrage();
     }
 
     if (this.specialTimer <= 0) {
-      this.specialTimer = 5000;
-      this.chargeAttack();
+      this.specialTimer = isAshen ? 3000 : 5000;
+      isAshen ? this.voidTeleport() : this.chargeAttack();
     }
   }
 
   private phase3AI(_delta: number) {
     if (!this.target) return;
-    this.moveHorizontally(130);
+    const isAshen = this.config.id === 'ashen_knight';
+    this.moveHorizontally(isAshen ? 180 : 150);
 
     if (this.attackTimer <= 0) {
-      this.attackTimer = 1000;
       const roll = Math.random();
-      if (roll < 0.33) this.basicAttack();
-      else if (roll < 0.66) this.projectileBarrage();
-      else this.groundSlam();
+      if (isAshen) {
+        this.attackTimer = 600;
+        if (roll < 0.2) this.voidTeleport();
+        else if (roll < 0.4) this.ashenStorm();
+        else if (roll < 0.6) this.swordRain();
+        else if (roll < 0.8) this.darkWave();
+        else this.projectileBarrage();
+      } else {
+        if (roll < 0.25) {
+          this.attackTimer = 800;
+          this.basicAttack();
+        } else if (roll < 0.5) {
+          this.attackTimer = 1200;
+          this.projectileBarrage();
+        } else if (roll < 0.75) {
+          this.attackTimer = 1500;
+          this.darkWave();
+        } else {
+          this.attackTimer = 2000;
+          this.voidTeleport();
+        }
+      }
     }
 
     if (this.specialTimer <= 0) {
-      this.specialTimer = 4000;
+      this.specialTimer = isAshen ? 2200 : 3500;
       this.darkExplosion();
     }
   }
 
+  private swordRain() {
+    const scene = this.scene;
+    // Roar audio
+    if (scene.cache.audio.exists('boss_roar')) {
+      scene.sound.play('boss_roar', { volume: 0.6 });
+    }
+
+    const duration = 2000;
+    const interval = 150;
+    const count = duration / interval;
+
+    for (let i = 0; i < count; i++) {
+      scene.time.delayedCall(i * interval, () => {
+        const x = Phaser.Math.Between(50, this.arenaRight - 50);
+        const sword = scene.physics.add.sprite(x, -50, 'sword_rain');
+        sword.setDisplaySize(24, 48);
+        sword.setDepth(15);
+        sword.setRotation(Math.PI); // Point down
+        sword.body.velocity.y = 600;
+        
+        scene.physics.add.overlap(sword, this.target!, () => {
+          scene.events.emit('boss-projectile-hit', { damage: this.config.attack * 0.6 });
+          sword.destroy();
+        });
+        
+        scene.time.delayedCall(1000, () => sword.destroy());
+      });
+    }
+  }
+
+  private ashenStorm() {
+    const scene = this.scene;
+    this.setTint(0xcccccc);
+    
+    for (let i = 0; i < 15; i++) {
+      scene.time.delayedCall(i * 80, () => {
+        const angle = Phaser.Math.DegToRad(Phaser.Math.Between(0, 360));
+        const proj = scene.physics.add.sprite(this.x, this.y, 'pixel');
+        proj.setTint(0xffffff);
+        proj.setDisplaySize(10, 10);
+        proj.setDepth(15);
+        
+        const speed = 350;
+        proj.body.velocity.x = Math.cos(angle) * speed;
+        proj.body.velocity.y = Math.sin(angle) * speed;
+        
+        scene.time.delayedCall(1500, () => proj.destroy());
+        scene.physics.add.overlap(proj, this.target!, () => {
+          scene.events.emit('boss-projectile-hit', { damage: this.config.attack * 0.45 });
+          proj.destroy();
+        });
+      });
+    }
+
+    scene.time.delayedCall(1200, () => this.clearTint());
+  }
+
   private enrageAI(_delta: number) {
     if (!this.target) return;
-    this.moveHorizontally(160);
-    this.setTint(0xff4400);
+    this.moveHorizontally(200);
+    this.setTint(0xff0000);
 
     if (this.attackTimer <= 0) {
-      this.attackTimer = 600;
-      this.basicAttack();
+      this.attackTimer = 500;
+      const roll = Math.random();
+      if (roll < 0.4) this.basicAttack();
+      else if (roll < 0.7) this.chargeAttack();
+      else this.voidTeleport();
     }
+    
+    if (this.specialTimer <= 0) {
+      this.specialTimer = 2500;
+      Math.random() < 0.5 ? this.groundSlam() : this.darkWave();
+    }
+  }
+
+  private darkWave() {
+    const dir = this.flipX ? -1 : 1;
+    const scene = this.scene;
+    
+    for (let i = 0; i < 3; i++) {
+      scene.time.delayedCall(i * 200, () => {
+        const wave = scene.add.graphics();
+        wave.lineStyle(4, 0x4b0082, 1);
+        wave.beginPath();
+        wave.moveTo(this.x, this.y + 30);
+        wave.lineTo(this.x, this.y - 30);
+        wave.strokePath();
+        wave.setDepth(20);
+
+        scene.tweens.add({
+          targets: wave,
+          x: wave.x + dir * 500,
+          alpha: 0,
+          duration: 1000,
+          onUpdate: () => {
+            if (this.target) {
+              const dist = Phaser.Math.Distance.Between(wave.x, wave.y, this.target.x, this.target.y);
+              if (dist < 40) {
+                scene.events.emit('boss-attack', { boss: this, damage: this.config.attack * 1.2, type: 'wave' });
+                wave.destroy();
+              }
+            }
+          },
+          onComplete: () => wave.destroy()
+        });
+      });
+    }
+  }
+
+  private voidTeleport() {
+    if (!this.target) return;
+    const scene = this.scene;
+    
+    // Dissolve effect
+    scene.tweens.add({
+      targets: this,
+      alpha: 0,
+      scaleX: 0,
+      duration: 300,
+      onComplete: () => {
+        // Teleport to player side
+        const side = Math.random() < 0.5 ? -120 : 120;
+        this.x = Phaser.Math.Clamp(this.target!.x + side, this.arenaLeft + 50, this.arenaRight - 50);
+        
+        scene.tweens.add({
+          targets: this,
+          alpha: 1,
+          scaleX: this.config.scale || 2.5,
+          duration: 300,
+          onComplete: () => {
+            this.basicAttack();
+          }
+        });
+      }
+    });
   }
 
   private moveHorizontally(speed: number) {
@@ -470,11 +619,28 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     });
   }
 
+  private isInvulnerable = false;
+
   takeDamage(amount: number): boolean {
-    if (this.isDead || this.phaseTransitioning) return false;
+    if (this.isDead || this.phaseTransitioning || this.isInvulnerable) return false;
+
+    const isAshen = this.config.id === 'ashen_knight';
+    
+    // ── FINAL BOSS CINEMATIC PHASE TRANSITIONS ────────────────
+    if (isAshen) {
+      if (this.phase === 1 && this.hp - amount <= this.maxHp * 0.2) {
+        this.hp = Math.floor(this.maxHp * 0.2);
+        this.triggerAshenPhaseShift(2);
+        return false;
+      }
+      if (this.phase === 2 && this.hp - amount <= this.maxHp * 0.1) {
+        this.hp = Math.floor(this.maxHp * 0.1);
+        this.triggerAshenPhaseShift(3);
+        return false;
+      }
+    }
 
     this.hp = Math.max(0, this.hp - amount);
-
     useGameStore.getState().damageBoss(amount);
 
     this.setTint(0xff4444);
@@ -565,8 +731,72 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     });
   }
 
+  private triggerAshenPhaseShift(newPhase: number) {
+    if (this.phase >= newPhase) return;
+    this.isInvulnerable = true;
+    this.phaseTransitioning = true;
+    this.phase = newPhase;
+    const scene = this.scene;
+    const store = useGameStore.getState();
+
+    // Visual feedback
+    this.setTint(0xffffff);
+    scene.cameras.main.shake(800, 0.015);
+    scene.cameras.main.flash(500, 255, 255, 255);
+
+    const alertTitle = newPhase === 2 ? 'PHASE II: UNYIELDING WILL' : 'PHASE III: ASHEN ASCENSION';
+    const alertMsg = newPhase === 2 
+      ? 'The Knight refuses to fall! Power is surging...' 
+      : 'THE END IS NEAR! The ground trembles...';
+
+    store.addNotification({
+      type: 'warning',
+      title: alertTitle,
+      message: alertMsg,
+      icon: '🔥',
+      duration: 4000,
+    });
+
+    scene.time.delayedCall(3000, () => {
+      this.isInvulnerable = false;
+      this.phaseTransitioning = false;
+      this.clearTint();
+
+      if (newPhase === 2) {
+        this.maxHp = 2500;
+        this.hp = 2500;
+        this.config.attack += 20;
+        this.config.speed += 30;
+      } else if (newPhase === 3) {
+        this.maxHp = 2000;
+        this.hp = 2000;
+        this.config.attack += 25;
+        this.config.speed += 40;
+        
+        // Increase scale for final form
+        scene.tweens.add({
+          targets: this,
+          scaleX: (this.config.scale || 2.5) * 1.35,
+          scaleY: (this.config.scale || 2.5) * 1.35,
+          duration: 1200,
+          ease: 'Cubic.easeInOut'
+        });
+      }
+
+      store.setActiveBoss({
+        id: this.config.id,
+        name: this.config.name,
+        hp: this.hp,
+        maxHp: this.maxHp,
+        phase: this.phase,
+        maxPhase: this.config.phases,
+        isActive: true,
+      });
+    });
+  }
+
   getHP(): number { return this.hp; }
-  getMaxHP(): number { return this.config.maxHp; }
+  getMaxHP(): number { return this.maxHp; }
   isAlive(): boolean { return !this.isDead; }
   getPhase(): number { return this.phase; }
 }
