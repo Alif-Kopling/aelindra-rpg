@@ -45,6 +45,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private jumpBufferTimer = 0;
   private isOnGround = false;
   private footstepTimer = 0;
+  private hitEntities = new Set<string>();
 
   private moveSpeed = 180;
   private jumpForce = -380;
@@ -824,29 +825,36 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const hb = this.attackHitbox.body as Phaser.Physics.Arcade.Body;
     if (!hb) return;
 
-    // Define standard hitbox width and height based on active attack state
-    let w = 120;
-    let h = 80;
+    // Define surgical hitbox width and height
+    let w = 75;
+    let h = 60;
 
     if (this.isChargedAttack) {
-      w = 185;
-      h = 100;
+      w = 110;
+      h = 80;
     } else if (this.isUltimate) {
-      w = 260;
-      h = 130;
+      w = 200;
+      h = 120;
     }
 
-    // Set the physics body size of the attack hitbox zone
     hb.setSize(w, h);
-
-    // Place the hitbox in front of the player
-    // If facingRight is true, the center is to the right. Else, to the left.
-    const margin = 10;
+    const margin = 5;
     const dir = this.facingRight ? 1 : -1;
     const px = this.x + dir * (w / 2 + margin);
     const py = this.y;
-
     this.attackHitbox.setPosition(px, py);
+  }
+
+  hasHit(entityId: string): boolean {
+    return this.hitEntities.has(entityId);
+  }
+
+  registerHit(entityId: string) {
+    this.hitEntities.add(entityId);
+  }
+
+  private resetHitTracking() {
+    this.hitEntities.clear();
   }
 
   private spawnSlashEffect(comboStep: number) {

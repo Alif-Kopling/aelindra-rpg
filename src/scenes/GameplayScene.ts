@@ -232,16 +232,23 @@ export class GameplayScene extends Phaser.Scene {
       (_hitbox, _enemy) => {
         if (!this.player.isCurrentlyAttacking()) return;
         const enemy = _enemy as Enemy;
+        const enemyId = (enemy as any).uuid || `${enemy.x},${enemy.y}`;
+
+        // Ensure each enemy is only hit ONCE per sword swing
+        if (this.player.hasHit(enemyId)) return;
+
         const store = useGameStore.getState();
         const isCharged = this.player.isAttackCharged();
         const comboCount = this.player.getComboCount();
-        const isCritChance = Math.random() < 0.25; // 25% base critical chance
+        const isCritChance = Math.random() < 0.25;
         const isCritical = isCharged || (comboCount >= 4) || isCritChance;
 
         const dmg = isCritical 
           ? Phaser.Math.Between(50, 100) 
           : (25 + Math.min(5, comboCount));
+        
         const killed = enemy.takeDamage(dmg, comboCount, isCritical);
+        this.player.registerHit(enemyId);
 
         if (killed) {
           this.enemies = this.enemies.filter(e => e !== enemy);
@@ -364,10 +371,17 @@ export class GameplayScene extends Phaser.Scene {
       this.boss,
       () => {
         if (!this.player.isCurrentlyAttacking() || !this.boss) return;
+        const bossId = this.boss.config.id;
+
+        // Ensure boss is only hit ONCE per sword swing
+        if (this.player.hasHit(bossId)) return;
+
         const store = useGameStore.getState();
         const baseDmg = store.player.stats.attack + Math.floor(Math.random() * 12);
         const dmg = this.player.isAttackCharged() ? Math.floor(baseDmg * 2.5) : baseDmg;
+        
         this.boss.takeDamage(dmg);
+        this.player.registerHit(bossId);
       }
     );
   }
