@@ -32,7 +32,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   private enrageMode = false;
   private timeAccumulator = 0;
   private arenaLeft = 0;
-  private arenaRight = 800;
+  private arenaRight = 1920;
 
   constructor(scene: Phaser.Scene, x: number, y: number, config: BossConfig) {
     const spriteKey = 'boss_blind_king_sprite';

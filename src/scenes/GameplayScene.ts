@@ -75,19 +75,31 @@ export class GameplayScene extends Phaser.Scene {
   private roundEnemyKilled = 0;
   private roundActive = false;
   private portalVisible = false;
+  private mapWidth = 60;
+  private mapHeight = 23;
 
   constructor() {
     super({ key: 'GameplayScene' });
   }
 
   create() {
-    const store = useGameStore.getState();
-    const zone = store.currentZone;
-    this.currentZone = zone;
+    try {
+      const store = useGameStore.getState();
+      const zone = store.currentZone || 'village';
+      this.currentZone = zone;
 
-    this.enemyGroup = this.physics.add.group();
+      this.enemyGroup = this.physics.add.group();
 
-    this.buildZone(this.getZoneData(zone));
+      const zoneData = this.getZoneData(zone);
+      if (!zoneData) {
+        console.error(`Failed to get zone data for: ${zone}`);
+        this.buildZone(this.getZoneData('village'));
+      } else {
+        this.buildZone(zoneData);
+      }
+    } catch (e) {
+      console.error('CRITICAL: GameplayScene create failed', e);
+    }
 
     this.fpsText = this.add.text(16, 16, '', {
       fontSize: '10px',
@@ -111,8 +123,8 @@ export class GameplayScene extends Phaser.Scene {
 
   private buildZone(zoneData: ZoneData) {
     const TILE = 32;
-    const W = 35;
-    const H = 22;
+    const W = 60;
+    const H = 23;
 
     this.enemies.forEach(e => e.destroy());
     this.npcs.forEach(n => n.destroy());
@@ -133,7 +145,7 @@ export class GameplayScene extends Phaser.Scene {
     this.platformGroup = platformBodies;
 
     const spawnX = 3 * TILE;
-    const spawnY = (H - 4) * TILE;
+    const spawnY = (H - 3) * TILE;
 
     if (!this.player) {
       this.player = new Player(this, spawnX, spawnY);
@@ -149,8 +161,8 @@ export class GameplayScene extends Phaser.Scene {
 
     let npcIndex = 0;
     for (const npcConfig of zoneData.npcs) {
-      const nx = (10 + npcIndex * 8) * TILE;
-      const ny = (H - 4) * TILE;
+      const nx = (12 + npcIndex * 12) * TILE;
+      const ny = (H - 3) * TILE;
       const npc = new NPC(this, nx, ny, npcConfig);
       this.npcs.push(npc);
       this.physics.add.collider(npc, this.platformGroup);
@@ -255,7 +267,7 @@ export class GameplayScene extends Phaser.Scene {
 
     const startCombat = () => {
       if (round.boss) {
-        this.spawnBoss(round.boss, 35 * 32, 22 * 32, 32);
+        this.spawnBoss(round.boss, this.mapWidth * 32, this.mapHeight * 32, 32);
       }
       if (round.enemies.length > 0) {
         this.spawnRoundEnemies(round);
@@ -277,15 +289,13 @@ export class GameplayScene extends Phaser.Scene {
 
   private spawnRoundEnemies(round: ZoneRound) {
     const TILE = 32;
-    const W = 35;
-    const H = 22;
     this.roundEnemyTotal = 0;
     this.roundEnemyKilled = 0;
 
     for (const entry of round.enemies) {
       for (let i = 0; i < entry.count; i++) {
-        const ex = (6 + Math.floor(Math.random() * (W - 12))) * TILE;
-        const ey = (H - 4) * TILE;
+        const ex = (6 + Math.floor(Math.random() * (this.mapWidth - 12))) * TILE;
+        const ey = (this.mapHeight - 3) * TILE;
         const enemy = new Enemy(this, ex, ey, entry.config);
         enemy.setTarget(this.player);
         this.enemies.push(enemy);
@@ -340,8 +350,8 @@ export class GameplayScene extends Phaser.Scene {
   }
 
   private spawnBoss(config: BossConfig, W: number, H: number, TILE: number) {
-    const bx = Math.floor(W / 2) * TILE;
-    const by = (H - 4) * TILE;
+    const bx = Math.floor(this.mapWidth / 2) * TILE;
+    const by = (this.mapHeight - 3) * TILE;
 
     this.boss = new Boss(this, bx, by, config);
     this.boss.setTarget(this.player);
@@ -377,13 +387,13 @@ export class GameplayScene extends Phaser.Scene {
     label.setOrigin(0.5);
 
     const portalGfx = this.add.graphics();
-    portalGfx.lineStyle(3, 0xffd700, 0.8);
+    portalGfx.lineStyle(3, 0xffd700, 1.0); // No transparency
     portalGfx.strokeCircle(x * TILE, y * TILE, TILE);
     portalGfx.setDepth(8);
     this.tweens.add({
       targets: portalGfx,
-      alpha: 0.3,
-      yoyo: true,
+      alpha: 1.0, // No transparency
+      yoyo: false,
       repeat: -1,
       duration: 1200,
     });
@@ -397,6 +407,12 @@ export class GameplayScene extends Phaser.Scene {
 
   private transitionToZone(zoneId: string) {
     if (this.currentZone === zoneId) return;
+    
+    const store = useGameStore.getState();
+    if (this.currentZone === 'battlefield' && zoneId === 'village') {
+      store.completeCycle();
+    }
+
     this.currentZone = zoneId;
 
     this.cameras.main.fadeOut(600, 0, 0, 0);
@@ -553,7 +569,7 @@ export class GameplayScene extends Phaser.Scene {
             routinePoints: [{ x: 260, y: 480 }, { x: 350, y: 480 }],
           },
         ],
-        nextZone: { x: 32, y: 18, zone: 'forest' },
+        nextZone: { x: 55, y: 20, zone: 'forest' },
       },
       forest: {
         theme: 'forest',
@@ -581,7 +597,7 @@ export class GameplayScene extends Phaser.Scene {
             accentColor: 0xecf0f1,
           },
         ],
-        nextZone: { x: 32, y: 18, zone: 'castle' },
+        nextZone: { x: 55, y: 20, zone: 'castle' },
       },
       castle: {
         theme: 'castle',
@@ -620,7 +636,7 @@ export class GameplayScene extends Phaser.Scene {
           speed: 120,
           scale: 2.5,
         },
-        nextZone: { x: 32, y: 18, zone: 'catacombs' },
+        nextZone: { x: 55, y: 20, zone: 'catacombs' },
       },
       catacombs: {
         theme: 'catacombs',
@@ -634,7 +650,7 @@ export class GameplayScene extends Phaser.Scene {
           },
         ],
         npcs: [],
-        nextZone: { x: 32, y: 18, zone: 'battlefield' },
+        nextZone: { x: 55, y: 20, zone: 'battlefield' },
       },
       battlefield: {
         theme: 'battlefield',
@@ -658,7 +674,7 @@ export class GameplayScene extends Phaser.Scene {
           attack: 40,
           speed: 150,
         },
-        nextZone: { x: 32, y: 18, zone: 'village' },
+        nextZone: { x: 55, y: 20, zone: 'village' },
       },
     };
 

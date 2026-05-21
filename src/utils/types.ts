@@ -44,6 +44,7 @@ export interface PlayerState {
   equippedAccessory: string;
   weaponLevel?: number;
   armorLevel?: number;
+  cycle: number;
 }
 
 // ============================================================

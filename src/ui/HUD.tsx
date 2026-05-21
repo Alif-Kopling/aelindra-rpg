@@ -93,7 +93,7 @@ const HUD: React.FC = () => {
           marginTop: 2,
           textShadow: '0 1px 4px rgba(0,0,0,0.8)',
         }}>
-          Lv.{stats.level}
+          Lv.{stats.level} {player.cycle > 1 && <span style={{ color: '#ffd700', marginLeft: 6 }}>✦ Cycle {player.cycle}</span>}
         </div>
       </div>
 

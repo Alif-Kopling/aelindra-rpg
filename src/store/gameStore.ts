@@ -52,6 +52,7 @@ const initialPlayer: PlayerState = {
   equippedAccessory: '',
   weaponLevel: 1,
   armorLevel: 1,
+  cycle: 1,
 };
 
 const initialInventory: InventoryState = {
@@ -194,6 +195,8 @@ interface GameStore {
   // Zone Rounds
   currentRound: number;
   setZoneRound: (round: number) => void;
+
+  completeCycle: () => void;
 }
 
 // ============================================================
@@ -538,5 +541,19 @@ export const useGameStore = create<GameStore>()(
     // Zone Rounds
     currentRound: 0,
     setZoneRound: (round) => set((s) => { s.currentRound = round; }),
+
+    completeCycle: () => {
+      set((s) => {
+        s.player.cycle += 1;
+        s.storyFlags['intro_seen'] = false; // Allow seeing intro again in new cycle if desired, or skip it
+      });
+      get().addNotification({
+        type: 'lore',
+        title: 'World Ascended',
+        message: `You have completed Cycle ${get().player.cycle - 1}. A new age begins.`,
+        icon: '🔱',
+        duration: 6000,
+      });
+    },
   }))
 );

@@ -7,6 +7,7 @@ import {
   COMBO_TIMEOUT,
   INVINCIBILITY_FRAMES,
   COLORS,
+  DEBUG_HITBOXES,
 } from '../utils/constants';
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
@@ -46,9 +47,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private footstepTimer = 0;
 
   private moveSpeed = 180;
-  private jumpForce = -420;
-  private coyoteTime = 100;
-  private jumpBufferTime = 120;
+  private jumpForce = -380;
+  private coyoteTime = 120;
+  private jumpBufferTime = 150;
 
   private isCharging = false;
   private chargeTime = 0;
@@ -57,6 +58,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private chargeGraphic!: Phaser.GameObjects.Graphics;
   private cachedBaseScaleX = 2;
   private cachedBaseScaleY = 2;
+  private hitboxDebugGfx!: Phaser.GameObjects.Graphics;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, scene.textures.exists('player_sprite') ? 'player_sprite' : 'player_idle_0');
@@ -82,6 +84,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.chargeGraphic = scene.add.graphics();
     this.chargeGraphic.setDepth(12);
+
+    this.hitboxDebugGfx = scene.add.graphics();
+    this.hitboxDebugGfx.setDepth(100);
 
     this.setupControls();
     this.createAnimations();
@@ -214,12 +219,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     body.setVelocityX(vx);
-    const isCustomTexture = ['player_sprite', 'player_attack1', 'player_attack2'].includes(this.texture.key);
-    if (isCustomTexture) {
-      this.setFlipX(this.facingRight);
-    } else {
-      this.setFlipX(!this.facingRight);
-    }
 
     if (Phaser.Input.Keyboard.JustDown(this.keys.W) || Phaser.Input.Keyboard.JustDown(this.keys.Space)) {
       this.jumpBufferTimer = this.jumpBufferTime;
@@ -273,6 +272,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.updateAttackHitbox();
 
+    const isCustomTexture = ['player_sprite', 'player_attack1', 'player_attack2'].includes(this.texture.key);
+
     if (vx !== 0 && this.isOnGround) {
       this.ultimateCharge = Math.min(100, this.ultimateCharge + 0.003 * delta);
       store.chargeUltimate(0.003 * delta);
@@ -311,6 +312,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
       body.setSize(targetBodyW / this.cachedBaseScaleX, targetBodyH / this.cachedBaseScaleY);
       body.setOffset(targetOffsetX / this.cachedBaseScaleX, targetOffsetY / this.cachedBaseScaleY);
+    }
+
+    if (DEBUG_HITBOXES) {
+      this.hitboxDebugGfx.clear();
+      const hb = this.attackHitbox.body as Phaser.Physics.Arcade.Body;
+      if (hb && hb.enable) {
+        this.hitboxDebugGfx.lineStyle(1, 0x00ff00, 1);
+        this.hitboxDebugGfx.strokeRect(hb.x, hb.y, hb.width, hb.height);
+        this.hitboxDebugGfx.fillStyle(0x00ff00, 0.2);
+        this.hitboxDebugGfx.fillRect(hb.x, hb.y, hb.width, hb.height);
+      }
     }
   }
 
@@ -443,13 +455,16 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private spawnSelfRecoil() {
     const body = this.body as Phaser.Physics.Arcade.Body;
     const dir = this.facingRight ? -1 : 1;
-    body.setVelocityX(dir * -200);
-    body.setVelocityY(-80);
+    body.setVelocityX(dir * -120);
+    body.setVelocityY(-60);
+
+    const baseScaleX = this.scaleX;
+    const baseScaleY = this.scaleY;
 
     this.scene.tweens.add({
       targets: this,
-      scaleX: 1.4,
-      scaleY: 0.7,
+      scaleX: baseScaleX * 1.2,
+      scaleY: baseScaleY * 0.8,
       duration: 80,
       yoyo: true,
       ease: 'Power2',
@@ -530,8 +545,16 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
       const shake = Math.sin(this.timeAccumulator / 40) * 2;
       this.angle = shake;
-      this.scaleX = 1.1;
-      this.scaleY = 0.95;
+      
+      const texScales: Record<string, number> = {
+        player_sprite: 0.167,
+        player_attack1: 0.263,
+        player_attack2: 0.216
+      };
+      const baseScale = texScales['player_attack1'] || 0.263;
+      
+      this.scaleX = baseScale * 1.1;
+      this.scaleY = baseScale * 0.95;
       return;
     }
 
@@ -566,6 +589,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.scaleX = baseScale;
         this.scaleY = baseScale;
         this.angle = 0;
+        
+        // Correct flip logic based on texture orientation
+        if (targetTexture === 'player_sprite') {
+          this.setFlipX(this.facingRight);
+        } else {
+          this.setFlipX(!this.facingRight);
+        }
 
         switch (anim) {
           case 'idle':
@@ -592,13 +622,24 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
             // No squash/stretch distortion during keyframed hand-drawn attacks
             this.frameTimer += delta;
             const frameDuration = this.isChargedAttack ? 150 : 120;
+
+            const hb = this.attackHitbox.body as Phaser.Physics.Arcade.Body;
+            
             if (this.frameTimer >= frameDuration) {
               this.frameTimer = 0;
               this.currentFrame++;
+              
+              // Enable hitbox on frame 1 (the swing)
+              if (this.currentFrame === 1) {
+                hb.enable = true;
+              } else {
+                hb.enable = false;
+              }
+
               if (this.currentFrame >= 3) {
                 this.isAttacking = false;
                 useGameStore.getState().setPlayerAttacking(false);
-                (this.attackHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
+                hb.enable = false;
               }
             }
             break;
@@ -898,7 +939,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     for (let i = 0; i < 5; i++) {
       const ghost = this.scene.add.image(this.x - this.dashDirX * i * 12, this.y, this.texture.key);
       ghost.setFlipX(this.flipX);
-      ghost.setScale(2);
+      ghost.setScale(this.scaleX, this.scaleY);
       ghost.setAlpha(0.4 - i * 0.07);
       ghost.setTint(0x4169e1);
       ghost.setDepth(9);
