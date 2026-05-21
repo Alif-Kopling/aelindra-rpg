@@ -5,6 +5,7 @@ const BGM_FILES: Record<string, string> = {
   catacombs: '/assets/audio/stage4-backsong.mp3',
   battlefield: '/assets/audio/stage5-backsong.mp3',
   ending: '/assets/audio/Ending-Backsong.mp3',
+  epilogue: '/assets/audio/Ending-Backsong.mp3',
   prologue: '/assets/audio/cutschene-song.mp3',
 };
 

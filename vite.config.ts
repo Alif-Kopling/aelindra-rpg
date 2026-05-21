@@ -4,11 +4,18 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: {
-      '@': '/src',
-    },
+    dedupe: ['react', 'react-dom'],
   },
   optimizeDeps: {
-    include: ['phaser'],
+    include: [
+      'react',
+      'react-dom',
+      'react-dom/client',
+      'react/jsx-runtime',
+      'react/jsx-dev-runtime',
+      'zustand',
+      'zustand/middleware/immer',
+      'immer',
+    ],
   },
 });

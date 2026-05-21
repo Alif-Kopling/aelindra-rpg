@@ -1,16 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
+import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
 import { ITEMS_DB } from '../utils/constants';
 
 const NameInputScreen: React.FC = () => {
   const { setScreen, setPlayerName, addItem } = useGameStore();
-  const [name, setName] = useState('Alden');
-  const [confirmed, setConfirmed] = useState(false);
-  const [fadeIn, setFadeIn] = useState(false);
-  const [error, setError] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [name, setName] = React.useState('Alden');
+  const [confirmed, setConfirmed] = React.useState(false);
+  const [fadeIn, setFadeIn] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setTimeout(() => setFadeIn(true), 100);
     setTimeout(() => inputRef.current?.focus(), 600);
   }, []);

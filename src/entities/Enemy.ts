@@ -39,6 +39,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private timeAccumulator = 0;
   private isStunned = false;
   private bleedTimer = 0;
+  private attackWindup = 0;
 
   constructor(scene: Phaser.Scene, x: number, y: number, config: EnemyConfig) {
 
@@ -135,8 +136,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       case 'chase':
         if (dist > this.aggroRange * 1.5) {
           this.aiState = 'patrol';
-        } else if (dist < this.attackRange) {
+        } else if (dist < this.attackRange && this.attackCooldown <= 0) {
           this.aiState = 'attack';
+          this.attackWindup = 280;
+          this.setTint(0xffaa00);
         }
         break;
       case 'attack':
@@ -235,12 +238,21 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     body.setVelocityX(0);
     this.animateFrames(delta, 4, 200);
 
+    if (this.attackWindup > 0) {
+      this.attackWindup -= delta;
+      if (this.attackWindup > 0) {
+        return;
+      }
+    }
+
     if (this.attackCooldown <= 0 && this.target) {
       const dist = Phaser.Math.Distance.Between(this.x, this.y, this.target.x, this.target.y);
-      if (dist < this.attackRange + 20) {
+      if (dist < this.attackRange + 24) {
         this.attackCooldown = 1500;
+        this.clearTint();
         this.dealDamage();
       }
+      this.aiState = 'chase';
     }
   }
 

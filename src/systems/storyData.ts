@@ -165,6 +165,87 @@ export const CATACOMBS_ROUND2_POST: DialogueLine[] = [
   { speaker: 'Alden', portrait: 'alden', text: '*dorong diri bangkit* Belum... belum telat...', emotion: 'determined' },
 ];
 
+// ── CATHEDRAL ZONE ─────────────────────────────────────────────
+
+export const CATHEDRAL_ENTRY: DialogueLine[] = [
+  { speaker: '— Narrator —', text: 'Cathedral of Ash berdiri di atas kota seperti doa yang gagal dikabulkan. Loncengnya retak, patung-patungnya tanpa wajah, dan altar-altar tua dipenuhi abu yang tak pernah dingin.', emotion: 'sad', isNarration: true },
+  { speaker: 'Alden', portrait: 'alden', text: 'Ini tempat penghakiman?', emotion: 'neutral' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Bukan. Ini tempat orang-orang datang buat diampuni, lalu dipaksa menanggung dosa yang bukan milik mereka.', emotion: 'sad' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Valther ada di sini?', emotion: 'determined' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Dia nyentuh altar, memelintir doa jadi rantai. Kalau lo mau lewat, lo harus putuskan pengakuan palsu yang dia tanam di tanah ini.', emotion: 'determined' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Kalau begitu gue hancurin gerejanya sampai tersisa kebenaran.', emotion: 'determined' },
+];
+
+export const CATHEDRAL_ROUND1_POST: DialogueLine[] = [
+  { speaker: 'Alden', portrait: 'alden', text: '*menatap patung malaikat yang patah* ...Mereka bahkan nggak sempat mati dengan tenang.', emotion: 'sad' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Mereka dipakai sebagai saksi palsu. Valther suka tempat sakral. Di sana, rasa bersalah paling mudah dijadikan senjata.', emotion: 'sad' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Gue mulai ngerti kenapa dia bikin dunia ini sekarat.', emotion: 'determined' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Biar dunia lupa siapa korban dan siapa pelaku. Itu caranya bertahan hidup.', emotion: 'sad' },
+];
+
+export const CATHEDRAL_ROUND2_POST: DialogueLine[] = [
+  { speaker: 'Alden', portrait: 'alden', text: '*terhuyung di lantai marmer retak* ...Suara-suara ini... gue dengar nama gue di tiap sudut.', emotion: 'sad' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Karena tempat ini menghafal rasa malu. Napas lo sendiri dibikin jadi hukuman.', emotion: 'determined' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Kalau rasa malu ini palsu, kenapa masih kerasa berat?', emotion: 'neutral' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Karena kebohongan yang lama cukup untuk jadi tulang. Sekarang dengarkan aku baik-baik: ambil relik dari ruang choir. Lo butuh itu buat memecah segel gunung.', emotion: 'determined' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Gunung?', emotion: 'shocked' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Ya. Sisa perjalanan lo bukan bawah tanah lagi. Ini pendakian. Dan pendakian selalu lebih kejam daripada jatuh.', emotion: 'sad' },
+];
+
+export const CATHEDRAL_BOSS_PRE: DialogueLine[] = [
+  { speaker: 'Saint of Rot', text: 'Doa-doamu bocor ke lantai, ksatria. Semua yang suci pada akhirnya hanya menunggu busuknya tiba.', emotion: 'angry' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Gue udah liat busuknya manusia. Lo cuma versi yang nyerobot mimbar.', emotion: 'determined' },
+  { speaker: 'Saint of Rot', text: 'Aku dulu menjaga iman mereka. Lalu iman mereka meninggalkanku. Sekarang aku menjaga sisa-sisa yang tersisa: ketakutan.', emotion: 'sad' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Kalau begitu, gue cabut rasa takut itu dari akarnya.', emotion: 'determined' },
+];
+
+export const CATHEDRAL_BOSS_POST: DialogueLine[] = [
+  { speaker: 'Saint of Rot', text: '*patah* Mereka... bahkan tak pernah... mendengarkan...', emotion: 'sad' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Sekarang lo bisa diem.', emotion: 'determined' },
+  { speaker: '— Narrator —', text: 'Dari bawah altar, Alden menemukan relik tua yang dingin seperti tulang. Di permukaannya terukir arah ke Frostpeak Summit — tempat segel kuno berikutnya berakar di batu dan salju.', isNarration: true, emotion: 'neutral' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Gunung itu bukan tempat buat hidup. Tapi mungkin tempat buat ngeliat kebenaran dari atas.', emotion: 'sad' },
+];
+
+// ── MOUNTAIN ZONE ──────────────────────────────────────────────
+
+export const MOUNTAIN_ENTRY: DialogueLine[] = [
+  { speaker: '— Narrator —', text: 'Frostpeak Summit memotong langit seperti pisau beku. Angin di sana tidak bertiup, ia menghakimi.', emotion: 'sad', isNarration: true },
+  { speaker: 'Alden', portrait: 'alden', text: 'Udara ini... kayak nggak mau gue masuk.', emotion: 'neutral' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Gunung menolak mereka yang datang dengan niat kosong. Bagus. Berarti dia masih punya pendirian.', emotion: 'determined' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Valther taruh segel di sini?', emotion: 'determined' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Bukan taruh. Dia kubur sumpah kuno di bawah es. Ada penjaga yang menolak turun dari puncak karena dia percaya tugasnya belum selesai.', emotion: 'sad' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Kalau penjaganya jalan menghalangi, gue mintain dia minggir. Kalau nggak bisa... gue lawan.', emotion: 'determined' },
+];
+
+export const MOUNTAIN_ROUND1_POST: DialogueLine[] = [
+  { speaker: 'Alden', portrait: 'alden', text: '*menarik napas berat* ...Setiap tebing di sini kayak mau menjatuhkan gue.', emotion: 'neutral' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Karena gunung cuma peduli pada dua hal: apa yang sanggup kau pikul, dan apa yang siap kau tinggalkan.', emotion: 'sad' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Gue udah ninggalin terlalu banyak.', emotion: 'sad' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Maka jangan tinggalkan dirimu sendiri.', emotion: 'determined' },
+];
+
+export const MOUNTAIN_ROUND2_POST: DialogueLine[] = [
+  { speaker: 'Alden', portrait: 'alden', text: '*lutut menyentuh salju* ...Tangan gue udah nggak kerasa.', emotion: 'sad' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Itu tanda baik. Berarti rasa sakitnya belum menang.', emotion: 'neutral' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Lo selalu nyari cara buat bikin gue maju.', emotion: 'determined' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Karena ada hal yang harus dilihat dari puncak sebelum lo turun lagi: manusia bisa bohong, kerajaan bisa bohong, tapi jejak darah selalu jujur.', emotion: 'sad' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Dan gue harus balik turun ke medan perang.', emotion: 'determined' },
+];
+
+export const MOUNTAIN_BOSS_PRE: DialogueLine[] = [
+  { speaker: 'Fallen Guardian', text: 'Siapa yang mengganggu kubur sumpah ini?', emotion: 'angry' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Gue bukan pengganggu. Gue penutup luka yang lo biarkan terbuka.', emotion: 'determined' },
+  { speaker: 'Fallen Guardian', text: 'Aku bersumpah menjaga segel terakhir sampai nafas terakhir. Kalau aku jatuh, semuanya jatuh bersamaku.', emotion: 'sad' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Kalau sumpah itu masih hidup, bantu gue selesaiin ini.', emotion: 'determined' },
+];
+
+export const MOUNTAIN_BOSS_POST: DialogueLine[] = [
+  { speaker: 'Fallen Guardian', text: '...Akhirnya... ada yang mengerti beban ini...', emotion: 'sad' },
+  { speaker: 'Alden', portrait: 'alden', text: 'Pergilah. Sumpah lo udah selesai.', emotion: 'sad' },
+  { speaker: 'Fallen Guardian', text: 'Segel terakhir ada di medan perang. Valther menunggu di sana karena dia percaya semua jalan akhirnya menuju darah.', emotion: 'sad' },
+  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Dan dia benar. Tapi kali ini darahnya bukan buat ritual. Itu buat mengakhirinya.', emotion: 'determined' },
+];
+
 // ── BATTLEFIELD ZONE ──────────────────────────────────────────
 
 export const BATTLEFIELD_ENTRY: DialogueLine[] = [

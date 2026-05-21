@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
 
 const PARTICLES = Array.from({ length: 30 }, (_, i) => ({
@@ -12,10 +12,10 @@ const PARTICLES = Array.from({ length: 30 }, (_, i) => ({
 
 const TitleScreen: React.FC = () => {
   const { setScreen } = useGameStore();
-  const [phase, setPhase] = useState<'initial' | 'subtitle' | 'menu'>('initial');
-  const [menuVisible, setMenuVisible] = useState(false);
+  const [phase, setPhase] = React.useState<'initial' | 'subtitle' | 'menu'>('initial');
+  const [menuVisible, setMenuVisible] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const t1 = setTimeout(() => setPhase('subtitle'), 1200);
     const t2 = setTimeout(() => {
       setPhase('menu');

@@ -29,6 +29,16 @@ import {
   CATACOMBS_ENTRY,
   CATACOMBS_ROUND1_POST,
   CATACOMBS_ROUND2_POST,
+  CATHEDRAL_ENTRY,
+  CATHEDRAL_ROUND1_POST,
+  CATHEDRAL_ROUND2_POST,
+  CATHEDRAL_BOSS_PRE,
+  CATHEDRAL_BOSS_POST,
+  MOUNTAIN_ENTRY,
+  MOUNTAIN_ROUND1_POST,
+  MOUNTAIN_ROUND2_POST,
+  MOUNTAIN_BOSS_PRE,
+  MOUNTAIN_BOSS_POST,
   BATTLEFIELD_ENTRY,
   BATTLEFIELD_ROUND1_POST,
   BATTLEFIELD_ROUND2_POST,
@@ -75,6 +85,7 @@ export class GameplayScene extends Phaser.Scene {
   private roundEnemyKilled = 0;
   private roundActive = false;
   private portalVisible = false;
+  private combatOverlapsInitialized = false;
   private mapWidth = 60;
   private mapHeight = 23;
 
@@ -169,11 +180,14 @@ export class GameplayScene extends Phaser.Scene {
       npcIndex++;
     }
 
-    this.setupCombatOverlaps();
-
     this.zoneRounds = this.getZoneRounds(this.currentZone);
     this.currentRoundIndex = -1;
     this.portalVisible = false;
+
+    if (!this.combatOverlapsInitialized) {
+      this.setupCombatOverlaps();
+      this.combatOverlapsInitialized = true;
+    }
 
     const store = useGameStore.getState();
     store.setZone(this.currentZone);
@@ -220,7 +234,26 @@ export class GameplayScene extends Phaser.Scene {
       this.enemyGroup,
       (_player, _enemy) => {
         const enemy = _enemy as Enemy;
+        const store = useGameStore.getState();
         if (enemy.getAIState() === 'attack') {
+          if (this.player.isParryActive()) {
+            const parried = this.player.consumeParry();
+            if (parried) {
+              enemy.applyStun(900);
+              store.restoreStamina(store.unlockedSkills.includes('iron_reflex') ? 16 : 12);
+              store.chargeUltimate(8);
+              store.addNotification({
+                type: 'success',
+                title: 'Parry!',
+                message: 'The strike breaks against your timing.',
+                icon: '⚔️',
+                duration: 1800,
+              });
+              this.triggerHitStop(110);
+            }
+            return;
+          }
+
           this.player.takeDamage(enemy['config']?.stats?.attack || 10);
         }
       }
@@ -240,12 +273,13 @@ export class GameplayScene extends Phaser.Scene {
         const store = useGameStore.getState();
         const isCharged = this.player.isAttackCharged();
         const comboCount = this.player.getComboCount();
-        const isCritChance = Math.random() < 0.25;
+        const critChance = store.unlockedSkills.includes('blood_pact') ? 0.35 : 0.25;
+        const isCritChance = Math.random() < critChance;
         const isCritical = isCharged || (comboCount >= 4) || isCritChance;
 
         const dmg = isCritical 
-          ? Phaser.Math.Between(50, 100) 
-          : (25 + Math.min(5, comboCount));
+          ? Math.round(Phaser.Math.Between(50, 100) * (store.unlockedSkills.includes('blood_pact') ? 1.25 : 1))
+          : Math.round((25 + Math.min(5, comboCount)) * (store.unlockedSkills.includes('blade_mastery') ? 1.2 : 1));
         
         const killed = enemy.takeDamage(dmg, comboCount, isCritical);
         this.player.registerHit(enemyId);
@@ -262,7 +296,7 @@ export class GameplayScene extends Phaser.Scene {
           }
         }
         if (this.player.getComboCount() % 3 === 0) {
-          enemy.applyBleed(5000); // 5s bleed
+          enemy.applyBleed(this.player.getBleedDuration());
         }
 
         if (killed) {
@@ -481,14 +515,16 @@ export class GameplayScene extends Phaser.Scene {
       this.boss,
       () => {
         if (!this.player.isCurrentlyAttacking() || !this.boss) return;
-        const bossId = this.boss.config.id;
+        const bossId = this.boss.getId();
 
         // Ensure boss is only hit ONCE per sword swing
         if (this.player.hasHit(bossId)) return;
 
         const store = useGameStore.getState();
         const baseDmg = store.player.stats.attack + Math.floor(Math.random() * 12);
-        const dmg = this.player.isAttackCharged() ? Math.floor(baseDmg * 2.5) : baseDmg;
+        const dmg = this.player.isAttackCharged()
+          ? Math.floor(baseDmg * 2.5 * (store.unlockedSkills.includes('blade_mastery') ? 1.1 : 1))
+          : Math.floor(baseDmg * (store.unlockedSkills.includes('blade_mastery') ? 1.2 : 1));
         
         this.boss.takeDamage(dmg);
         this.player.registerHit(bossId);
@@ -802,6 +838,80 @@ export class GameplayScene extends Phaser.Scene {
           },
         ],
         npcs: [],
+        nextZone: { x: 55, y: 20, zone: 'cathedral' },
+      },
+      cathedral: {
+        theme: 'cathedral',
+        name: 'Cathedral of Ash',
+        enemies: [
+          {
+            key: 'enemy_corrupted',
+            name: 'Ashen Acolyte',
+            stats: { hp: 160, attack: 26, defense: 6, speed: 95, exp: 65, gold: 22 },
+            frameCount: 4,
+          },
+          {
+            key: 'enemy_undead',
+            name: 'Choir Wraith',
+            stats: { hp: 120, attack: 22, defense: 4, speed: 110, exp: 58, gold: 18 },
+            frameCount: 4,
+          },
+        ],
+        npcs: [
+          {
+            name: 'Wandering Nun',
+            portrait: 'nun',
+            dialogue: NUN_DIALOGUE,
+            color: 0x2c3e50,
+            accentColor: 0xecf0f1,
+          },
+        ],
+        boss: {
+          id: 'saint_of_rot',
+          name: 'Saint of Rot',
+          title: 'The Hollow Vessel of Prayer',
+          maxHp: 1400,
+          phases: 3,
+          attack: 48,
+          speed: 120,
+        },
+        nextZone: { x: 55, y: 20, zone: 'mountain' },
+      },
+      mountain: {
+        theme: 'mountain',
+        name: 'Frostpeak Summit',
+        enemies: [
+          {
+            key: 'enemy_beast',
+            name: 'Frostborne Beast',
+            stats: { hp: 220, attack: 30, defense: 8, speed: 115, exp: 72, gold: 24 },
+            frameCount: 4,
+          },
+          {
+            key: 'enemy_corrupted',
+            name: 'Summit Warden',
+            stats: { hp: 180, attack: 28, defense: 10, speed: 90, exp: 68, gold: 20 },
+            frameCount: 4,
+          },
+        ],
+        npcs: [
+          {
+            name: 'Wandering Nun',
+            portrait: 'nun',
+            dialogue: NUN_DIALOGUE,
+            color: 0x2c3e50,
+            accentColor: 0xecf0f1,
+          },
+        ],
+        boss: {
+          id: 'fallen_guardian',
+          name: 'Fallen Guardian',
+          title: 'Last Keeper of the Oath',
+          maxHp: 1600,
+          phases: 3,
+          attack: 52,
+          speed: 130,
+        },
         nextZone: { x: 55, y: 20, zone: 'battlefield' },
       },
       battlefield: {
@@ -909,6 +1019,46 @@ export class GameplayScene extends Phaser.Scene {
         },
         {
           postDialogue: CATACOMBS_ROUND2_POST,
+          enemies: [],
+        },
+      ],
+      cathedral: [
+        {
+          preDialogue: CATHEDRAL_ENTRY,
+          enemies: [{ config: C2, count: 2 }, { config: C1, count: 2 }],
+        },
+        {
+          postDialogue: CATHEDRAL_ROUND1_POST,
+          enemies: [{ config: C2, count: 3 }, { config: C1, count: 1 }],
+        },
+        {
+          postDialogue: CATHEDRAL_ROUND2_POST,
+          enemies: [{ config: C2, count: 2 }],
+        },
+        {
+          preDialogue: CATHEDRAL_BOSS_PRE,
+          boss: { id: 'saint_of_rot', name: 'Saint of Rot', title: 'The Hollow Vessel of Prayer', maxHp: 1400, phases: 3, attack: 48, speed: 120 },
+          postDialogue: CATHEDRAL_BOSS_POST,
+          enemies: [],
+        },
+      ],
+      mountain: [
+        {
+          preDialogue: MOUNTAIN_ENTRY,
+          enemies: [{ config: B2, count: 2 }, { config: B1, count: 1 }],
+        },
+        {
+          postDialogue: MOUNTAIN_ROUND1_POST,
+          enemies: [{ config: B2, count: 2 }, { config: B1, count: 2 }],
+        },
+        {
+          postDialogue: MOUNTAIN_ROUND2_POST,
+          enemies: [],
+        },
+        {
+          preDialogue: MOUNTAIN_BOSS_PRE,
+          boss: { id: 'fallen_guardian', name: 'Fallen Guardian', title: 'Last Keeper of the Oath', maxHp: 1600, phases: 3, attack: 52, speed: 130 },
+          postDialogue: MOUNTAIN_BOSS_POST,
           enemies: [],
         },
       ],

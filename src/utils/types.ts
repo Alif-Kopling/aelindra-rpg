@@ -2,7 +2,7 @@
 // CORE GAME TYPES
 // ============================================================
 
-export type GameScreen = 'title' | 'prologue' | 'nameInput' | 'game' | 'paused' | 'gameOver' | 'ending';
+export type GameScreen = 'title' | 'prologue' | 'nameInput' | 'game' | 'paused' | 'gameOver' | 'ending' | 'epilogue';
 
 export interface Vector2 {
   x: number;
@@ -45,6 +45,8 @@ export interface PlayerState {
   weaponLevel?: number;
   armorLevel?: number;
   cycle: number;
+  skillPoints: number;
+  unlockedSkills: string[];
 }
 
 // ============================================================
@@ -241,6 +243,8 @@ export interface GameSave {
   quests: Quest[];
   discoveredZones: string[];
   storyFlags: Record<string, boolean>;
+  skillPoints: number;
+  unlockedSkills: string[];
   playtime: number;
   timestamp: number;
 }

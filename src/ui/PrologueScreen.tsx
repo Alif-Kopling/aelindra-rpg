@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
 import { playBGM, stopBGM, setBGMVolume } from '../utils/bgm';
 
@@ -181,38 +181,38 @@ const PROLOGUE_CINEMATIC: CinematicLine[] = [
 
 const PrologueScreen: React.FC = () => {
   const { setScreen, settings } = useGameStore();
-  const [lineIndex, setLineIndex] = useState(0);
-  const [displayText, setDisplayText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [showContinue, setShowContinue] = useState(false);
-  const [fadeOut, setFadeOut] = useState(false);
-  const [bgOpacity, setBgOpacity] = useState(0);
+  const [lineIndex, setLineIndex] = React.useState(0);
+  const [displayText, setDisplayText] = React.useState('');
+  const [isTyping, setIsTyping] = React.useState(false);
+  const [showContinue, setShowContinue] = React.useState(false);
+  const [fadeOut, setFadeOut] = React.useState(false);
+  const [bgOpacity, setBgOpacity] = React.useState(0);
 
-  const fullTextRef = useRef('');
-  const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const charIndexRef = useRef(0);
+  const fullTextRef = React.useRef('');
+  const typingTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const charIndexRef = React.useRef(0);
 
   const currentLine = PROLOGUE_CINEMATIC[lineIndex];
 
-  useEffect(() => {
+  React.useEffect(() => {
     // Fade in scene wrapper
     setTimeout(() => setBgOpacity(1), 100);
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setBGMVolume(settings.musicVolume, settings.masterVolume);
     playBGM('prologue');
     return () => stopBGM();
   }, [settings.musicVolume, settings.masterVolume]);
 
-  const finishTyping = useCallback(() => {
+  const finishTyping = React.useCallback(() => {
     if (typingTimerRef.current) clearInterval(typingTimerRef.current);
     setDisplayText(fullTextRef.current);
     setIsTyping(false);
     setShowContinue(true);
   }, []);
 
-  const handleAdvance = useCallback(() => {
+  const handleAdvance = React.useCallback(() => {
     if (isTyping) {
       finishTyping();
       return;
@@ -227,7 +227,7 @@ const PrologueScreen: React.FC = () => {
     }
   }, [isTyping, finishTyping, lineIndex, setScreen]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!currentLine) return;
 
     // Reset typewriter
@@ -255,7 +255,7 @@ const PrologueScreen: React.FC = () => {
   }, [lineIndex, currentLine, finishTyping]);
 
   // Handle keyboard inputs (Enter, Space, Z)
-  useEffect(() => {
+  React.useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'z' || e.key === 'Z') {
         e.preventDefault();

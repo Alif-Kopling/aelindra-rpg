@@ -19,6 +19,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     Space: Phaser.Input.Keyboard.Key;
     E: Phaser.Input.Keyboard.Key;
     L: Phaser.Input.Keyboard.Key;
+    F: Phaser.Input.Keyboard.Key;
     Shift: Phaser.Input.Keyboard.Key;
   };
 
@@ -43,6 +44,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private ultimateCharge = 0;
   private isUltimate = false;
   private ultimateCooldown = 0;
+  private isParrying = false;
+  private parryTimer = 0;
+  private parryCooldown = 0;
+  private parryConsumed = false;
   private timeAccumulator = 0;
   private coyoteTimer = 0;
   private jumpBufferTimer = 0;
@@ -107,6 +112,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       Space: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
       E: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.E),
       L: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.L),
+      F: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.F),
       Shift: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT),
     };
   }
@@ -123,6 +129,38 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   isAttackCharged(): boolean {
     return this.isChargedAttack;
+  }
+
+  isParryActive(): boolean {
+    return this.isParrying && !this.parryConsumed && this.parryTimer > 0;
+  }
+
+  consumeParry(): boolean {
+    if (!this.isParryActive()) return false;
+    this.parryConsumed = true;
+    this.parryTimer = 0;
+    this.isParrying = false;
+    return true;
+  }
+
+  private hasSkill(skillId: string): boolean {
+    return useGameStore.getState().unlockedSkills.includes(skillId);
+  }
+
+  private getAttackMultiplier(): number {
+    return this.hasSkill('blade_mastery') ? 1.2 : 1;
+  }
+
+  private getParryWindow(): number {
+    return this.hasSkill('iron_reflex') ? 300 : 220;
+  }
+
+  private getDashCost(): number {
+    return this.hasSkill('relentless_step') ? 28 : 35;
+  }
+
+  getBleedDuration(): number {
+    return this.hasSkill('blood_pact') ? 7000 : 5000;
   }
 
   update(delta: number) {
@@ -142,6 +180,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.dashCooldown = Math.max(0, this.dashCooldown - delta);
     this.attackCooldown = Math.max(0, this.attackCooldown - delta);
     this.invincibleTimer = Math.max(0, this.invincibleTimer - delta);
+    this.parryCooldown = Math.max(0, this.parryCooldown - delta);
     this.staminaRegenTimer += delta;
     this.ultimateCooldown = Math.max(0, this.ultimateCooldown - delta);
     this.frameTimer += delta;
@@ -162,6 +201,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (this.staminaRegenTimer > 200 && stats.stamina < stats.maxStamina) {
       store.restoreStamina(2);
       this.staminaRegenTimer = 0;
+    }
+
+    if (this.isParrying) {
+      this.parryTimer -= delta;
+      body.setVelocityX(0);
+      body.setVelocityY(Math.max(body.velocity.y, 0));
+      this.setTint(0xcfe8ff);
+      if (this.parryTimer <= 0 || this.parryConsumed) {
+        this.isParrying = false;
+        this.clearTint();
+      }
     }
 
     if (this.isDashing) {
@@ -187,14 +237,18 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const pointer = this.scene.input.activePointer;
     const attackHeld = pointer.isDown || this.keys.L.isDown;
 
-    if (attackHeld && !this.isAttacking && this.attackCooldown <= 0 && !this.isUltimate) {
+    if (Phaser.Input.Keyboard.JustDown(this.keys.F) && !this.isDashing && !this.isAttacking && !this.isCharging && this.parryCooldown <= 0 && stats.stamina >= 6) {
+      this.beginParry(store);
+    }
+
+    if (attackHeld && !this.isAttacking && this.attackCooldown <= 0 && !this.isUltimate && !this.isParrying) {
       if (!this.isCharging && !this.isAttacking) {
         this.isCharging = true;
         this.chargeTime = 0;
       }
     }
 
-    if (this.isCharging) {
+    if (this.isCharging && !this.isParrying) {
       this.chargeTime += delta;
       this.updateChargeVisual();
       body.setVelocityX(body.velocity.x * 0.7);
@@ -218,7 +272,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     // ── MOVEMENT ────────────────────────────────────────────────
     let vx = 0;
 
-    if (!this.isCharging) {
+    if (!this.isCharging && !this.isParrying) {
       if (this.keys.A.isDown) { vx = -this.moveSpeed; this.facingRight = false; }
       else if (this.keys.D.isDown) { vx = this.moveSpeed; this.facingRight = true; }
     }
@@ -240,13 +294,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       body.setVelocityY(body.velocity.y * 0.5);
     }
 
-    if ((Phaser.Input.Keyboard.JustDown(this.keys.Space) || Phaser.Input.Keyboard.JustDown(this.keys.Shift)) &&
+    if (!this.isParrying && (Phaser.Input.Keyboard.JustDown(this.keys.Space) || Phaser.Input.Keyboard.JustDown(this.keys.Shift)) &&
         this.dashCooldown <= 0 &&
-        stats.stamina >= 35 && vx !== 0 && !this.isDashing) {
+        stats.stamina >= this.getDashCost() && vx !== 0 && !this.isDashing) {
       this.startDash(vx, store);
     }
 
-    if (this.scene.input.activePointer.rightButtonDown() &&
+    if (!this.isParrying && this.scene.input.activePointer.rightButtonDown() &&
         this.ultimateCharge >= 100 &&
         this.ultimateCooldown <= 0) {
       this.performUltimate(store);
@@ -477,6 +531,24 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.setTint(0xff4444);
     this.scene.time.delayedCall(150, () => this.clearTint());
+  }
+
+  private beginParry(store: ReturnType<typeof useGameStore.getState>) {
+    this.isParrying = true;
+    this.parryConsumed = false;
+    this.parryTimer = this.getParryWindow();
+    this.parryCooldown = 600;
+    this.scene.time.delayedCall(this.parryTimer, () => {
+      this.isParrying = false;
+      this.clearTint();
+    });
+
+    store.drainStamina(this.hasSkill('iron_reflex') ? 6 : 8);
+
+    if (this.scene.cache.audio.exists('sfx_critical')) {
+      this.scene.sound.play('sfx_critical', { volume: 0.4, rate: 1.2 });
+    }
+    this.scene.cameras.main.flash(80, 210, 240, 255);
   }
 
   private spawnChargedSlashEffect() {
@@ -763,6 +835,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.resetHitTracking(); // Clear hits for the new swing
 
+    const damageMultiplier = this.getAttackMultiplier();
+
     if (comboStep === 0) {
       body.setVelocityX(dir * 180);
       this.spawnSlashEffect(0);
@@ -779,6 +853,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     const hb = this.attackHitbox.body as Phaser.Physics.Arcade.Body;
     hb.enable = true;
+    this.scene.time.delayedCall(20, () => {
+      this.setTint(0xf0f8ff);
+      this.scene.time.delayedCall(80, () => this.clearTint());
+    });
 
     this.scene.time.delayedCall(220, () => {
       hb.enable = false;
@@ -826,9 +904,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.isDashing = true;
     this.dashTimer = DASH_DURATION;
     this.dashCooldown = DASH_COOLDOWN;
-    this.invincibleTimer = INVINCIBILITY_FRAMES;
+    this.invincibleTimer = INVINCIBILITY_FRAMES + (this.hasSkill('relentless_step') ? 120 : 0);
     store.setPlayerDashing(true);
-    store.drainStamina(35);
+    store.drainStamina(this.getDashCost());
 
     this.dashDirX = vx > 0 ? 1 : -1;
     this.spawnDashTrail();

@@ -130,6 +130,10 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     this.target = target;
   }
 
+  getId(): string {
+    return this.config.id;
+  }
+
   getProjectiles(): Phaser.Physics.Arcade.Group {
     return this.projectiles;
   }
@@ -798,9 +802,10 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
         });
       }
 
-      store.setActiveBoss({
+      store.setBoss({
         id: this.config.id,
         name: this.config.name,
+        title: this.config.title,
         hp: this.hp,
         maxHp: this.maxHp,
         phase: this.phase,

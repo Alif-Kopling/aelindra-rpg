@@ -15,7 +15,7 @@ import {
   SaveSlot,
   HitEffect,
 } from '../utils/types';
-import { PLAYER_DEFAULTS, ITEMS_DB } from '../utils/constants';
+import { PLAYER_DEFAULTS, ITEMS_DB, SKILL_TREE } from '../utils/constants';
 
 // ============================================================
 // INITIAL STATES
@@ -53,6 +53,8 @@ const initialPlayer: PlayerState = {
   weaponLevel: 1,
   armorLevel: 1,
   cycle: 1,
+  skillPoints: 0,
+  unlockedSkills: [],
 };
 
 const initialInventory: InventoryState = {
@@ -109,6 +111,9 @@ interface GameStore {
   incrementCombo: () => void;
   resetCombo: () => void;
   chargeUltimate: (amount: number) => void;
+  skillPoints: number;
+  unlockedSkills: string[];
+  unlockSkill: (skillId: string) => boolean;
 
   // Inventory
   inventory: InventoryState;
@@ -229,8 +234,12 @@ export const useGameStore = create<GameStore>()(
     }),
     gainExp: (amount) => {
       set((s) => { s.player.stats.exp += amount; });
-      const { player } = get();
-      if (player.stats.exp >= player.stats.expToNext) get().levelUp();
+
+      let player = get().player;
+      while (player.stats.exp >= player.stats.expToNext) {
+        get().levelUp();
+        player = get().player;
+      }
     },
     levelUp: () => set((s) => {
       const p = s.player.stats;
@@ -245,10 +254,11 @@ export const useGameStore = create<GameStore>()(
       p.mana = p.maxMana;
       p.attack += 3;
       p.defense += 2;
+      s.skillPoints += 1;
       get().addNotification({
         type: 'success',
         title: `Level ${p.level}!`,
-        message: 'You grow stronger with every wound endured.',
+        message: 'You grow stronger with every wound endured. 1 skill point gained.',
         icon: '⬆️',
         duration: 4000,
       });
@@ -263,6 +273,31 @@ export const useGameStore = create<GameStore>()(
     chargeUltimate: (amount) => set((s) => {
       s.player.ultimateCharge = Math.min(100, s.player.ultimateCharge + amount);
     }),
+    skillPoints: 0,
+    unlockedSkills: [],
+    unlockSkill: (skillId) => {
+      const state = get();
+      if (state.unlockedSkills.includes(skillId)) return false;
+
+      const skill = SKILL_TREE.find((entry) => entry.id === skillId);
+      if (!skill) return false;
+      if (state.skillPoints < skill.cost) return false;
+      if (!skill.prerequisites.every((req) => state.unlockedSkills.includes(req))) return false;
+
+      set((s) => {
+        s.skillPoints -= skill.cost;
+        s.unlockedSkills.push(skillId);
+      });
+
+      get().addNotification({
+        type: 'success',
+        title: `${skill.name} Unlocked`,
+        message: skill.description,
+        icon: '★',
+        duration: 3500,
+      });
+      return true;
+    },
 
     // Inventory
     inventory: initialInventory,
@@ -494,7 +529,10 @@ export const useGameStore = create<GameStore>()(
         quests: state.quests,
         discoveredZones: state.discoveredZones,
         storyFlags: state.storyFlags,
+        skillPoints: state.skillPoints,
+        unlockedSkills: state.unlockedSkills,
         playtime: state.playtime,
+        currentZone: state.currentZone,
         timestamp: Date.now(),
         slot,
       };
@@ -523,7 +561,10 @@ export const useGameStore = create<GameStore>()(
         s.quests = data.quests;
         s.discoveredZones = data.discoveredZones;
         s.storyFlags = data.storyFlags;
+        s.skillPoints = data.skillPoints ?? s.skillPoints;
+        s.unlockedSkills = data.unlockedSkills ?? s.unlockedSkills;
         s.playtime = data.playtime;
+        s.currentZone = data.currentZone || 'village';
         s.screen = 'game';
       });
     },
@@ -555,5 +596,5 @@ export const useGameStore = create<GameStore>()(
         duration: 6000,
       });
     },
-  }))
+  })),
 );

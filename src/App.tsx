@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import * as React from 'react';
 import { useGameStore } from './store/gameStore';
 import TitleScreen from './ui/TitleScreen';
 import PrologueScreen from './ui/PrologueScreen';
@@ -6,19 +6,20 @@ import NameInputScreen from './ui/NameInputScreen';
 import GameComponent from './components/GameComponent';
 import GameOverScreen from './ui/GameOverScreen';
 import EndingScreen from './ui/EndingScreen';
+import EpilogueScreen from './ui/EpilogueScreen';
 
 const App: React.FC = () => {
   const { screen } = useGameStore();
 
   // Prevent context menu on right click (for skill usage)
-  useEffect(() => {
+  React.useEffect(() => {
     const prevent = (e: MouseEvent) => e.preventDefault();
     document.addEventListener('contextmenu', prevent);
     return () => document.removeEventListener('contextmenu', prevent);
   }, []);
 
   // Prevent default space/arrow scrolling
-  useEffect(() => {
+  React.useEffect(() => {
     const prevent = (e: KeyboardEvent) => {
       if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
         if (screen === 'game') e.preventDefault();
@@ -50,6 +51,9 @@ const App: React.FC = () => {
 
       {/* Ending */}
       {screen === 'ending' && <EndingScreen />}
+
+      {/* Epilogue */}
+      {screen === 'epilogue' && <EpilogueScreen />}
 
       {/* Global vignette for non-game screens */}
       {screen !== 'game' && (

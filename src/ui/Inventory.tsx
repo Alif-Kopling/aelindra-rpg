@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
 import { Item, ItemRarity } from '../utils/types';
 
@@ -12,8 +12,8 @@ const RARITY_COLORS: Record<ItemRarity, { border: string; glow: string; label: s
 
 const Inventory: React.FC = () => {
   const { isInventoryOpen, toggleInventory, inventory, player, equipItem, removeItem, healPlayer, addNotification } = useGameStore();
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-  const [hoveredItem, setHoveredItem] = useState<Item | null>(null);
+  const [selectedItem, setSelectedItem] = React.useState<Item | null>(null);
+  const [hoveredItem, setHoveredItem] = React.useState<Item | null>(null);
 
   if (!isInventoryOpen) return null;
 

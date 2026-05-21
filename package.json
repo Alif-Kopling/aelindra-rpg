@@ -4,9 +4,9 @@
   "description": "Aelindra: The Forsaken Knight - A dark fantasy pixel RPG",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "dev": "node scripts/dev.mjs",
+    "build": "tsc && node scripts/build.mjs",
+    "preview": "node scripts/preview.mjs"
   },
   "dependencies": {
     "react": "^18.2.0",

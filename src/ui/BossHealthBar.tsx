@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
 
 const BossHealthBar: React.FC = () => {
   const { activeBoss } = useGameStore();
-  const [visible, setVisible] = useState(false);
-  const [prevHp, setPrevHp] = useState(0);
-  const [damageFlash, setDamageFlash] = useState(false);
-  const prevHpRef = useRef(0);
+  const [visible, setVisible] = React.useState(false);
+  const [prevHp, setPrevHp] = React.useState(0);
+  const [damageFlash, setDamageFlash] = React.useState(false);
+  const prevHpRef = React.useRef(0);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (activeBoss?.isActive) {
       setVisible(true);
       setPrevHp(activeBoss.hp);
@@ -18,7 +18,7 @@ const BossHealthBar: React.FC = () => {
     }
   }, [activeBoss?.isActive]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!activeBoss) return;
     if (activeBoss.hp < prevHpRef.current) {
       setDamageFlash(true);

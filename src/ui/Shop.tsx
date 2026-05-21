@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
 
 const Shop: React.FC = () => {
@@ -12,10 +12,10 @@ const Shop: React.FC = () => {
     buyPotion,
   } = useGameStore();
 
-  const [activeTab, setActiveTab] = useState<'upgrade' | 'item'>('upgrade');
-  const [clickAudio, setClickAudio] = useState<HTMLAudioElement | null>(null);
+  const [activeTab, setActiveTab] = React.useState<'upgrade' | 'item'>('upgrade');
+  const [clickAudio, setClickAudio] = React.useState<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     // Setup click sound effect
     const audio = new Audio('/assets/audio/dialog-sound.mp3');
     audio.volume = 0.25;

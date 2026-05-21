@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
 import { PLAYER_DEFAULTS } from '../utils/constants';
 
 const GameOverScreen: React.FC = () => {
   const { setScreen, player, updatePlayerStats, loadGame, saveSlots } = useGameStore();
-  const [visible, setVisible] = useState(false);
-  const [quote, setQuote] = useState('');
+  const [visible, setVisible] = React.useState(false);
+  const [quote, setQuote] = React.useState('');
 
   const DEATH_QUOTES = [
     '"Even a forsaken knight rises again."',
@@ -16,7 +16,7 @@ const GameOverScreen: React.FC = () => {
     '"A nameless grave is not your ending."',
   ];
 
-  useEffect(() => {
+  React.useEffect(() => {
     setQuote(DEATH_QUOTES[Math.floor(Math.random() * DEATH_QUOTES.length)]);
     setTimeout(() => setVisible(true), 300);
   }, []);

@@ -1,8 +1,8 @@
-import React from 'react';
+import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
 
 const HUD: React.FC = () => {
-  const { player, currentZone } = useGameStore();
+  const { player, currentZone, skillPoints } = useGameStore();
   const { stats, name, comboCount, ultimateCharge } = player;
 
   const hpPct = (stats.hp / stats.maxHp) * 100;
@@ -95,6 +95,17 @@ const HUD: React.FC = () => {
         }}>
           Lv.{stats.level} {player.cycle > 1 && <span style={{ color: '#ffd700', marginLeft: 6 }}>✦ Cycle {player.cycle}</span>}
         </div>
+        {skillPoints > 0 && (
+          <div style={{
+            fontSize: '9px',
+            color: '#ffd700',
+            marginTop: 4,
+            letterSpacing: '1px',
+            textShadow: '0 0 8px rgba(255,215,0,0.35)',
+          }}>
+            {skillPoints} UNSPENT SKILL POINT{skillPoints === 1 ? '' : 'S'}
+          </div>
+        )}
       </div>
 
       {/* Bottom: Minimal controls hint */}

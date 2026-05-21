@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
 import { playBGM, stopBGM, setBGMVolume } from '../utils/bgm';
 
@@ -27,11 +27,11 @@ const ENDING_LINES = [
 
 const EndingScreen: React.FC = () => {
   const { setScreen, player, settings } = useGameStore();
-  const [visibleLines, setVisibleLines] = useState<Set<number>>(new Set());
-  const [finished, setFinished] = useState(false);
-  const [bgPhase, setBgPhase] = useState<'dark' | 'dawn' | 'bright'>('dark');
+  const [visibleLines, setVisibleLines] = React.useState<Set<number>>(new Set());
+  const [finished, setFinished] = React.useState(false);
+  const [bgPhase, setBgPhase] = React.useState<'dark' | 'dawn' | 'bright'>('dark');
 
-  useEffect(() => {
+  React.useEffect(() => {
     ENDING_LINES.forEach((line, i) => {
       setTimeout(() => {
         setVisibleLines(prev => new Set([...prev, i]));
@@ -43,7 +43,7 @@ const EndingScreen: React.FC = () => {
     setTimeout(() => setFinished(true), 76000);
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setBGMVolume(settings.musicVolume, settings.masterVolume);
     playBGM('ending');
     return () => stopBGM();
@@ -222,7 +222,7 @@ const EndingScreen: React.FC = () => {
           }}
         >
           <button
-            onClick={() => setScreen('title')}
+            onClick={() => setScreen('epilogue')}
             className="btn-fantasy py-4 px-16 rounded-sm transition-all duration-300 hover:scale-110 active:scale-95"
             style={{
               fontFamily: 'Cinzel, serif',
@@ -234,7 +234,7 @@ const EndingScreen: React.FC = () => {
               boxShadow: '0 0 40px rgba(0,0,0,0.6), inset 0 0 20px rgba(200,168,98,0.1)',
             }}
           >
-            ✦ ASCEND TO TITLE ✦
+            ✦ OPEN EPILOGUE ✦
           </button>
         </div>
       )}

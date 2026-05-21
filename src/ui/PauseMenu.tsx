@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
+import { SKILL_TREE } from '../utils/constants';
 
-type PauseTab = 'main' | 'settings' | 'controls' | 'save' | 'quests';
+type PauseTab = 'main' | 'skills' | 'settings' | 'controls' | 'save' | 'quests';
 
 const PauseMenu: React.FC = () => {
   const { isPaused, togglePause, settings, updateSettings, saveGame, loadGame, saveSlots, quests, player, setScreen } = useGameStore();
-  const [tab, setTab] = useState<PauseTab>('main');
+  const [tab, setTab] = React.useState<PauseTab>('main');
 
   if (!isPaused) return null;
 
@@ -48,7 +49,7 @@ const PauseMenu: React.FC = () => {
 
         {/* Tab nav */}
         <div className="flex border-b" style={{ borderColor: 'rgba(184,134,11,0.2)' }}>
-          {(['main', 'settings', 'controls', 'save', 'quests'] as PauseTab[]).map((t) => (
+          {(['main', 'skills', 'settings', 'controls', 'save', 'quests'] as PauseTab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -71,7 +72,10 @@ const PauseMenu: React.FC = () => {
         {/* Tab content */}
         <div style={{ minHeight: 300, padding: 24 }}>
           {tab === 'main' && (
-            <MainTab togglePause={togglePause} setScreen={setScreen} />
+            <MainTab togglePause={togglePause} setScreen={setScreen} setTab={setTab} />
+          )}
+          {tab === 'skills' && (
+            <SkillsTab />
           )}
           {tab === 'settings' && (
             <SettingsTab settings={settings} updateSettings={updateSettings} />
@@ -91,11 +95,11 @@ const PauseMenu: React.FC = () => {
   );
 };
 
-const MainTab: React.FC<{ togglePause: () => void; setScreen: (s: any) => void }> = ({ togglePause, setScreen }) => {
+const MainTab: React.FC<{ togglePause: () => void; setScreen: (s: any) => void; setTab: (tab: PauseTab) => void }> = ({ togglePause, setScreen, setTab }) => {
   const menuItems = [
     { label: '▶  Resume', action: togglePause, color: '#ffd700' },
     { label: '🗺  World Map', action: () => {}, color: '#f4e4c1' },
-    { label: '🌟  Skill Tree', action: () => {}, color: '#f4e4c1' },
+    { label: '🌟  Skill Tree', action: () => setTab('skills'), color: '#f4e4c1' },
     { label: '📜  Codex', action: () => {}, color: '#f4e4c1' },
     { label: '🏠  Return to Title', action: () => setScreen('title'), color: '#ff6b6b' },
   ];
@@ -112,6 +116,101 @@ const MainTab: React.FC<{ togglePause: () => void; setScreen: (s: any) => void }
           {label}
         </button>
       ))}
+    </div>
+  );
+};
+
+const SkillsTab: React.FC = () => {
+  const { skillPoints, unlockedSkills, unlockSkill } = useGameStore();
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <div style={{ fontFamily: 'Cinzel, serif', fontSize: 10, color: '#b8860b', letterSpacing: '2px' }}>
+            SKILL TREE
+          </div>
+          <div style={{ fontFamily: 'Lora, serif', fontSize: 11, color: '#8fa8b8', fontStyle: 'italic', marginTop: 4 }}>
+            Spend points on combat identity, not raw inflation.
+          </div>
+        </div>
+        <div style={{
+          padding: '6px 10px',
+          borderRadius: 4,
+          border: '1px solid rgba(184,134,11,0.35)',
+          background: 'rgba(0,0,0,0.25)',
+          fontFamily: 'Cinzel, serif',
+          fontSize: 11,
+          color: '#ffd700',
+          letterSpacing: '1px',
+        }}>
+          {skillPoints} POINT{skillPoints === 1 ? '' : 'S'}
+        </div>
+      </div>
+
+      {SKILL_TREE.map((skill) => {
+        const unlocked = unlockedSkills.includes(skill.id);
+        const canAfford = skillPoints >= skill.cost;
+        const meetsReq = skill.prerequisites.every((req) => unlockedSkills.includes(req));
+        const canUnlock = !unlocked && canAfford && meetsReq;
+
+        return (
+          <div
+            key={skill.id}
+            style={{
+              background: unlocked ? 'rgba(24, 20, 12, 0.9)' : 'rgba(10, 10, 16, 0.72)',
+              border: `1px solid ${unlocked ? 'rgba(255,215,0,0.65)' : 'rgba(184,134,11,0.22)'}`,
+              borderRadius: 6,
+              padding: '12px 14px',
+              boxShadow: unlocked ? '0 0 18px rgba(255,215,0,0.08)' : 'none',
+            }}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div style={{ fontFamily: 'Cinzel, serif', fontSize: 12, color: unlocked ? '#ffd700' : '#f4e4c1', fontWeight: 700 }}>
+                  {skill.name}
+                </div>
+                <div style={{ fontFamily: 'Lora, serif', fontSize: 10, color: '#8fa8b8', fontStyle: 'italic', marginTop: 4, lineHeight: 1.5 }}>
+                  {skill.description}
+                </div>
+                <div style={{ fontFamily: 'Cinzel, serif', fontSize: 9, color: '#b8860b', marginTop: 8, letterSpacing: '1px' }}>
+                  COST {skill.cost} | {skill.category.toUpperCase()}
+                  {skill.prerequisites.length > 0 && (
+                    <span style={{ color: meetsReq ? '#32cd32' : '#ff6b6b', marginLeft: 10 }}>
+                      REQ: {skill.prerequisites.join(', ')}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col items-end gap-2">
+                <div style={{
+                  fontFamily: 'Cinzel, serif',
+                  fontSize: 9,
+                  color: unlocked ? '#32cd32' : '#8fa8b8',
+                  letterSpacing: '1px',
+                }}>
+                  {unlocked ? 'UNLOCKED' : canAfford ? 'READY' : 'LOCKED'}
+                </div>
+                {!unlocked && (
+                  <button
+                    onClick={() => unlockSkill(skill.id)}
+                    disabled={!canUnlock}
+                    className="btn-fantasy px-3 py-1 rounded-sm"
+                    style={{
+                      fontSize: 9,
+                      opacity: canUnlock ? 1 : 0.45,
+                      cursor: canUnlock ? 'pointer' : 'not-allowed',
+                    }}
+                  >
+                    UNLOCK
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -265,7 +364,7 @@ const SaveTab: React.FC<{ saveSlots: any[]; saveGame: (slot: number) => void; lo
 const ControlsTab: React.FC = () => {
   const controls = [
     { title: 'MOVEMENT', keys: [{ key: 'WASD', desc: 'Move Character' }, { key: 'SPACE / SHIFT', desc: 'High-Stamina Dash' }, { key: 'W / SPACE', desc: 'Jump / Double Jump' }] },
-    { title: 'COMBAT', keys: [{ key: 'L / MOUSE 1', desc: 'Light Attack' }, { key: 'CHARGE', desc: 'Heavy / Critical Attack' }, { key: 'RIGHT CLICK', desc: 'Forsaken Slash (Ult)' }] },
+    { title: 'COMBAT', keys: [{ key: 'L / MOUSE 1', desc: 'Light Attack' }, { key: 'HOLD', desc: 'Heavy / Critical Attack' }, { key: 'F', desc: 'Parry / Counter Window' }, { key: 'RIGHT CLICK', desc: 'Forsaken Slash (Ult)' }] },
     { title: 'ACTIONS', keys: [{ key: 'E', desc: 'Interact / Dialogue' }, { key: 'TAB', desc: 'Inventory' }, { key: 'ESC', desc: 'Pause Menu' }] },
   ];
 

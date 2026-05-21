@@ -27,6 +27,50 @@ export const COLORS = {
   parchment: 0xf4e4c1,
 };
 
+export interface SkillDefinition {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  category: 'combat' | 'survival' | 'passive';
+  prerequisites: string[];
+}
+
+export const SKILL_TREE: SkillDefinition[] = [
+  {
+    id: 'blade_mastery',
+    name: 'Blade Mastery',
+    description: 'Basic and charged attacks deal more damage, rewarding disciplined offense.',
+    cost: 1,
+    category: 'combat',
+    prerequisites: [],
+  },
+  {
+    id: 'relentless_step',
+    name: 'Relentless Step',
+    description: 'Dodge cost is lower and invincibility lasts slightly longer.',
+    cost: 1,
+    category: 'survival',
+    prerequisites: [],
+  },
+  {
+    id: 'iron_reflex',
+    name: 'Iron Reflex',
+    description: 'Parry window widens and successful parries restore more stamina.',
+    cost: 1,
+    category: 'combat',
+    prerequisites: ['blade_mastery'],
+  },
+  {
+    id: 'blood_pact',
+    name: 'Blood Pact',
+    description: 'Critical hits hit harder and bleed lasts longer.',
+    cost: 2,
+    category: 'passive',
+    prerequisites: ['iron_reflex'],
+  },
+];
+
 export const COMBO_TIMEOUT = 1200; // ms between combo hits
 export const DASH_COOLDOWN = 600;
 export const DASH_DURATION = 200;

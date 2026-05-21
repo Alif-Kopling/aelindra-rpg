@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
 
 const PORTRAIT_COLORS: Record<string, { bg: string; border: string; emoji: string; img?: string }> = {
@@ -34,26 +34,26 @@ const playBlip = () => {
 
 const DialogueSystem: React.FC = () => {
   const { dialogue, advanceDialogue, closeDialogue } = useGameStore();
-  const [displayText, setDisplayText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [showContinue, setShowContinue] = useState(false);
-  const [transitionDir, setTransitionDir] = useState<'in' | 'out'>('in');
-  const [prevSpeaker, setPrevSpeaker] = useState('');
-  const fullTextRef = useRef('');
-  const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const charIndexRef = useRef(0);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [displayText, setDisplayText] = React.useState('');
+  const [isTyping, setIsTyping] = React.useState(false);
+  const [showContinue, setShowContinue] = React.useState(false);
+  const [transitionDir, setTransitionDir] = React.useState<'in' | 'out'>('in');
+  const [prevSpeaker, setPrevSpeaker] = React.useState('');
+  const fullTextRef = React.useRef('');
+  const typingTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const charIndexRef = React.useRef(0);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const currentLine = dialogue.lines[dialogue.currentIndex];
 
-  const finishTyping = useCallback(() => {
+  const finishTyping = React.useCallback(() => {
     if (typingTimerRef.current) clearInterval(typingTimerRef.current);
     setDisplayText(fullTextRef.current);
     setIsTyping(false);
     setShowContinue(true);
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!dialogue.isOpen || !currentLine) return;
 
     if (typingTimerRef.current) clearInterval(typingTimerRef.current);
@@ -102,7 +102,7 @@ const DialogueSystem: React.FC = () => {
     };
   }, [dialogue.currentIndex, dialogue.isOpen, currentLine, prevSpeaker, finishTyping]);
 
-  const handleAdvance = useCallback(() => {
+  const handleAdvance = React.useCallback(() => {
     if (isTyping) {
       finishTyping();
       return;
@@ -110,7 +110,7 @@ const DialogueSystem: React.FC = () => {
     advanceDialogue();
   }, [isTyping, finishTyping, advanceDialogue]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (!dialogue.isOpen) return;
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'z' || e.key === 'Z') {

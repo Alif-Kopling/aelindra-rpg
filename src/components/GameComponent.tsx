@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import * as React from 'react';
 import Phaser from 'phaser';
 import { createPhaserGame } from '../game/phaserConfig';
 import { useGameStore } from '../store/gameStore';
@@ -12,11 +12,11 @@ import Shop from '../ui/Shop';
 import { playBGM, stopBGM, setBGMVolume } from '../utils/bgm';
 
 const GameComponent: React.FC = () => {
-  const gameRef = useRef<Phaser.Game | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const gameRef = React.useRef<Phaser.Game | null>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const { isPaused, isInventoryOpen, dialogue, isShopOpen, currentZone, settings } = useGameStore();
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!containerRef.current || gameRef.current) return;
 
     gameRef.current = createPhaserGame('game-canvas');
@@ -27,7 +27,7 @@ const GameComponent: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!gameRef.current) return;
     const scene = gameRef.current.scene.getScene('GameplayScene');
     if (scene) {
@@ -39,11 +39,11 @@ const GameComponent: React.FC = () => {
     }
   }, [isPaused, dialogue.isOpen, isShopOpen]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setBGMVolume(settings.musicVolume, settings.masterVolume);
   }, [settings.musicVolume, settings.masterVolume]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (currentZone) {
       playBGM(currentZone);
     }
