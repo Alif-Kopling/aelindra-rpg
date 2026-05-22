@@ -39,6 +39,58 @@
 
 ---
 
+## Cutscene Highlights
+
+- **Prologue Cinematic**
+  - pembuka cerita bergaya visual novel, membangun tragedi awal Alden
+- **Ashen Knight Pre-Boss Cinematic**
+  - transisi dramatis sebelum pertarungan final dimulai
+- **Final 6-Frame Stop-Motion Ending**
+  - urutan frame sinematik setelah boss kalah:
+  - The Final Strike
+  - Ashen Dissolution
+  - The Wounded Knight
+  - The Princess Runs
+  - The Final Embrace
+  - The Monument
+- **Ending Dialogue Sequence**
+  - narasi penutup emosional dengan transisi langit/atmosfer bertahap
+- **Epilogue Screen**
+  - closure dunia pasca perang dengan tone reflektif
+
+---
+
+## Visual Preview
+
+<table>
+  <tr>
+    <td align="center"><strong>Prologue</strong></td>
+    <td align="center"><strong>Tragedy</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./public/assets/images/animation/scene1-before-tragedy.jpeg" alt="Prologue Scene" width="100%"></td>
+    <td><img src="./public/assets/images/animation/scene3-The-Tragedy.jpeg" alt="The Tragedy" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Final Clash</strong></td>
+    <td align="center"><strong>Battlefield Mood</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./public/assets/images/animation/pict-animasi-boss-vs-mc.png" alt="Boss vs Alden" width="100%"></td>
+    <td><img src="./public/assets/images/boss-fight-bg.jpeg" alt="Battlefield" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Ending Dialogue</strong></td>
+    <td align="center"><strong>Memorial</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./public/assets/images/ending-bg-dialog.jpeg" alt="Ending Dialogue Background" width="100%"></td>
+    <td><img src="./public/assets/images/ending.png" alt="Memorial Ending" width="100%"></td>
+  </tr>
+</table>
+
+---
+
 ## Story Arc (Short)
 
 1. **Alden** difitnah membunuh Raja Aldric oleh **Valther**  
@@ -167,4 +219,3 @@ npx vite build
 Game universe: **Aelindra**  
 Main character: **Alden**  
 Built with Phaser + React for narrative-action hybrid gameplay.
-
