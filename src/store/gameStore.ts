@@ -53,8 +53,6 @@ const initialPlayer: PlayerState = {
   weaponLevel: 1,
   armorLevel: 1,
   cycle: 1,
-  skillPoints: 0,
-  unlockedSkills: [],
 };
 
 const initialInventory: InventoryState = {
@@ -202,6 +200,19 @@ interface GameStore {
   setZoneRound: (round: number) => void;
 
   completeCycle: () => void;
+
+  // Auto/Idle Mechanics
+  isAutoPlay: boolean;
+  toggleAutoPlay: () => void;
+  isAutoDialogue: boolean;
+  toggleAutoDialogue: () => void;
+  hotbar: (string | null)[];
+  assignToHotbar: (slotIndex: number, itemId: string | null) => void;
+  useHotbarItem: (slotIndex: number) => void;
+  furthestClearedZone: string;
+  recallToTown: () => void;
+  returnToBattlefield: () => void;
+  hasRecallPortal: boolean;
 }
 
 // ============================================================
@@ -358,6 +369,7 @@ export const useGameStore = create<GameStore>()(
       s.dialogue.isOpen = false;
       s.dialogue.lines = [];
       s.dialogue.currentIndex = 0;
+      s.dialogue.onComplete = undefined;
     }),
 
     // Boss
@@ -405,8 +417,10 @@ export const useGameStore = create<GameStore>()(
     addNotification: (notif) => set((s) => {
       const id = `notif_${Date.now()}_${Math.random()}`;
       s.notifications.push({ ...notif, id });
-      // Auto-remove
-      setTimeout(() => get().removeNotification(id), notif.duration || 3000);
+      const dur = notif.duration ?? 3000;
+      if (dur > 0) {
+        setTimeout(() => get().removeNotification(id), dur);
+      }
     }),
     removeNotification: (id) => set((s) => {
       s.notifications = s.notifications.filter(n => n.id !== id);
@@ -429,11 +443,145 @@ export const useGameStore = create<GameStore>()(
 
     // Zone
     currentZone: 'village',
-    setZone: (zone) => set((s) => { s.currentZone = zone; }),
+    setZone: (zone) => set((s) => {
+      s.currentZone = zone;
+      if (zone !== 'village') {
+        s.furthestClearedZone = zone;
+      }
+    }),
     discoveredZones: ['village'],
     discoverZone: (zoneId) => set((s) => {
       if (!s.discoveredZones.includes(zoneId)) s.discoveredZones.push(zoneId);
     }),
+
+    // Auto/Idle Mechanics
+    isAutoPlay: false,
+    toggleAutoPlay: () => set((s) => {
+      s.isAutoPlay = !s.isAutoPlay;
+      const id = `notif_${Date.now()}_${Math.random()}`;
+      s.notifications.push({
+        id,
+        type: 'success',
+        title: s.isAutoPlay ? 'Auto Combat: ON' : 'Auto Combat: OFF',
+        message: s.isAutoPlay ? 'Alden bertarung secara otomatis.' : 'Kendali manual diaktifkan.',
+        icon: '⚔️',
+        duration: 2000,
+        timestamp: Date.now()
+      });
+      setTimeout(() => get().removeNotification(id), 2000);
+    }),
+    isAutoDialogue: false,
+    toggleAutoDialogue: () => set((s) => {
+      s.isAutoDialogue = !s.isAutoDialogue;
+      const id = `notif_${Date.now()}_${Math.random()}`;
+      s.notifications.push({
+        id,
+        type: 'success',
+        title: s.isAutoDialogue ? 'Auto Story: ON' : 'Auto Story: OFF',
+        message: s.isAutoDialogue ? 'Dialog cerita berjalan otomatis.' : 'Dialog manual diaktifkan.',
+        icon: '📖',
+        duration: 2000,
+        timestamp: Date.now()
+      });
+      setTimeout(() => get().removeNotification(id), 2000);
+    }),
+    hotbar: ['health_potion', null, null, null, null, null, null, null],
+    assignToHotbar: (slotIndex, itemId) => set((s) => {
+      if (slotIndex >= 0 && slotIndex < 8) {
+        s.hotbar[slotIndex] = itemId;
+      }
+    }),
+    useHotbarItem: (slotIndex) => {
+      const state = get();
+      const itemId = state.hotbar[slotIndex];
+      if (!itemId) return;
+
+      const item = state.inventory.items.find(i => i.id === itemId);
+      if (!item || item.quantity <= 0) {
+        set((s) => {
+          s.notifications.push({
+            id: `notif_${Date.now()}`,
+            type: 'error',
+            title: 'Item Habis',
+            message: `Kamu tidak memiliki item tersebut!`,
+            icon: '🎒',
+            duration: 2000,
+            timestamp: Date.now()
+          });
+        });
+        return;
+      }
+
+      if (item.type === 'consumable') {
+        if (itemId === 'health_potion') {
+          const healAmount = 50;
+          set((s) => {
+            s.player.stats.hp = Math.min(s.player.stats.maxHp, s.player.stats.hp + healAmount);
+            const pot = s.inventory.items.find(i => i.id === itemId);
+            if (pot) {
+              pot.quantity -= 1;
+              if (pot.quantity <= 0) {
+                s.inventory.items = s.inventory.items.filter(i => i.id !== itemId);
+              }
+            }
+            s.notifications.push({
+              id: `notif_${Date.now()}`,
+              type: 'success',
+              title: 'Meminum Ramuan',
+              message: `HP pulih sebanyak ${healAmount} poin!`,
+              icon: '🧪',
+              duration: 2000,
+              timestamp: Date.now()
+            });
+          });
+        }
+      } else {
+        // Weapon/Armor/Accessory - equip it
+        get().equipItem(itemId);
+        set((s) => {
+          s.notifications.push({
+            id: `notif_${Date.now()}`,
+            type: 'success',
+            title: 'Peralatan Diganti',
+            message: `Berhasil mengenakan ${item.name}!`,
+            icon: item.type === 'weapon' ? '⚔️' : '🛡️',
+            duration: 2000,
+            timestamp: Date.now()
+          });
+        });
+      }
+    },
+    furthestClearedZone: 'village',
+    recallToTown: () => set((s) => {
+      if (s.currentZone === 'village') return;
+      s.currentZone = 'village';
+      s.hasRecallPortal = true;
+      s.notifications.push({
+        id: `notif_${Date.now()}`,
+        type: 'lore',
+        title: 'Recall Portal',
+        message: 'Mantra dilafalkan, membuka gerbang kembali ke desa.',
+        icon: '🌀',
+        duration: 3000,
+        timestamp: Date.now()
+      });
+    }),
+    returnToBattlefield: () => set((s) => {
+      if (s.currentZone !== 'village') return;
+      const dest = s.furthestClearedZone || 'village';
+      s.currentZone = dest;
+      s.hasRecallPortal = false;
+      s.notifications.push({
+        id: `notif_${Date.now()}`,
+        type: 'lore',
+        title: 'Return Rift',
+        message: `Kembali ke arena pertempuran terdalam: ${dest.toUpperCase()}!`,
+        icon: '🔱',
+        duration: 3000,
+        timestamp: Date.now()
+      });
+    }),
+    hasRecallPortal: false,
 
     // UI state
     isInventoryOpen: false,
@@ -533,6 +681,11 @@ export const useGameStore = create<GameStore>()(
         unlockedSkills: state.unlockedSkills,
         playtime: state.playtime,
         currentZone: state.currentZone,
+        isAutoPlay: state.isAutoPlay,
+        isAutoDialogue: state.isAutoDialogue,
+        hotbar: state.hotbar,
+        furthestClearedZone: state.furthestClearedZone,
+        hasRecallPortal: state.hasRecallPortal,
         timestamp: Date.now(),
         slot,
       };
@@ -565,6 +718,11 @@ export const useGameStore = create<GameStore>()(
         s.unlockedSkills = data.unlockedSkills ?? s.unlockedSkills;
         s.playtime = data.playtime;
         s.currentZone = data.currentZone || 'village';
+        s.isAutoPlay = data.isAutoPlay ?? false;
+        s.isAutoDialogue = data.isAutoDialogue ?? false;
+        s.hotbar = data.hotbar ?? ['health_potion', null, null, null, null, null, null, null];
+        s.furthestClearedZone = data.furthestClearedZone || 'village';
+        s.hasRecallPortal = data.hasRecallPortal ?? false;
         s.screen = 'game';
       });
     },

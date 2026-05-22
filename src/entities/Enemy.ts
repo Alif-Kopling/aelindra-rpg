@@ -39,7 +39,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private timeAccumulator = 0;
   private isStunned = false;
   private bleedTimer = 0;
+  private bleedTickAccumulator = 0;
   private attackWindup = 0;
+  private aiTimer: Phaser.Time.TimerEvent | null = null;
+  private stunTimerId: Phaser.Time.TimerEvent | null = null;
+  private bleedTimerId: Phaser.Time.TimerEvent | null = null;
 
   constructor(scene: Phaser.Scene, x: number, y: number, config: EnemyConfig) {
 
@@ -113,7 +117,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   }
 
   private startAI() {
-    this.scene.time.addEvent({
+    this.aiTimer = this.scene.time.addEvent({
       delay: 500 + Math.random() * 200,
       loop: true,
       callback: this.updateAIState,
@@ -157,12 +161,15 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   update(delta: number) {
     if (this.isDead) return;
 
+    this.timeAccumulator += delta;
+    this.bleedTickAccumulator += delta;
+
     // Handle Status Effects
     if (this.bleedTimer > 0) {
       this.bleedTimer -= delta;
-      if (this.timeAccumulator % 1000 < delta) { // Every 1s
-        this.takeDamage(5); // Bleed DoT
-        this.spawnDamageNumber(5, false);
+      if (this.bleedTickAccumulator >= 1000) {
+        this.bleedTickAccumulator -= 1000;
+        this.takeDamage(5);
       }
     }
 
@@ -171,8 +178,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.frameTimer += delta;
 
     if (this.isStunned) {
-      this.staggerTimer = 0; // Stun overrides stagger
-      // Visual feedback for stun: slightly blue/grey tint
+      this.staggerTimer = 0;
       this.setTint(0x8888ff);
       this.updateHpBar();
       return;
@@ -181,6 +187,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     if (this.staggerTimer > 0) {
       this.updateHpBar();
       return;
+    }
+
+    if (this.aiState === 'stagger') {
+      this.aiState = 'idle';
     }
 
     const body = this.body as Phaser.Physics.Arcade.Body;
@@ -462,6 +472,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.isDead = true;
     this.aiState = 'dead' as AIState;
 
+    if (this.aiTimer) { this.aiTimer.remove(); this.aiTimer = null; }
+
     const store = useGameStore.getState();
     store.gainExp(this.config.stats.exp);
     store.addGold(this.config.stats.gold);
@@ -523,8 +535,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
   applyBleed(duration: number) {
     this.bleedTimer = duration;
-    this.setTint(0xff00ff); // Purple tint for bleed
-    this.scene.time.delayedCall(duration, () => {
+    this.setTint(0xff00ff);
+    if (this.bleedTimerId) this.bleedTimerId.remove();
+    this.bleedTimerId = this.scene.time.delayedCall(duration, () => {
+      this.bleedTimerId = null;
       if (!this.isDead) this.clearTint();
     });
   }
@@ -532,9 +546,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   applyStun(duration: number) {
     this.isStunned = true;
     this.staggerTimer = 0;
-    this.scene.time.delayedCall(duration, () => {
+    if (this.stunTimerId) this.stunTimerId.remove();
+    this.stunTimerId = this.scene.time.delayedCall(duration, () => {
+      this.stunTimerId = null;
       this.isStunned = false;
-      this.clearTint();
+      if (!this.isDead) this.clearTint();
     });
   }
 
@@ -545,4 +561,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   getHP(): number { return this.hp; }
   getMaxHP(): number { return this.maxHp; }
   isAlive(): boolean { return !this.isDead; }
+
+  destroy(fromScene?: boolean) {
+    if (this.aiTimer) { this.aiTimer.remove(); this.aiTimer = null; }
+    if (this.stunTimerId) { this.stunTimerId.remove(); this.stunTimerId = null; }
+    if (this.bleedTimerId) { this.bleedTimerId.remove(); this.bleedTimerId = null; }
+    super.destroy(fromScene);
+  }
 }

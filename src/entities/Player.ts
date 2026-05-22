@@ -25,6 +25,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   private attackKey!: Phaser.Input.Pointer;
   private isDashing = false;
+  private autoCombatTimer = 0;
+  private autoPotionCooldown = 0;
+  private autoTarget: Phaser.Physics.Arcade.Sprite | null = null;
+  private hotbarKeys: Phaser.Input.Keyboard.Key[] = [];
   private dashCooldown = 0;
   private dashTimer = 0;
   private dashDirX = 1;
@@ -115,6 +119,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       F: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.F),
       Shift: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT),
     };
+    for (let i = 0; i < 8; i++) {
+      this.hotbarKeys.push(kbd.addKey(Phaser.Input.Keyboard.KeyCodes.ONE + i));
+    }
   }
 
   private createAnimations() {}
@@ -203,6 +210,19 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.staminaRegenTimer = 0;
     }
 
+    // Auto-potion: drink when HP < 30%
+    this.autoPotionCooldown = Math.max(0, this.autoPotionCooldown - delta);
+    if (store.isAutoPlay && stats.hp / stats.maxHp < 0.3 && this.autoPotionCooldown <= 0) {
+      const potionSlot = store.hotbar.indexOf('health_potion');
+      if (potionSlot >= 0) {
+        const pot = store.inventory.items.find(i => i.id === 'health_potion');
+        if (pot && pot.quantity > 0) {
+          store.useHotbarItem(potionSlot);
+          this.autoPotionCooldown = 2000;
+        }
+      }
+    }
+
     if (this.isParrying) {
       this.parryTimer -= delta;
       body.setVelocityX(0);
@@ -272,9 +292,28 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     // ── MOVEMENT ────────────────────────────────────────────────
     let vx = 0;
 
-    if (!this.isCharging && !this.isParrying) {
-      if (this.keys.A.isDown) { vx = -this.moveSpeed; this.facingRight = false; }
-      else if (this.keys.D.isDown) { vx = this.moveSpeed; this.facingRight = true; }
+    if (store.isAutoPlay && !this.isCharging && !this.isParrying && !this.isAttacking && this.attackCooldown <= 0) {
+      this.autoCombatTimer -= delta;
+      this.autoTarget = this.findNearestEnemy();
+      if (this.autoTarget) {
+        const dx = this.autoTarget.x - this.x;
+        const dist = Math.abs(dx);
+        this.facingRight = dx > 0;
+        if (dist > 60) {
+          vx = this.facingRight ? this.moveSpeed : -this.moveSpeed;
+          if (dist > 180 && this.dashCooldown <= 0 && !this.isDashing && stats.stamina >= this.getDashCost()) {
+            this.startDash(vx, store);
+          }
+        } else {
+          vx = 0;
+          this.performAutoAttack(store);
+        }
+      }
+    } else if (!store.isAutoPlay) {
+      if (!this.isCharging && !this.isParrying) {
+        if (this.keys.A.isDown) { vx = -this.moveSpeed; this.facingRight = false; }
+        else if (this.keys.D.isDown) { vx = this.moveSpeed; this.facingRight = true; }
+      }
     }
 
     body.setVelocityX(vx);
@@ -306,6 +345,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.performUltimate(store);
     }
 
+    // Hotbar keyboard shortcuts (1-8)
+    for (let i = 0; i < this.hotbarKeys.length; i++) {
+      if (Phaser.Input.Keyboard.JustDown(this.hotbarKeys[i])) {
+        store.useHotbarItem(i);
+      }
+    }
+
     if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
       this.checkInteraction(store);
     }
@@ -334,24 +380,25 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const isCustomTexture = ['player_sprite', 'player_attack1', 'player_attack2'].includes(this.texture.key);
 
     if (vx !== 0 && this.isOnGround) {
-      this.ultimateCharge = Math.min(100, this.ultimateCharge + 0.003 * delta);
       store.chargeUltimate(0.003 * delta);
     }
     this.ultimateCharge = store.player.ultimateCharge;
 
-    // Lock physics body size and offset to prevent clipping through platforms at all times (including attacks)
-    const targetBodyW = 40;
-    const targetBodyH = 72;
-
-    const texInfo: Record<string, { sourceW: number; centerX: number; centerY: number }> = {
-      player_sprite: { sourceW: 500, centerX: 279, centerY: 260 },
-      player_attack1: { sourceW: 677, centerX: 236, centerY: 207 },
-      player_attack2: { sourceW: 677, centerX: 275, centerY: 183 }
-    };
+    // Standardized body size to prevent jitter and clipping
+    const targetBodyW = 32;
+    const targetBodyH = 68;
 
     if (isCustomTexture) {
-      const info = texInfo[this.texture.key] || { sourceW: 500, centerX: 279, centerY: 260 };
+      const texInfo: Record<string, { sourceW: number; centerX: number; centerY: number }> = {
+        player_sprite: { sourceW: 500, centerX: 279, centerY: 260 },
+        player_attack1: { sourceW: 677, centerX: 236, centerY: 207 },
+        player_attack2: { sourceW: 677, centerX: 275, centerY: 183 }
+      };
+
+      const info = texInfo[this.texture.key] || texInfo.player_sprite;
       const isFlipped = this.flipX;
+      
+      // Calculate offset based on texture's internal center point
       const visualCenterX = isFlipped 
         ? (info.sourceW - info.centerX) * this.scaleX 
         : info.centerX * this.scaleX;
@@ -363,14 +410,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       body.setOffset(targetOffsetX / this.scaleX, targetOffsetY / this.scaleY);
     } else {
       // Fallback for procedural texture
-      const baseW = this.width * this.cachedBaseScaleX;
-      const defaultOffset = 12;
-      const flippedOffset = baseW - targetBodyW - defaultOffset;
-      const targetOffsetX = (!this.facingRight) ? defaultOffset : flippedOffset;
-      const targetOffsetY = 20;
-
-      body.setSize(targetBodyW / this.cachedBaseScaleX, targetBodyH / this.cachedBaseScaleY);
-      body.setOffset(targetOffsetX / this.cachedBaseScaleX, targetOffsetY / this.cachedBaseScaleY);
+      body.setSize(20, 36);
+      body.setOffset(6, 10);
     }
 
     if (DEBUG_HITBOXES) {
@@ -1138,6 +1179,47 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     // Gold & Amber particle storms radiating outwards
     this.spawnParticles(this.x, this.y, 0xffd700, 25, 2.2);
     this.spawnParticles(this.x, this.y, 0xff6600, 20, 1.6);
+  }
+
+  private findNearestEnemy(): Phaser.Physics.Arcade.Sprite | null {
+    const scene = this.scene as any;
+    let nearest: Phaser.Physics.Arcade.Sprite | null = null;
+    let nearestDist = Infinity;
+    if (scene.enemyGroup) {
+      scene.enemyGroup.getChildren().forEach((e: Phaser.Physics.Arcade.Sprite) => {
+        if (!e.active) return;
+        const d = Phaser.Math.Distance.Between(this.x, this.y, e.x, e.y);
+        if (d < nearestDist) {
+          nearestDist = d;
+          nearest = e;
+        }
+      });
+    }
+    if (scene.bossGroup) {
+      scene.bossGroup.getChildren().forEach((b: Phaser.Physics.Arcade.Sprite) => {
+        if (!b.active) return;
+        const d = Phaser.Math.Distance.Between(this.x, this.y, b.x, b.y);
+        if (d < nearestDist) {
+          nearestDist = d;
+          nearest = b;
+        }
+      });
+    }
+    return nearest;
+  }
+
+  private performAutoAttack(store: ReturnType<typeof useGameStore.getState>) {
+    if (this.attackCooldown > 0 || this.isAttacking || this.isCharging || this.isParrying) return;
+    if (store.player.stats.stamina < 8) return;
+
+    const isCharged = this.autoCombatTimer <= -300;
+    if (isCharged && store.player.stats.stamina >= 20) {
+      this.performChargedAttack(store);
+      this.autoCombatTimer = 0;
+    } else {
+      this.performAttack(store);
+      this.autoCombatTimer = 0;
+    }
   }
 
   takeDamage(amount: number) {

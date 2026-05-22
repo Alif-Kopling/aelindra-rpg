@@ -34,16 +34,26 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   private timeAccumulator = 0;
   private arenaLeft = 0;
   private arenaRight = 1920;
+  private activeTimers: Phaser.Time.TimerEvent[] = [];
 
   private static spriteKeyForBoss(id: string): string {
     const map: Record<string, string> = {
       blind_king: 'boss_blind_king_sprite',
       ashen_knight: 'boss_ashen_knight_sprite',
+      saint_of_rot: 'boss_saint_of_rot_sprite',
+      fallen_guardian: 'boss_fallen_guardian_sprite',
     };
     return map[id] || 'boss_blind_king_sprite';
   }
 
   private getSpriteKey(): string {
+    if (
+      this.config.id === 'blind_king' &&
+      this.phase >= 3 &&
+      this.scene.textures.exists('boss_blind_king_phase3_sprite')
+    ) {
+      return 'boss_blind_king_phase3_sprite';
+    }
     return Boss.spriteKeyForBoss(this.config.id);
   }
 
@@ -292,21 +302,25 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     const count = duration / interval;
 
     for (let i = 0; i < count; i++) {
-      scene.time.delayedCall(i * interval, () => {
+      const t = scene.time.delayedCall(i * interval, () => {
+        if (this.isDead) return;
         const x = Phaser.Math.Between(50, this.arenaRight - 50);
         const sword = scene.physics.add.sprite(x, -50, 'sword_rain');
         sword.setDisplaySize(24, 48);
         sword.setDepth(15);
-        sword.setRotation(Math.PI); // Point down
-        sword.body.velocity.y = 600;
+        sword.setRotation(Math.PI);
+        (sword.body as Phaser.Physics.Arcade.Body).velocity.y = 600;
         
-        scene.physics.add.overlap(sword, this.target!, () => {
-          scene.events.emit('boss-projectile-hit', { damage: this.config.attack * 0.6 });
-          sword.destroy();
-        });
+        if (this.target && this.target.active) {
+          scene.physics.add.overlap(sword, this.target, () => {
+            scene.events.emit('boss-projectile-hit', { damage: this.config.attack * 0.6 });
+            if (sword.active) sword.destroy();
+          });
+        }
         
-        scene.time.delayedCall(1000, () => sword.destroy());
+        scene.time.delayedCall(1000, () => { if (sword.active) sword.destroy(); });
       });
+      this.activeTimers.push(t);
     }
   }
 
@@ -315,7 +329,8 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     this.setTint(0xcccccc);
     
     for (let i = 0; i < 15; i++) {
-      scene.time.delayedCall(i * 80, () => {
+      const t = scene.time.delayedCall(i * 80, () => {
+        if (this.isDead) return;
         const angle = Phaser.Math.DegToRad(Phaser.Math.Between(0, 360));
         const proj = scene.physics.add.sprite(this.x, this.y, 'pixel');
         proj.setTint(0xffffff);
@@ -323,18 +338,22 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
         proj.setDepth(15);
         
         const speed = 350;
-        proj.body.velocity.x = Math.cos(angle) * speed;
-        proj.body.velocity.y = Math.sin(angle) * speed;
+        (proj.body as Phaser.Physics.Arcade.Body).velocity.x = Math.cos(angle) * speed;
+        (proj.body as Phaser.Physics.Arcade.Body).velocity.y = Math.sin(angle) * speed;
         
-        scene.time.delayedCall(1500, () => proj.destroy());
-        scene.physics.add.overlap(proj, this.target!, () => {
-          scene.events.emit('boss-projectile-hit', { damage: this.config.attack * 0.45 });
-          proj.destroy();
-        });
+        scene.time.delayedCall(1500, () => { if (proj.active) proj.destroy(); });
+        if (this.target && this.target.active) {
+          scene.physics.add.overlap(proj, this.target, () => {
+            scene.events.emit('boss-projectile-hit', { damage: this.config.attack * 0.45 });
+            if (proj.active) proj.destroy();
+          });
+        }
       });
+      this.activeTimers.push(t);
     }
 
-    scene.time.delayedCall(1200, () => this.clearTint());
+    const clearTintTimer = scene.time.delayedCall(1200, () => { if (!this.isDead) this.clearTint(); });
+    this.activeTimers.push(clearTintTimer);
   }
 
   private enrageAI(_delta: number) {
@@ -361,7 +380,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     const scene = this.scene;
     
     for (let i = 0; i < 3; i++) {
-      scene.time.delayedCall(i * 200, () => {
+      const t = scene.time.delayedCall(i * 200, () => {
         const wave = scene.add.graphics();
         wave.lineStyle(4, 0x4b0082, 1);
         wave.beginPath();
@@ -370,23 +389,27 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
         wave.strokePath();
         wave.setDepth(20);
 
+        let hit = false;
         scene.tweens.add({
           targets: wave,
           x: wave.x + dir * 500,
           alpha: 0,
           duration: 1000,
           onUpdate: () => {
-            if (this.target) {
+            if (hit || !wave.active) return;
+            if (this.target && this.target.active) {
               const dist = Phaser.Math.Distance.Between(wave.x, wave.y, this.target.x, this.target.y);
               if (dist < 40) {
+                hit = true;
                 scene.events.emit('boss-attack', { boss: this, damage: this.config.attack * 1.2, type: 'wave' });
                 wave.destroy();
               }
             }
           },
-          onComplete: () => wave.destroy()
+          onComplete: () => { if (wave.active) wave.destroy(); }
         });
       });
+      this.activeTimers.push(t);
     }
   }
 
@@ -498,11 +521,12 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
         delay: 16,
         loop: true,
         callback: () => {
+          if (!proj.active) { timer.remove(); return; }
           proj.x += vx * 0.016;
           proj.y += vy * 0.016;
           traveled += speed * 0.016;
 
-          if (this.target) {
+          if (this.target && this.target.active) {
             const dist = Phaser.Math.Distance.Between(proj.x, proj.y, this.target.x, this.target.y);
             if (dist < 30) {
               this.scene.events.emit('boss-projectile-hit', { damage: this.config.attack * 0.8 });
@@ -518,6 +542,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
           }
         },
       });
+      this.activeTimers.push(timer);
     }
   }
 
@@ -530,17 +555,20 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     body.setVelocityX(0);
     this.setTint(0xff8800);
 
-    this.scene.time.delayedCall(500, () => {
+    const t1 = this.scene.time.delayedCall(500, () => {
       if (this.isDead) return;
       this.clearTint();
       body.setVelocityX(dx > 0 ? 600 : -600);
       this.scene.cameras.main.shake(200, 0.01);
 
-      this.scene.time.delayedCall(400, () => {
+      const t2 = this.scene.time.delayedCall(400, () => {
+        if (this.isDead) return;
         body.setVelocityX(0);
         this.scene.events.emit('boss-attack', { boss: this, damage: this.config.attack * 2, type: 'charge' });
       });
+      this.activeTimers.push(t2);
     });
+    this.activeTimers.push(t1);
   }
 
   private darkExplosion() {
@@ -716,14 +744,17 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   private die() {
     this.isDead = true;
     const body = this.body as Phaser.Physics.Arcade.Body;
-    body.setVelocityX(0);
-    body.enable = false;
+    if (body) {
+      body.setVelocityX(0);
+      body.enable = false;
+    }
 
     this.scene.cameras.main.shake(1000, 0.02);
     this.scene.cameras.main.flash(500, 255, 100, 0);
 
     for (let i = 0; i < 8; i++) {
-      this.scene.time.delayedCall(i * 150, () => {
+      const t = this.scene.time.delayedCall(i * 150, () => {
+        if (!this.scene) return;
         const ex = this.scene.add.graphics();
         ex.fillStyle(0x8b0000, 0.8);
         ex.fillCircle(0, 0, 30);
@@ -744,6 +775,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
           onComplete: () => ex.destroy(),
         });
       });
+      this.activeTimers.push(t);
     }
 
     this.scene.tweens.add({
@@ -831,4 +863,15 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   getMaxHP(): number { return this.maxHp; }
   isAlive(): boolean { return !this.isDead; }
   getPhase(): number { return this.phase; }
+
+  destroy(fromScene?: boolean) {
+    this.isDead = true;
+    this.activeTimers.forEach(t => t.remove());
+    this.activeTimers = [];
+    if (this.projectiles) {
+      this.projectiles.clear(true, true);
+    }
+    this.scene.tweens.killTweensOf(this);
+    super.destroy(fromScene);
+  }
 }

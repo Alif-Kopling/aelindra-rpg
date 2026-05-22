@@ -8,6 +8,7 @@ const NOTIF_STYLES: Record<Notification['type'], { border: string; glow: string;
   warning: { border: 'rgba(255,165,0,0.6)',   glow: 'rgba(255,165,0,0.2)',   bg: 'rgba(30,15,0,0.9)' },
   danger:  { border: 'rgba(220,20,60,0.6)',   glow: 'rgba(220,20,60,0.2)',   bg: 'rgba(30,0,0,0.9)' },
   lore:    { border: 'rgba(184,134,11,0.6)',  glow: 'rgba(184,134,11,0.2)',  bg: 'rgba(20,12,0,0.9)' },
+  error:   { border: 'rgba(255,0,0,0.6)',     glow: 'rgba(255,0,0,0.2)',     bg: 'rgba(30,0,0,0.9)' },
 };
 
 const Notifications: React.FC = () => {
@@ -26,7 +27,7 @@ const Notifications: React.FC = () => {
 };
 
 const NotifCard: React.FC<{ notif: Notification }> = ({ notif }) => {
-  const style = NOTIF_STYLES[notif.type];
+  const style = NOTIF_STYLES[notif.type] ?? NOTIF_STYLES.info;
 
   return (
     <div

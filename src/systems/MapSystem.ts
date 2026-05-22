@@ -49,8 +49,8 @@ export class MapSystem {
       castle: 'bg_castle',
       catacombs: 'bg_catacombs',
       battlefield: 'bg_battlefield',
-      cathedral: 'bg_castle',
-      mountain: 'bg_forest',
+      cathedral: 'bg_cathedral',
+      mountain: 'bg_mountain',
     };
 
     const key = bgKeys[theme];
@@ -129,8 +129,8 @@ export class MapSystem {
       castle: 'bg_castle',
       catacombs: 'bg_catacombs',
       battlefield: 'bg_battlefield',
-      cathedral: 'bg_castle',
-      mountain: 'bg_forest',
+      cathedral: 'bg_cathedral',
+      mountain: 'bg_mountain',
     };
     const floorClr = floorColors[theme];
 

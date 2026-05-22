@@ -13,7 +13,11 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('enemy_beast_sprite', 'assets/images/beast_enemy.png');
     this.load.image('enemy_corrupted_sprite', 'assets/images/corrupted_enemy.png');
     this.load.image('boss_blind_king_sprite', 'assets/images/blind_king_boss.png');
+    this.load.image('boss_blind_king_phase3_sprite', 'assets/images/blind-boss-phase-3.png');
     this.load.image('boss_ashen_knight_sprite', 'assets/images/boss_ashen_knight.png');
+    this.load.image('boss_saint_of_rot_sprite', 'assets/images/saint_of_rot_boss.png');
+    this.load.image('boss_fallen_guardian_sprite', 'assets/images/fallen_guardian_boss.png');
+    this.load.image('sword_rain', 'assets/images/extract-only-the-sword-from-the-image-large-dark-f-removebg-preview.png');
     this.load.image('anim_boss_vs_mc', 'assets/images/animation/pict-animasi-boss-vs-mc.png');
 
     this.load.image('scene_intro_1', 'assets/images/animation/scene1-before-tragedy.jpeg');
@@ -29,6 +33,8 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('bg_castle', 'assets/images/castle-bg.jpeg');
     this.load.image('bg_catacombs', 'assets/images/cave-bg.jpeg');
     this.load.image('bg_battlefield', 'assets/images/boss-fight-bg.jpeg');
+    this.load.image('bg_cathedral', 'assets/images/cathedral-bg.png');
+    this.load.image('bg_mountain', 'assets/images/mountain-bg.png');
     this.load.image('bg_ending', 'assets/images/ending-bg-dialog.jpeg');
 
     // Load NPC sprites
@@ -46,6 +52,7 @@ export class PreloadScene extends Phaser.Scene {
     this.load.audio('sfx_undead', 'assets/audio/undead-monster-sound.mp3');
     this.load.audio('sfx_footstep', 'assets/audio/footstaps.mp3');
     this.load.audio('sfx_dialog', 'assets/audio/dialog-sound.mp3');
+    this.load.audio('boss_roar', 'assets/audio/Boss-Roar-sound.mp3');
   }
 
   create() {

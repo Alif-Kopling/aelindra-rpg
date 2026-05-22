@@ -53,7 +53,6 @@ interface ZoneData {
   name: string;
   enemies: EnemyConfig[];
   npcs: NPCConfig[];
-  boss?: BossConfig;
   music?: string;
   nextZone?: { x: number; y: number; zone: string };
 }
@@ -78,8 +77,11 @@ export class GameplayScene extends Phaser.Scene {
     targetZone: string;
     label: Phaser.GameObjects.Text;
     gfx: Phaser.GameObjects.Graphics;
+    orbs: Phaser.GameObjects.Graphics[];
   }[] = [];
   private enemyGroup!: Phaser.Physics.Arcade.Group;
+  private bossGroup!: Phaser.Physics.Arcade.Group;
+  private ambientTimer: Phaser.Time.TimerEvent | null = null;
   private spawnTimer = 0;
   private maxEnemies = 5;
   private playtimeTimer = 0;
@@ -99,6 +101,20 @@ export class GameplayScene extends Phaser.Scene {
     super({ key: 'GameplayScene' });
   }
 
+  shutdown() {
+    this.events.off('player-interact');
+    this.events.off('boss-summon-minion');
+    this.events.off('boss-attack');
+    this.events.off('boss-projectile-hit');
+    this.events.off('boss-died');
+    this.enemies.forEach(e => e.destroy());
+    this.enemies = [];
+    this.npcs.forEach(n => n.destroy());
+    this.npcs = [];
+    if (this.boss) { this.boss.destroy(); this.boss = null; }
+    if (this.ambientTimer) { this.ambientTimer.remove(); this.ambientTimer = null; }
+  }
+
   create() {
     try {
       const store = useGameStore.getState();
@@ -106,6 +122,7 @@ export class GameplayScene extends Phaser.Scene {
       this.currentZone = zone;
 
       this.enemyGroup = this.physics.add.group();
+      this.bossGroup = this.physics.add.group();
 
       const zoneData = this.getZoneData(zone);
       if (!zoneData) {
@@ -151,6 +168,7 @@ export class GameplayScene extends Phaser.Scene {
       p.zone.destroy();
       p.label.destroy();
       p.gfx.destroy();
+      p.orbs.forEach(o => o.destroy());
     });
     this.zonePortals = [];
 
@@ -158,6 +176,10 @@ export class GameplayScene extends Phaser.Scene {
       this.boss.destroy();
       this.boss = null;
     }
+    if (this.bossGroup) {
+      this.bossGroup.clear(true, true);
+    }
+    this.createAmbientFX(zoneData.theme);
 
     if (this.map) {
       this.map.destroy();
@@ -217,33 +239,6 @@ export class GameplayScene extends Phaser.Scene {
       message: this.getZoneDescription(this.currentZone),
       icon: this.getZoneIcon(this.currentZone),
       duration: 4000,
-    });
-  }
-
-  private playIntroSequence() {
-    const s = useGameStore.getState();
-    s.setStoryFlag('intro_seen', true);
-    s.openDialogue(CASTLE_DIALOGUE_INTRO as any, () => {
-      this.time.delayedCall(500, () => {
-        useGameStore.getState().openDialogue(BETRAYAL_SCENE as any, () => {
-          this.time.delayedCall(500, () => {
-            useGameStore.getState().openDialogue(ESCAPE_NARRATION as any, () => {
-              this.time.delayedCall(500, () => {
-                useGameStore.getState().openDialogue(CHAPTER_1 as any, () => {
-                  useGameStore.getState().addNotification({
-                    type: 'lore',
-                    title: 'Chapter I',
-                    message: 'The Forsaken Knight — Your journey begins.',
-                    icon: '📖',
-                    duration: 5000,
-                  });
-                  this.time.delayedCall(1000, () => this.advanceToNextRound());
-                });
-              });
-            });
-          });
-        });
-      });
     });
   }
 
@@ -323,6 +318,44 @@ export class GameplayScene extends Phaser.Scene {
           this.enemyGroup.remove(enemy);
           store.updateQuestObjective('defend_village', 'kill_undead', 1);
           this.onEnemyKilled();
+        }
+      }
+    );
+
+    // Overlap fisik antara hitbox serangan pemain dengan grup Boss
+    this.physics.add.overlap(
+      this.player.getAttackHitbox(),
+      this.bossGroup,
+      (_hitbox, _boss) => {
+        if (!this.player.isCurrentlyAttacking()) return;
+        const boss = _boss as Boss;
+        const bossId = boss.getId();
+
+        // Pastikan boss hanya terkena hit SATU kali per ayunan pedang
+        if (this.player.hasHit(bossId)) return;
+
+        const store = useGameStore.getState();
+        const isCharged = this.player.isAttackCharged();
+        const comboCount = this.player.getComboCount();
+        const critChance = store.unlockedSkills.includes('blood_pact') ? 0.35 : 0.25;
+        const isCritChance = Math.random() < critChance;
+        const isCritical = isCharged || (comboCount >= 4) || isCritChance;
+
+        const dmg = isCritical 
+          ? Math.round(Phaser.Math.Between(100, 180) * (store.unlockedSkills.includes('blood_pact') ? 1.25 : 1))
+          : Math.round((45 + Math.min(10, comboCount)) * (store.unlockedSkills.includes('blade_mastery') ? 1.2 : 1));
+        
+        // Spawn partikel cipratan darah jika serangan kritikal
+        if (isCritical) {
+          this.spawnBloodSpray(boss.x, boss.y);
+        }
+
+        const killed = boss.takeDamage(dmg);
+        this.player.registerHit(bossId);
+        this.triggerHitStop(isCritical ? 120 : 80);
+
+        if (killed) {
+          this.bossGroup.remove(boss);
         }
       }
     );
@@ -477,7 +510,10 @@ export class GameplayScene extends Phaser.Scene {
       }
     }
 
-    if (this.roundEnemyTotal === 0) this.roundEnemyTotal = 1;
+    if (this.roundEnemyTotal === 0) {
+      this.roundActive = false;
+      this.time.delayedCall(300, () => this.onRoundCleared());
+    }
   }
 
   private onEnemyKilled() {
@@ -532,30 +568,8 @@ export class GameplayScene extends Phaser.Scene {
 
     this.boss = new Boss(this, bx, by, config);
     this.boss.setTarget(this.player);
+    this.bossGroup.add(this.boss);
     this.physics.add.collider(this.boss, this.platformGroup);
-
-    this.physics.add.overlap(this.player, this.boss, () => {});
-
-    this.physics.add.overlap(
-      this.player.getAttackHitbox(),
-      this.boss,
-      () => {
-        if (!this.player.isCurrentlyAttacking() || !this.boss) return;
-        const bossId = this.boss.getId();
-
-        // Ensure boss is only hit ONCE per sword swing
-        if (this.player.hasHit(bossId)) return;
-
-        const store = useGameStore.getState();
-        const baseDmg = store.player.stats.attack + Math.floor(Math.random() * 12);
-        const dmg = this.player.isAttackCharged()
-          ? Math.floor(baseDmg * 2.5 * (store.unlockedSkills.includes('blade_mastery') ? 1.1 : 1))
-          : Math.floor(baseDmg * (store.unlockedSkills.includes('blade_mastery') ? 1.2 : 1));
-        
-        this.boss.takeDamage(dmg);
-        this.player.registerHit(bossId);
-      }
-    );
   }
 
   private createPortal(x: number, y: number, targetZone: string, TILE: number) {
@@ -574,6 +588,7 @@ export class GameplayScene extends Phaser.Scene {
     label.setDepth(30);
     label.setOrigin(0.5);
 
+    // Portal visual layers
     const portalGfx = this.add.graphics();
     portalGfx.lineStyle(3, 0xffd700, 1.0);
     portalGfx.strokeCircle(portalX, portalY, TILE * 1.2);
@@ -586,12 +601,35 @@ export class GameplayScene extends Phaser.Scene {
       duration: 900,
     });
 
+    // Orbiting particles around portal
+    const orbs: Phaser.GameObjects.Graphics[] = [];
+    for (let i = 0; i < 4; i++) {
+      const orb = this.add.graphics();
+      orb.fillStyle(0xffd700, 0.6);
+      orb.fillCircle(0, 0, 3);
+      orb.setPosition(portalX, portalY);
+      orb.setDepth(9);
+      const angle = (i / 4) * Math.PI * 2;
+      const radius = TILE * 1.6;
+      this.tweens.add({
+        targets: orb,
+        x: portalX + Math.cos(angle) * radius,
+        y: portalY + Math.sin(angle) * radius,
+        duration: 800,
+        yoyo: true,
+        repeat: -1,
+        delay: i * 200,
+        ease: 'Sine.easeInOut',
+      });
+      orbs.push(orb);
+    }
+
     this.physics.add.overlap(this.player, portal as any, () => {
       if (this.transitioningZone || useGameStore.getState().dialogue.isOpen) return;
       this.transitionToZone(targetZone);
     });
 
-    this.zonePortals.push({ zone: portal, targetZone, label, gfx: portalGfx });
+    this.zonePortals.push({ zone: portal, targetZone, label, gfx: portalGfx, orbs });
   }
 
   private transitionToZone(zoneId: string) {
@@ -603,6 +641,7 @@ export class GameplayScene extends Phaser.Scene {
       p.zone.destroy();
       p.label.destroy();
       p.gfx.destroy();
+      p.orbs.forEach(o => o.destroy());
     });
     this.zonePortals = [];
 
@@ -681,9 +720,6 @@ export class GameplayScene extends Phaser.Scene {
     });
 
     this.events.on('boss-died', (data: { bossId: string }) => {
-      if (this.boss) {
-        this.boss.destroy();
-      }
       this.boss = null;
       this.roundEnemyKilled = 1;
       const store = useGameStore.getState();
@@ -732,6 +768,12 @@ export class GameplayScene extends Phaser.Scene {
 
   update(time: number, delta: number) {
     const store = useGameStore.getState();
+
+    // Detect zone changes from store (triggered by recall/return)
+    if (store.currentZone !== this.currentZone && !this.transitioningZone) {
+      this.transitionToZone(store.currentZone);
+      return;
+    }
 
     if (store.dialogue.isOpen || store.isPaused || this.isHitStopping) return;
 
@@ -859,16 +901,6 @@ export class GameplayScene extends Phaser.Scene {
             accentColor: 0xda70d6,
           }
         ],
-        boss: {
-          id: 'blind_king',
-          name: 'The Blind King',
-          title: 'Former Ruler, Now Hollow',
-          maxHp: 500,
-          phases: 2,
-          attack: 35,
-          speed: 120,
-          scale: 2.5,
-        },
         nextZone: { x: 50, y: 20, zone: 'catacombs' },
       },
       catacombs: {
@@ -911,15 +943,6 @@ export class GameplayScene extends Phaser.Scene {
             accentColor: 0xecf0f1,
           },
         ],
-        boss: {
-          id: 'saint_of_rot',
-          name: 'Saint of Rot',
-          title: 'The Hollow Vessel of Prayer',
-          maxHp: 1400,
-          phases: 3,
-          attack: 48,
-          speed: 120,
-        },
         nextZone: { x: 50, y: 20, zone: 'mountain' },
       },
       mountain: {
@@ -948,15 +971,6 @@ export class GameplayScene extends Phaser.Scene {
             accentColor: 0xecf0f1,
           },
         ],
-        boss: {
-          id: 'fallen_guardian',
-          name: 'Fallen Guardian',
-          title: 'Last Keeper of the Oath',
-          maxHp: 1600,
-          phases: 3,
-          attack: 52,
-          speed: 130,
-        },
         nextZone: { x: 50, y: 20, zone: 'battlefield' },
       },
       battlefield: {
@@ -972,15 +986,6 @@ export class GameplayScene extends Phaser.Scene {
           },
         ],
         npcs: [],
-        boss: {
-          id: 'ashen_knight',
-          name: 'Ashen Knight',
-          title: 'Once a Guardian, Now Dust',
-          maxHp: 500,
-          phases: 2,
-          attack: 40,
-          speed: 150,
-        },
         nextZone: { x: 50, y: 20, zone: 'village' },
       },
     };
@@ -1169,5 +1174,72 @@ export class GameplayScene extends Phaser.Scene {
       mountain: '🏔️',
     };
     return icons[zoneId] || '🗺️';
+  }
+
+  private playIntroSequence() {
+    const store = useGameStore.getState();
+    store.setStoryFlag('intro_seen', true);
+    store.openDialogue(VILLAGE_ENTRY, () => {
+      this.advanceToNextRound();
+    });
+  }
+
+  spawnBloodSpray(x: number, y: number) {
+    const count = 12;
+    for (let i = 0; i < count; i++) {
+      const px = x + Phaser.Math.Between(-10, 10);
+      const py = y + Phaser.Math.Between(-30, 10);
+      const rect = this.add.rectangle(px, py, 4, 4, 0x8b0000);
+      this.physics.add.existing(rect);
+      const body = rect.body as Phaser.Physics.Arcade.Body;
+      body.setVelocity(Phaser.Math.Between(-150, 150), Phaser.Math.Between(-250, -50));
+      body.setGravityY(400);
+      body.setDrag(50);
+      
+      this.time.delayedCall(Phaser.Math.Between(500, 800), () => {
+        rect.destroy();
+      });
+    }
+  }
+
+  private createAmbientFX(theme: ZoneTheme) {
+    if (this.ambientTimer) {
+      this.ambientTimer.destroy();
+      this.ambientTimer = null;
+    }
+
+    this.ambientTimer = this.time.addEvent({
+      delay: 350,
+      callback: () => {
+        const cam = this.cameras.main;
+        if (!cam) return;
+        
+        const spawnCount = theme === 'mountain' || theme === 'cathedral' ? 3 : 1;
+        
+        for (let i = 0; i < spawnCount; i++) {
+          const rx = cam.scrollX + Phaser.Math.Between(0, cam.width);
+          
+          if (theme === 'mountain') {
+            const ry = cam.scrollY - 10;
+            const snow = this.add.rectangle(rx, ry, 3, 3, 0xffffff, 0.8);
+            this.physics.add.existing(snow);
+            const b = snow.body as Phaser.Physics.Arcade.Body;
+            b.allowGravity = false;
+            b.setVelocity(Phaser.Math.Between(-80, -30), Phaser.Math.Between(50, 100));
+            this.time.delayedCall(4000, () => snow.destroy());
+          } else if (theme === 'cathedral') {
+            const ry = cam.scrollY + cam.height + 10;
+            const isOrange = Math.random() < 0.35;
+            const ash = this.add.rectangle(rx, ry, 3, 3, isOrange ? 0xff4500 : 0x555555, 0.6);
+            this.physics.add.existing(ash);
+            const b = ash.body as Phaser.Physics.Arcade.Body;
+            b.allowGravity = false;
+            b.setVelocity(Phaser.Math.Between(10, 40), Phaser.Math.Between(-30, -70));
+            this.time.delayedCall(6000, () => ash.destroy());
+          }
+        }
+      },
+      loop: true
+    });
   }
 }

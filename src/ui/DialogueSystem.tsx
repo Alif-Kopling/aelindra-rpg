@@ -11,6 +11,8 @@ const PORTRAIT_COLORS: Record<string, { bg: string; border: string; emoji: strin
   boy:        { bg: '#1a2a10', border: '#32cd32', emoji: '🌟', img: '/assets/images/npc-villages-boy.png' },
   blind_king: { bg: '#1a1028', border: '#9b59b6', emoji: '♔', img: '/assets/images/blind_king_boss.png' },
   ashen_knight:{ bg: '#141820', border: '#7f8c8d', emoji: '💀', img: '/assets/images/boss_ashen_knight.png' },
+  saint_of_rot: { bg: '#0f1a0a', border: '#4a7c3f', emoji: '☠', img: '/assets/images/saint_of_rot_boss.png' },
+  fallen_guardian: { bg: '#0d1820', border: '#6eb5d4', emoji: '🛡', img: '/assets/images/fallen_guardian_boss.png' },
   default:    { bg: '#0a0a14', border: '#b8860b', emoji: '👤' },
 };
 
@@ -28,81 +30,71 @@ let blipAudio: HTMLAudioElement | null = null;
 const playBlip = () => {
   if (!blipAudio) {
     blipAudio = new Audio('/assets/audio/dialog-sound.mp3');
-    blipAudio.volume = 0.25;
+    blipAudio.volume = 0.15;
   }
   blipAudio.currentTime = 0;
   blipAudio.play().catch(() => {});
 };
 
 const DialogueSystem: React.FC = () => {
-  const { dialogue, advanceDialogue, closeDialogue } = useGameStore();
+  const { dialogue, advanceDialogue, closeDialogue, isAutoDialogue } = useGameStore();
   const [displayText, setDisplayText] = React.useState('');
   const [isTyping, setIsTyping] = React.useState(false);
   const [showContinue, setShowContinue] = React.useState(false);
-  const [transitionDir, setTransitionDir] = React.useState<'in' | 'out'>('in');
-  const [prevSpeaker, setPrevSpeaker] = React.useState('');
-  const fullTextRef = React.useRef('');
-  const typingTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const [portraitVisible, setPortraitVisible] = React.useState(false);
+  const typingTimerRef = React.useRef<number | null>(null);
   const charIndexRef = React.useRef(0);
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  const autoAdvanceRef = React.useRef<number | null>(null);
 
   const currentLine = dialogue.lines[dialogue.currentIndex];
 
   const finishTyping = React.useCallback(() => {
-    if (typingTimerRef.current) clearInterval(typingTimerRef.current);
-    setDisplayText(fullTextRef.current);
+    if (typingTimerRef.current) {
+      window.clearInterval(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+    setDisplayText(currentLine?.text || '');
     setIsTyping(false);
     setShowContinue(true);
-  }, []);
+  }, [currentLine]);
 
   React.useEffect(() => {
-    if (!dialogue.isOpen || !currentLine) return;
+    if (!dialogue.isOpen || !currentLine) {
+      setDisplayText('');
+      setIsTyping(false);
+      setShowContinue(false);
+      setPortraitVisible(false);
+      return;
+    }
 
-    if (typingTimerRef.current) clearInterval(typingTimerRef.current);
+    // Reset for new line
+    if (typingTimerRef.current) window.clearInterval(typingTimerRef.current);
     charIndexRef.current = 0;
     setDisplayText('');
     setIsTyping(true);
     setShowContinue(false);
-    fullTextRef.current = currentLine.text;
+    setPortraitVisible(true);
 
-    if (!currentLine.isNarration) playBlip();
-
-    const speakerChanged = currentLine.speaker !== prevSpeaker;
-    const typeChar = () => {
+    const speed = currentLine.isNarration ? 20 : 30;
+    
+    typingTimerRef.current = window.setInterval(() => {
       charIndexRef.current++;
-      setDisplayText(fullTextRef.current.slice(0, charIndexRef.current));
-      if (!currentLine.isNarration) {
+      const nextText = currentLine.text.slice(0, charIndexRef.current);
+      setDisplayText(nextText);
+      
+      if (!currentLine.isNarration && charIndexRef.current % 2 === 0) {
         playBlip();
       }
-      if (charIndexRef.current >= fullTextRef.current.length) {
+
+      if (charIndexRef.current >= currentLine.text.length) {
         finishTyping();
       }
-    };
-
-    if (speakerChanged) {
-      setTransitionDir('out');
-      const outTimer = setTimeout(() => {
-        setTransitionDir('in');
-        setPrevSpeaker(currentLine.speaker);
-      }, 50);
-      const typeTimer = setTimeout(() => {
-        const baseSpeed = currentLine.isNarration ? 22 : 30;
-        typingTimerRef.current = setInterval(typeChar, baseSpeed);
-      }, 100);
-      return () => {
-        clearTimeout(outTimer);
-        clearTimeout(typeTimer);
-        if (typingTimerRef.current) clearInterval(typingTimerRef.current);
-      };
-    }
-
-    const baseSpeed = currentLine.isNarration ? 22 : 30;
-    typingTimerRef.current = setInterval(typeChar, baseSpeed);
+    }, speed);
 
     return () => {
-      if (typingTimerRef.current) clearInterval(typingTimerRef.current);
+      if (typingTimerRef.current) window.clearInterval(typingTimerRef.current);
     };
-  }, [dialogue.currentIndex, dialogue.isOpen, currentLine, prevSpeaker, finishTyping]);
+  }, [dialogue.currentIndex, dialogue.isOpen, currentLine, finishTyping]);
 
   const handleAdvance = React.useCallback(() => {
     if (isTyping) {
@@ -111,6 +103,24 @@ const DialogueSystem: React.FC = () => {
     }
     advanceDialogue();
   }, [isTyping, finishTyping, advanceDialogue]);
+
+  // Auto-dialogue: advance automatically when typing finishes
+  React.useEffect(() => {
+    if (autoAdvanceRef.current) {
+      window.clearTimeout(autoAdvanceRef.current);
+      autoAdvanceRef.current = null;
+    }
+    if (isAutoDialogue && showContinue && dialogue.isOpen) {
+      autoAdvanceRef.current = window.setTimeout(() => {
+        handleAdvance();
+      }, 2500);
+    }
+    return () => {
+      if (autoAdvanceRef.current) {
+        window.clearTimeout(autoAdvanceRef.current);
+      }
+    };
+  }, [isAutoDialogue, showContinue, dialogue.isOpen, handleAdvance]);
 
   React.useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -139,280 +149,105 @@ const DialogueSystem: React.FC = () => {
     : null;
 
   return (
-    <div
-      className="absolute inset-0 flex flex-col justify-end pb-6 pointer-events-none"
-      style={{ zIndex: 80 }}
-    >
+    <div className="absolute inset-0 flex flex-col justify-end pb-8 pointer-events-none" style={{ zIndex: 100 }}>
+      {/* Dark vignette cinematic overlay */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%)',
+        zIndex: 1,
+      }} />
+
+      {/* Background Image / Overlay */}
       {sceneImage && (
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: `url('${sceneImage}')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            filter: 'brightness(0.55) contrast(1.05)',
-            opacity: 0.95,
-            transition: 'opacity 0.5s ease',
-          }}
-        />
+        <div className="absolute inset-0 transition-opacity duration-1000" style={{
+          backgroundImage: `url('${sceneImage}')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'brightness(0.5) contrast(1.1)',
+          opacity: portraitVisible ? 1 : 0,
+        }} />
       )}
+      <div className="absolute inset-0 pointer-events-auto" style={{
+        background: sceneImage ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.6)',
+        transition: 'background 0.5s ease',
+      }} onClick={handleAdvance} />
 
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 pointer-events-auto"
-        style={{
-          background: sceneImage
-            ? (isNarration ? 'rgba(0,0,0,0.72)' : 'rgba(0,0,0,0.45)')
-            : (isNarration ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.55)'),
-          transition: 'background 0.4s ease',
-        }}
-        onClick={handleAdvance}
-      />
-
-      {/* Narration cinematic bars */}
+      {/* Cinematic Bars for Narration */}
       {isNarration && (
         <>
-          <div className="absolute top-0 left-0 right-0" style={{
-            height: 80, zIndex: 81,
-            background: 'linear-gradient(to bottom, rgba(0,0,0,0.95), transparent)',
-          }} />
-          <div className="absolute bottom-0 left-0 right-0" style={{
-            height: 80, zIndex: 81,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.95), transparent)',
-          }} />
+          <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black to-transparent opacity-80" />
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black to-transparent opacity-80" />
         </>
       )}
 
-      {/* Narration content */}
-      {isNarration ? (
-        <div
-          className="relative pointer-events-auto cursor-pointer flex items-center justify-center"
-          style={{ zIndex: 82, minHeight: 200 }}
-          onClick={handleAdvance}
-        >
-          <div style={{
-            maxWidth: 640,
-            padding: '0 32px',
-            transition: 'opacity 0.3s ease',
-          }}>
-            <div className="mb-1" style={{
-              fontFamily: 'Cinzel, serif',
-              fontSize: 11,
-              color: '#b8860b',
-              letterSpacing: '4px',
-              textTransform: 'uppercase',
-              textAlign: 'center',
-              opacity: 0.6,
-            }}>
+      {/* Main Container */}
+      <div className="relative mx-auto w-full max-w-3xl px-4 pointer-events-auto cursor-pointer" onClick={handleAdvance}>
+        {isNarration ? (
+          <div className="flex flex-col items-center justify-center text-center py-12">
+            <div className="text-xs uppercase tracking-[0.3em] text-amber-600/60 font-serif mb-4">
               {currentLine.speaker}
             </div>
-            <div style={{
-              fontFamily: 'Lora, serif',
-              fontSize: 16,
-              fontStyle: 'italic',
-              lineHeight: 2,
-              color: '#c8a882',
-              textShadow: '0 0 30px rgba(200,168,130,0.2)',
-              textAlign: 'center',
-            }}>
+            <div className="text-xl md:text-2xl italic font-serif leading-relaxed" style={{ color: '#c8a882', textShadow: '0 0 20px rgba(0,0,0,0.5)' }}>
               {displayText}
-              {isTyping && (
-                <span style={{ color: '#b8860b', marginLeft: 2, opacity: 0.8 }}>▌</span>
-              )}
+              {isTyping && <span className="inline-block w-2 h-5 bg-amber-600 ml-1 animate-pulse" />}
             </div>
-            {showContinue && (
-              <div className="flex justify-center mt-6" style={{
-                animation: 'fadeIn 0.3s ease',
-              }}>
-                <div style={{
-                  fontFamily: 'Cinzel, serif',
-                  fontSize: 9,
-                  color: '#b8860b',
-                  letterSpacing: '2px',
-                  opacity: 0.6,
-                  animation: 'pulse 2s infinite',
-                }}>
-                  [ Click or press Enter ]
-                </div>
-              </div>
-            )}
           </div>
-        </div>
-      ) : (
-        /* Dialogue Box */
-        <div
-          ref={containerRef}
-          className="relative pointer-events-auto cursor-pointer mx-auto"
-          onClick={handleAdvance}
-          style={{
-            width: 'min(720px, 92vw)',
-            zIndex: 82,
-            animation: dialogue.currentIndex === 0 ? 'slideUp 0.35s ease-out' : 'none',
-          }}
-        >
-          {/* Speaker accent bar */}
-          <div style={{
-            height: 3,
-            background: `linear-gradient(90deg, ${portraitData.border}, ${portraitData.border}40, transparent)`,
-            borderRadius: '2px 2px 0 0',
-            transition: 'background 0.4s ease',
-          }} />
-
-          <div style={{
-            background: 'linear-gradient(180deg, rgba(10,8,12,0.97), rgba(15,12,18,0.95))',
-            border: `1px solid ${portraitData.border}30`,
-            borderTop: 'none',
-            borderBottom: `1px solid ${portraitData.border}20`,
-            padding: '20px 24px',
-            position: 'relative',
-          }}>
-            {/* Progress dots */}
-            <div className="flex gap-1 absolute top-3 right-4">
-              {dialogue.lines.map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: 5,
-                    height: 5,
-                    borderRadius: '50%',
-                    background: i <= dialogue.currentIndex ? portraitData.border : `${portraitData.border}20`,
-                    transition: 'background 0.3s',
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Content row */}
-            <div className="flex items-start gap-4">
+        ) : (
+          <div className="relative bg-zinc-950/95 border border-white/10 rounded-lg shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+            {/* Accent Bar */}
+            <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, ${portraitData.border}, transparent)` }} />
+            
+            <div className="p-6 flex gap-6">
               {/* Portrait */}
-              <div
-                className="flex-shrink-0 flex items-center justify-center overflow-hidden"
-                style={{
-                  width: 72,
-                  height: 72,
-                  background: `linear-gradient(135deg, ${portraitData.bg}, #000)`,
-                  border: `2px solid ${portraitData.border}`,
-                  borderRadius: 6,
-                  boxShadow: `0 0 16px ${portraitData.border}30, inset 0 0 20px rgba(0,0,0,0.5)`,
-                  fontSize: portraitData.img ? undefined : 34,
-                  transform: transitionDir === 'in' ? 'scale(1)' : 'scale(0.9)',
-                  opacity: transitionDir === 'in' ? 1 : 0,
-                  transition: 'transform 0.25s ease, opacity 0.25s ease',
-                }}
-              >
-                {portraitData.img ? (
-                  <img
-                    src={portraitData.img}
-                    alt={currentLine.speaker}
-                    className="w-full h-full object-cover object-top"
-                    style={{
-                      imageRendering: 'pixelated',
-                      transform: transitionDir === 'in' ? 'scale(1)' : 'scale(0.8)',
-                      transition: 'transform 0.3s ease',
-                      opacity: transitionDir === 'in' ? 1 : 0,
-                    }}
-                  />
-                ) : (
-                  <span style={{
-                    transform: transitionDir === 'in' ? 'scale(1)' : 'scale(0.8)',
-                    transition: 'transform 0.3s ease',
-                  }}>
-                    {portraitData.emoji}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                {/* Speaker name */}
-                <div className="mb-1" style={{
-                  fontFamily: 'Cinzel, serif',
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: portraitData.border,
-                  textShadow: `0 0 12px ${portraitData.border}50`,
-                  letterSpacing: '3px',
-                  opacity: transitionDir === 'in' ? 1 : 0,
-                  transform: `translateX(${transitionDir === 'in' ? '0' : '-8px'})`,
-                  transition: 'opacity 0.3s ease, transform 0.3s ease',
-                }}>
-                  {currentLine.speaker}
-                </div>
-
-                {/* Emotion tag */}
-                {emotion !== 'neutral' && (
-                  <div className="mb-1" style={{
-                    fontFamily: 'Lora, serif',
-                    fontSize: 10,
-                    fontStyle: 'italic',
-                    color: textColor,
-                    opacity: 0.5,
-                  }}>
-                    — {emotion}
-                  </div>
-                )}
-
-                {/* Text */}
-                <div style={{
-                  fontFamily: 'Lora, serif',
-                  fontSize: 14,
-                  lineHeight: 1.8,
-                  color: textColor,
-                  minHeight: 56,
-                  opacity: transitionDir === 'in' ? 1 : 0,
-                  transform: `translateY(${transitionDir === 'in' ? '0' : '6px'})`,
-                  transition: 'opacity 0.25s ease, transform 0.25s ease',
-                }}>
-                  {displayText}
-                  {isTyping && (
-                    <span style={{ color: '#b8860b', marginLeft: 1, animation: 'pulse 0.8s infinite' }}>▌</span>
+              <div className="flex-shrink-0 relative">
+                <div className="w-20 h-20 rounded border-2 border-white/20 bg-black overflow-hidden shadow-inner transform transition-transform duration-300"
+                     style={{ borderColor: portraitData.border, transform: portraitVisible ? 'scale(1)' : 'scale(0.8)' }}>
+                  {portraitData.img ? (
+                    <img src={portraitData.img} alt={currentLine.speaker} className="w-full h-full object-cover object-top pixelated" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-4xl">{portraitData.emoji}</div>
                   )}
                 </div>
               </div>
+
+              {/* Text Area */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline justify-between mb-2">
+                  <span className="text-sm font-bold tracking-widest uppercase font-serif" style={{ color: portraitData.border }}>
+                    {currentLine.speaker}
+                  </span>
+                  {emotion !== 'neutral' && (
+                    <span className="text-[10px] italic opacity-40 uppercase tracking-tighter" style={{ color: textColor }}>
+                      {emotion}
+                    </span>
+                  )}
+                </div>
+                <div className="text-base leading-relaxed font-serif min-h-[4rem]" style={{ color: textColor }}>
+                  {displayText}
+                  {isTyping && <span className="inline-block w-1.5 h-4 bg-amber-600/80 ml-1" />}
+                </div>
+              </div>
             </div>
 
-            {/* Continue indicator */}
+            {/* Continue Prompt */}
             {showContinue && (
-              <div className="flex items-center justify-end gap-2 mt-2" style={{
-                animation: 'fadeIn 0.3s ease',
-              }}>
-                <span style={{
-                  fontSize: 9,
-                  fontFamily: 'Cinzel, serif',
-                  color: portraitData.border,
-                  opacity: 0.6,
-                  letterSpacing: '1px',
-                }}>
-                  {dialogue.currentIndex < dialogue.lines.length - 1 ? 'Continue' : 'Close'}
+              <div className="absolute bottom-2 right-4 flex items-center gap-2 animate-bounce">
+                <span className="text-[9px] uppercase tracking-widest text-white/30">
+                  {dialogue.currentIndex < dialogue.lines.length - 1 ? 'Next' : 'Close'}
                 </span>
-                <div style={{
-                  color: portraitData.border,
-                  fontSize: 12,
-                  opacity: 0.8,
-                  animation: 'bounce 1.2s infinite',
-                }}>▼</div>
+                <div className="w-1.5 h-1.5 rotate-45 border-r-2 border-b-2" style={{ borderColor: portraitData.border }} />
               </div>
             )}
-          </div>
 
-          {/* Decorative corners */}
-          {['top-0 left-0', 'top-0 right-0', 'bottom-0 left-0', 'bottom-0 right-0'].map((pos, i) => (
-            <div
-              key={i}
-              className={`absolute ${pos}`}
-              style={{
-                width: 14,
-                height: 14,
-                borderTop: i < 2 ? `2px solid ${portraitData.border}` : 'none',
-                borderBottom: i >= 2 ? `2px solid ${portraitData.border}` : 'none',
-                borderLeft: i % 2 === 0 ? `2px solid ${portraitData.border}` : 'none',
-                borderRight: i % 2 === 1 ? `2px solid ${portraitData.border}` : 'none',
-                borderRadius: i === 0 ? '4px 0 0 0' : i === 1 ? '0 4px 0 0' : i === 2 ? '0 0 0 4px' : '0 0 4px 0',
-                opacity: 0.7,
-              }}
-            />
-          ))}
-        </div>
-      )}
+            {/* Progress Dots */}
+            <div className="absolute top-3 right-4 flex gap-1">
+              {dialogue.lines.map((_, i) => (
+                <div key={i} className="w-1 h-1 rounded-full transition-colors duration-300"
+                     style={{ background: i <= dialogue.currentIndex ? portraitData.border : 'rgba(255,255,255,0.1)' }} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

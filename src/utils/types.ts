@@ -45,8 +45,6 @@ export interface PlayerState {
   weaponLevel?: number;
   armorLevel?: number;
   cycle: number;
-  skillPoints: number;
-  unlockedSkills: string[];
 }
 
 // ============================================================
@@ -257,11 +255,12 @@ export interface GameSave {
 
 export interface Notification {
   id: string;
-  type: 'info' | 'success' | 'warning' | 'danger' | 'lore';
+  type: 'info' | 'success' | 'warning' | 'danger' | 'lore' | 'error';
   title: string;
   message: string;
   icon?: string;
   duration?: number;
+  timestamp?: number;
 }
 
 // ============================================================

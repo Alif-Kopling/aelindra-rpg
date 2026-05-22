@@ -8,6 +8,27 @@ import GameOverScreen from './ui/GameOverScreen';
 import EndingScreen from './ui/EndingScreen';
 import EpilogueScreen from './ui/EpilogueScreen';
 
+const LowHealthVignette: React.FC = () => {
+  const { player, screen } = useGameStore();
+  if (screen !== 'game') return null;
+  const hpPct = player.stats.hp / player.stats.maxHp;
+  if (hpPct > 0.35) return null;
+
+  const intensity = 1 - (hpPct / 0.35);
+
+  return (
+    <div
+      className="absolute inset-0 pointer-events-none"
+      style={{
+        background: `radial-gradient(circle, transparent 40%, rgba(139,0,0,${0.25 * intensity}) 80%, rgba(139,0,0,${0.5 * intensity}) 100%)`,
+        zIndex: 100,
+        boxShadow: `inset 0 0 ${100 * intensity}px rgba(139,0,0,0.4)`,
+        animation: 'pulse 1.5s ease-in-out infinite',
+      }}
+    />
+  );
+};
+
 const App: React.FC = () => {
   const { screen } = useGameStore();
 
@@ -45,6 +66,9 @@ const App: React.FC = () => {
 
       {/* Main Game */}
       {screen === 'game' && <GameComponent />}
+
+      {/* Low Health Effect */}
+      <LowHealthVignette />
 
       {/* Game Over */}
       {screen === 'gameOver' && <GameOverScreen />}
