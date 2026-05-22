@@ -2,6 +2,15 @@ import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
 import { Item, ItemRarity } from '../utils/types';
 
+const ITEM_IMAGES: Record<string, string> = {
+  health_potion: '/assets/images/items/health_potion.png',
+  iron_sword: '/assets/images/items/iron_sword.png',
+  forsaken_blade: '/assets/images/items/forsaken_blade.png',
+  knight_armor: '/assets/images/items/knight_armor.png',
+  wanderers_ring: '/assets/images/items/wanderers_ring.png',
+  blacksmiths_gift: '/assets/images/items/blacksmiths_gift.png',
+};
+
 const RARITY_COLORS: Record<ItemRarity, { border: string; glow: string; label: string }> = {
   common:    { border: '#666', glow: 'transparent', label: '#aaa' },
   uncommon:  { border: '#32cd32', glow: 'rgba(50,205,50,0.2)', label: '#32cd32' },
@@ -101,8 +110,12 @@ const Inventory: React.FC = () => {
                     onMouseEnter={() => setHoveredItem(item)}
                     onMouseLeave={() => setHoveredItem(null)}
                   >
-                    <div className="flex items-center justify-center h-full" style={{ fontSize: 28 }}>
-                      {item.icon}
+                    <div className="flex items-center justify-center h-full">
+                      <img
+                        src={ITEM_IMAGES[item.id] || ''}
+                        alt={item.id}
+                        style={{ width: 32, height: 32, imageRendering: 'pixelated' }}
+                      />
                     </div>
 
                     {/* Quantity badge */}
@@ -197,7 +210,11 @@ const Inventory: React.FC = () => {
                     minWidth: 120,
                   }}
                 >
-                  <span style={{ fontSize: 18 }}>{item?.icon || '—'}</span>
+                  {item ? (
+                    <img src={ITEM_IMAGES[item.id] || ''} alt={item.id} style={{ width: 24, height: 24, imageRendering: 'pixelated' }} />
+                  ) : (
+                    <span style={{ fontSize: 14, color: '#555' }}>—</span>
+                  )}
                   <div>
                     <div style={{ fontSize: '8px', fontFamily: 'Cinzel, serif', color: '#b8860b', letterSpacing: '1px' }}>{slot}</div>
                     <div style={{ fontFamily: 'Lora, serif', fontSize: 10, color: '#f4e4c1' }}>{item?.name || 'None'}</div>
@@ -218,7 +235,11 @@ const ItemDetail: React.FC<{ item: Item; onAction: (item: Item) => void; readonl
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
-        <span style={{ fontSize: 32 }}>{item.icon}</span>
+        <img
+          src={ITEM_IMAGES[item.id] || ''}
+          alt={item.id}
+          style={{ width: 32, height: 32, imageRendering: 'pixelated' }}
+        />
         <div>
           <div style={{ fontFamily: 'Cinzel, serif', fontSize: 12, fontWeight: 700, color: '#f4e4c1' }}>{item.name}</div>
           <div style={{ fontSize: '9px', fontFamily: 'Cinzel, serif', color: rarity.label }}>

@@ -3,13 +3,13 @@ import { useGameStore } from '../store/gameStore';
 
 const HOTBAR_SIZE = 8;
 
-const HOTBAR_ICONS: Record<string, string> = {
-  health_potion: '🧪',
-  iron_sword: '⚔️',
-  forsaken_blade: '🗡️',
-  knight_armor: '🛡️',
-  wanderers_ring: '💍',
-  blacksmiths_gift: '🔨',
+const ITEM_IMAGES: Record<string, string> = {
+  health_potion: '/assets/images/items/health_potion.png',
+  iron_sword: '/assets/images/items/iron_sword.png',
+  forsaken_blade: '/assets/images/items/forsaken_blade.png',
+  knight_armor: '/assets/images/items/knight_armor.png',
+  wanderers_ring: '/assets/images/items/wanderers_ring.png',
+  blacksmiths_gift: '/assets/images/items/blacksmiths_gift.png',
 };
 
 const HUD: React.FC = () => {
@@ -284,9 +284,15 @@ const HUD: React.FC = () => {
             >
               {itemId && (
                 <>
-                  <span style={{ fontSize: '18px', lineHeight: 1 }}>
-                    {HOTBAR_ICONS[itemId] || '?'}
-                  </span>
+                  <img
+                    src={ITEM_IMAGES[itemId] || ''}
+                    alt={itemId}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      imageRendering: 'pixelated',
+                    }}
+                  />
                   <span style={{
                     fontSize: '6px',
                     color: '#b8860b',
