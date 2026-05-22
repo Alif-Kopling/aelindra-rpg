@@ -9,6 +9,7 @@ import Inventory from '../ui/Inventory';
 import PauseMenu from '../ui/PauseMenu';
 import Notifications from '../ui/Notifications';
 import Shop from '../ui/Shop';
+import DevToolsPanel from '../ui/DevToolsPanel';
 import { playBGM, setBGMVolume } from '../utils/bgm';
 
 const GameComponent: React.FC = () => {
@@ -48,6 +49,19 @@ const GameComponent: React.FC = () => {
       playBGM(currentZone);
     }
   }, [currentZone]);
+
+  const triggerFinalBossDefeated = React.useCallback(() => {
+    const scene = gameRef.current?.scene.getScene('GameplayScene') as Phaser.Scene | undefined;
+    if (!scene) return;
+    scene.events.emit('boss-died', { bossId: 'ashen_knight' });
+    useGameStore.getState().addNotification({
+      type: 'info',
+      title: 'Dev Event',
+      message: 'Triggered boss-died: ashen_knight',
+      icon: '🧪',
+      duration: 1800,
+    });
+  }, []);
 
   return (
     <div className="flex items-center justify-center w-full h-full overflow-hidden" style={{ background: '#07070c' }}>
@@ -106,6 +120,7 @@ const GameComponent: React.FC = () => {
           <div className={isPaused ? 'pointer-events-auto' : 'pointer-events-none'}>
             <PauseMenu />
           </div>
+          <DevToolsPanel onTriggerFinalBossDefeat={triggerFinalBossDefeated} />
         </div>
       </div>
     </div>

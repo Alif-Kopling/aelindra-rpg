@@ -647,6 +647,7 @@ export class GameplayScene extends Phaser.Scene {
       key: string;
       hold: number;
       fromScale: number;
+      fitMode?: 'cover' | 'contain';
       toScale?: number;
       startOffsetX?: number;
       startOffsetY?: number;
@@ -660,7 +661,7 @@ export class GameplayScene extends Phaser.Scene {
       { key: 'final_cinematic_3', hold: 5000, fromScale: 1.1, toScale: 0.95 },
       { key: 'final_cinematic_4', hold: 4000, fromScale: 1.05 },
       { key: 'final_cinematic_5', hold: 6000, fromScale: 1.08, endOffsetX: 40 },
-      { key: 'final_cinematic_6', hold: 3000, fromScale: 1.0 },
+      { key: 'final_cinematic_6', hold: 3000, fromScale: 1.0, fitMode: 'contain' },
     ];
 
     const finishCinematic = () => {
@@ -684,7 +685,9 @@ export class GameplayScene extends Phaser.Scene {
           .setAlpha(0)
       );
 
-      const baseScale = Math.max(width / image.width, height / image.height);
+      const scaleCover = Math.max(width / image.width, height / image.height);
+      const scaleContain = Math.min(width / image.width, height / image.height);
+      const baseScale = frame.fitMode === 'contain' ? scaleContain : scaleCover;
       image.setScale(baseScale * frame.fromScale);
       image.x = centerX + (frame.startOffsetX ?? 0);
       image.y = centerY + (frame.startOffsetY ?? 0);
