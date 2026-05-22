@@ -28,6 +28,39 @@
 - **Skill tree** with prerequisites
 - **Cycle system** (NG+ loop)
 - **Literary Indonesian** dialogue (all 389 lines)
+- **Final 6-frame cinematic ending** (`public/assets/cinematic/cinematic_1..6.png`)
+- **Cinematic FX stack** (letterbox, scanline, grain jitter ~8fps, frame flash/fade transitions)
+- **Ending audio continuity** (boss clear -> cinematic -> ending -> epilogue without reset)
+- **Dev Tools panel** (`;` launcher, `F10` toggle, zone jump, ending/epilogue jump, final boss defeat trigger)
+- **Title Screen v2 clean premium** (minimal cinematic layout + Settings/Credits/Quit modal + hover polish)
+
+## Latest Rollout Notes (May 2026)
+
+### Final Boss Ending Flow
+- Replaced old chained delayed dialogue flow with:
+  - camera flash -> `playFinalCinematic()` -> `ENDING_SCENE` dialogue -> `setScreen('ending')`
+- Removed `BATTLEFIELD_BOSS_POST` from battlefield boss round to avoid duplicate post-boss narrative.
+- Added cinematic object/tween/timer lifecycle cleanup in `GameplayScene.shutdown()` safe path.
+
+### Cinematic Assets & Rendering
+- Added preload keys:
+  - `final_cinematic_1` ... `final_cinematic_6`
+- Frame 6 supports full-fit behavior (`contain`) to avoid top/bottom crop under cinematic bars.
+
+### Audio Continuity Changes
+- Ending BGM now starts directly on `ashen_knight` boss death event.
+- Removed automatic BGM stop on unmount between `game -> ending -> epilogue` screens.
+- BGM stops explicitly when returning to title from epilogue.
+
+### Dev Tools / QA Controls
+- Added `src/ui/DevToolsPanel.tsx` and mounted in `GameComponent`.
+- Zone jump now uses dual path:
+  - store-driven fallback (`setZone`, `setScreen('game')`, `intro_seen=true`)
+  - scene event (`dev-jump-zone`) to force `transitionToZone()` rebuild.
+- Added final boss event trigger (`scene.events.emit('boss-died', { bossId: 'ashen_knight' })`).
+
+### Documentation
+- `README.md` rewritten with cleaner structure, visual preview gallery, cutscene highlights, and updated dev tools/audio notes.
 
 ## Critical Bug Fixes Completed (May 22, 2026)
 
@@ -68,6 +101,7 @@
 - Phaser chunk size warning (1.8MB, expected with Phaser)
 - `roundActive` not reset for final boss path (game ends anyway)
 - Stun tint overrides bleed tint (cosmetic)
+- `window.close()` on title `Quit` is browser-limited and may be blocked unless opened by script
 
 ## Story Summary
 **Prologue**: Alden, kesatria kerajaan Aelindra, difitnah membunuh Raja Aldric oleh Valther. Putri Evelyne menghukumnya. Pandai besi Old Edric memotong rantainya saat fajar.
@@ -87,4 +121,4 @@ npx vite build     # production build
 - `npx tsc --noEmit` passes with zero errors
 - `npx vite build` succeeds (chunk size warning is pre-existing)
 - No automated test suite found
-- Last tested gameplay flow: zone transitions, combat, dialogue, hotbar, recall portal
+- Last tested gameplay flow: zone transitions, combat, dialogue, hotbar, recall portal, final cinematic ending, ending->epilogue audio continuity, dev tools zone jump
