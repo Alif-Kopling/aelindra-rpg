@@ -571,6 +571,7 @@ export const useGameStore = create<GameStore>()(
               timestamp: Date.now()
             });
           });
+          window.dispatchEvent(new CustomEvent('sfx:play', { detail: { key: 'sfx_potion', volume: 0.5, rate: 1 } }));
         }
       } else {
         // Weapon/Armor/Accessory - equip it
@@ -586,6 +587,7 @@ export const useGameStore = create<GameStore>()(
             timestamp: Date.now()
           });
         });
+        window.dispatchEvent(new CustomEvent('sfx:play', { detail: { key: 'sfx_equip', volume: 0.4, rate: 1 } }));
       }
     },
     furthestClearedZone: 'village',

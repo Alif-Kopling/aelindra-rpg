@@ -483,6 +483,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
+  private playSfx(key: string, volume = 0.5, rate = 1) {
+    if (this.scene.cache.audio.exists(key)) {
+      this.scene.sound.play(key, { volume, rate });
+    }
+  }
+
   private playFootstep() {
     if (this.scene.cache.audio.exists('sfx_footstep')) {
       this.scene.sound.play('sfx_footstep', { volume: 0.15, rate: 0.8 + Math.random() * 0.4 });
@@ -523,9 +529,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.lastComboTime = Date.now();
     store.incrementCombo();
 
-    if (this.scene.cache.audio.exists('sfx_critical')) {
-      this.scene.sound.play('sfx_critical', { volume: 0.7 });
-    }
+    this.playSfx('sfx_slash_crit', 0.6, 0.7 + Math.random() * 0.3);
     this.playSlashSound();
 
     const body = this.body as Phaser.Physics.Arcade.Body;
@@ -588,9 +592,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     store.drainStamina(this.hasSkill('iron_reflex') ? 6 : 8);
 
-    if (this.scene.cache.audio.exists('sfx_critical')) {
-      this.scene.sound.play('sfx_critical', { volume: 0.4, rate: 1.2 });
-    }
+    this.playSfx('sfx_parry', 0.5, 0.8 + Math.random() * 0.4);
     this.scene.cameras.main.flash(80, 210, 240, 255);
   }
 
@@ -599,51 +601,77 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const cx = this.x + dir * 30;
     const cy = this.y;
 
+    this.scene.cameras.main.shake(200, 0.015);
+    this.scene.cameras.main.flash(80, 255, 215, 0);
+
+    const glowArc = this.scene.add.graphics();
+    glowArc.lineStyle(16, 0xffd700, 0.3);
+    glowArc.beginPath();
+    glowArc.arc(cx, cy, 50, Math.PI / 2, -Math.PI / 2, dir > 0);
+    glowArc.strokePath();
+    glowArc.setDepth(24);
+    this.scene.tweens.add({
+      targets: glowArc, alpha: 0, scaleX: 2, scaleY: 2, duration: 300,
+      onComplete: () => glowArc.destroy(),
+    });
+
     const arc = this.scene.add.graphics();
     arc.lineStyle(8, 0xffd700, 1);
     arc.beginPath();
-    // Sweep from bottom (PI/2) to top (-PI/2). Counter-clockwise if facing right, clockwise if facing left.
     arc.arc(cx, cy, 50, Math.PI / 2, -Math.PI / 2, dir > 0);
     arc.strokePath();
     arc.setDepth(25);
-
     this.scene.tweens.add({
-      targets: arc,
-      alpha: 0,
-      scaleX: 1.5,
-      scaleY: 1.5,
-      duration: 300,
+      targets: arc, alpha: 0, scaleX: 1.5, scaleY: 1.5, duration: 300,
       onComplete: () => arc.destroy(),
+    });
+
+    const whiteArc = this.scene.add.graphics();
+    whiteArc.lineStyle(4, 0xffffff, 0.9);
+    whiteArc.beginPath();
+    whiteArc.arc(cx, cy, 42, Math.PI / 2, -Math.PI / 2, dir > 0);
+    whiteArc.strokePath();
+    whiteArc.setDepth(26);
+    this.scene.tweens.add({
+      targets: whiteArc, alpha: 0, scaleX: 1.4, scaleY: 1.4, duration: 200,
+      onComplete: () => whiteArc.destroy(),
     });
 
     const burst = this.scene.add.graphics();
     burst.fillStyle(0xffffff, 0.9);
     burst.fillCircle(cx + dir * 40, cy, 12);
     burst.setDepth(26);
-
     this.scene.tweens.add({
-      targets: burst,
-      scaleX: 3,
-      scaleY: 3,
-      alpha: 0,
-      duration: 250,
+      targets: burst, scaleX: 3, scaleY: 3, alpha: 0, duration: 250,
       onComplete: () => burst.destroy(),
     });
 
-    for (let i = 0; i < 8; i++) {
+    const colorBurst = this.scene.add.graphics();
+    colorBurst.fillStyle(0xffd700, 0.5);
+    colorBurst.fillCircle(cx + dir * 40, cy, 24);
+    colorBurst.setDepth(23);
+    this.scene.tweens.add({
+      targets: colorBurst, scaleX: 3, scaleY: 3, alpha: 0, duration: 350,
+      onComplete: () => colorBurst.destroy(),
+    });
+
+    for (let i = 0; i < 12; i++) {
       const spark = this.scene.add.graphics();
-      spark.fillStyle(0xffd700, 0.9);
-      spark.fillCircle(0, 0, 3);
+      const isWhite = Math.random() > 0.5;
+      spark.fillStyle(isWhite ? 0xffffff : 0xffd700, 0.9);
+      const size = isWhite ? 2 : 3;
+      spark.fillRect(-size/2, -size/2, size, size);
       spark.setPosition(cx + dir * 20, cy);
       spark.setDepth(25);
 
       this.scene.tweens.add({
         targets: spark,
-        x: spark.x + dir * Phaser.Math.Between(40, 100),
-        y: spark.y + Phaser.Math.Between(-40, 40),
+        x: spark.x + dir * Phaser.Math.Between(40, 120),
+        y: spark.y + Phaser.Math.Between(-50, 50),
         alpha: 0,
-        duration: 350,
-        delay: i * 30,
+        rotation: Math.random() * Math.PI * 2,
+        duration: Phaser.Math.Between(200, 400),
+        delay: i * 20,
         onComplete: () => spark.destroy(),
       });
     }
@@ -908,13 +936,28 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   private spawnCycloneEffect() {
     const dir = this.facingRight ? 1 : -1;
+    const cx = this.x;
+    const cy = this.y;
+
+    const outerRing = this.scene.add.graphics();
+    outerRing.setDepth(24);
+    outerRing.lineStyle(3, 0x00ffff, 0.4);
+    outerRing.strokeCircle(cx, cy, 100);
+    this.scene.tweens.add({
+      targets: outerRing,
+      scaleX: 2,
+      scaleY: 2,
+      alpha: 0,
+      rotation: Math.PI * 2 * dir,
+      duration: 400,
+      ease: 'Cubic.easeOut',
+      onComplete: () => outerRing.destroy(),
+    });
+
     const g = this.scene.add.graphics();
     g.setDepth(25);
-    g.lineStyle(6, 0x00ffff, 1);
-    
-    // Large spinning circular slash
-    g.strokeCircle(this.x, this.y, 80);
-    
+    g.lineStyle(6, 0x00ffff, 0.9);
+    g.strokeCircle(cx, cy, 80);
     this.scene.tweens.add({
       targets: g,
       scaleX: 1.5,
@@ -926,21 +969,40 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       onComplete: () => g.destroy(),
     });
 
-    // Outer shockwave
-    const ring = this.scene.add.graphics();
-    ring.lineStyle(2, 0xffffff, 0.8);
-    ring.strokeCircle(this.x, this.y, 40);
-    ring.setDepth(24);
+    const innerGlow = this.scene.add.graphics();
+    innerGlow.fillStyle(0x00ffff, 0.2);
+    innerGlow.fillCircle(cx, cy, 40);
+    innerGlow.setDepth(23);
     this.scene.tweens.add({
-      targets: ring,
+      targets: innerGlow,
       scaleX: 4,
       scaleY: 4,
       alpha: 0,
       duration: 300,
-      onComplete: () => ring.destroy(),
+      onComplete: () => innerGlow.destroy(),
     });
 
-    this.spawnParticles(this.x, this.y, 0x00ffff, 15, 1.8);
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2;
+      const streak = this.scene.add.graphics();
+      streak.fillStyle(0x00ffff, 0.6);
+      streak.fillRect(-12, -2, 24, 4);
+      streak.setPosition(cx + Math.cos(a) * 60, cy + Math.sin(a) * 60);
+      streak.setRotation(a);
+      streak.setDepth(24);
+      this.scene.tweens.add({
+        targets: streak,
+        x: streak.x + Math.cos(a) * 80,
+        y: streak.y + Math.sin(a) * 80,
+        alpha: 0,
+        scaleX: 1.5,
+        duration: 300,
+        ease: 'Power2',
+        onComplete: () => streak.destroy(),
+      });
+    }
+
+    this.spawnParticles(cx, cy, 0x00ffff, 18, 1.8);
   }
 
   private startDash(vx: number, store: ReturnType<typeof useGameStore.getState>) {
@@ -953,6 +1015,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.dashDirX = vx > 0 ? 1 : -1;
     this.spawnDashTrail();
+    this.playSfx('sfx_dash', 0.35, 0.9 + Math.random() * 0.2);
   }
 
   private performUltimate(store: ReturnType<typeof useGameStore.getState>) {
@@ -963,6 +1026,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.scene.cameras.main.shake(300, 0.01);
     this.scene.cameras.main.flash(200, 255, 215, 0);
+
+    this.playSfx('sfx_whoosh', 0.7, 0.8);
+    this.playSfx('sfx_slash_crit', 0.5, 0.6);
 
     this.spawnUltimateEffect();
 
@@ -1098,9 +1164,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         onComplete: () => graphics.destroy()
       });
 
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < 8; i++) {
         const spark = this.scene.add.graphics();
-        spark.fillStyle(0xffd700, 0.9);
+        const c = i % 2 === 0 ? 0xffd700 : 0xffffff;
+        spark.fillStyle(c, 0.9);
         spark.fillRect(0, 0, 4, 4);
         spark.setPosition(targetX, startY + Phaser.Math.Between(-10, 10));
         spark.setDepth(25);
@@ -1110,7 +1177,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
           targets: spark,
           x: spark.x + sparkDir * Phaser.Math.Between(30, 80),
           y: spark.y + Phaser.Math.Between(-20, 20),
-          alpha: 0, duration: 300,
+          alpha: 0, rotation: Math.random() * 6, duration: 300,
           onComplete: () => spark.destroy()
         });
       }
@@ -1118,67 +1185,119 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   private spawnDashTrail() {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
       const ghost = this.scene.add.image(this.x - this.dashDirX * i * 12, this.y, this.texture.key);
       ghost.setFlipX(this.flipX);
       ghost.setScale(this.scaleX, this.scaleY);
-      ghost.setAlpha(0.4 - i * 0.07);
+      ghost.setAlpha(0.35 - i * 0.05);
       ghost.setTint(0x4169e1);
       ghost.setDepth(9);
 
       this.scene.tweens.add({
-        targets: ghost, alpha: 0, duration: 300, ease: 'Linear',
+        targets: ghost, alpha: 0, duration: 350, ease: 'Linear',
         onComplete: () => ghost.destroy(),
       });
     }
 
-    for (let i = 0; i < 4; i++) {
-      if (this.scene.textures.exists('dust_0')) {
-        const dust = this.scene.add.image(
-          this.x + Phaser.Math.Between(-10, 10), this.y + 18, 'dust_0'
-        );
-        dust.setDepth(8);
-        this.scene.tweens.add({
-          targets: dust, y: dust.y - 20, alpha: 0, duration: 400, ease: 'Power2',
-          delay: i * 50, onComplete: () => dust.destroy(),
-        });
-      }
+    const trailGlow = this.scene.add.graphics();
+    trailGlow.fillStyle(0x4169e1, 0.3);
+    trailGlow.fillCircle(this.x, this.y, 12);
+    trailGlow.setDepth(8);
+    this.scene.tweens.add({
+      targets: trailGlow,
+      x: this.x + this.dashDirX * -60,
+      alpha: 0, scaleX: 0.5, scaleY: 0.5,
+      duration: 350,
+      onComplete: () => trailGlow.destroy(),
+    });
+
+    for (let i = 0; i < 6; i++) {
+      const spark = this.scene.add.graphics();
+      spark.fillStyle(0x4169e1, 0.6);
+      spark.fillCircle(0, 0, 1.5 + Math.random() * 2);
+      spark.setPosition(this.x + Phaser.Math.Between(-8, 8), this.y + Phaser.Math.Between(-12, 12));
+      spark.setDepth(8);
+      this.scene.tweens.add({
+        targets: spark, alpha: 0, x: spark.x - this.dashDirX * Phaser.Math.Between(10, 30),
+        duration: 300, delay: i * 30, onComplete: () => spark.destroy(),
+      });
     }
   }
 
   private spawnUltimateEffect() {
-    const circle = this.scene.add.graphics();
-    circle.lineStyle(4, COLORS.gold, 1);
-    circle.strokeCircle(this.x, this.y, 10);
-    circle.setDepth(25);
+    const cx = this.x;
+    const cy = this.y;
 
+    this.scene.cameras.main.shake(400, 0.02);
+    this.scene.cameras.main.flash(150, 255, 215, 0);
+
+    const expandingRing = this.scene.add.graphics();
+    expandingRing.lineStyle(6, COLORS.gold, 1);
+    expandingRing.strokeCircle(cx, cy, 10);
+    expandingRing.setDepth(26);
     this.scene.tweens.add({
-      targets: circle, scaleX: 15, scaleY: 15, alpha: 0, duration: 600, ease: 'Power2',
-      onComplete: () => circle.destroy(),
+      targets: expandingRing, scaleX: 18, scaleY: 18, alpha: 0, duration: 600, ease: 'Power2',
+      onComplete: () => expandingRing.destroy(),
     });
 
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2;
-      const dist = 120;
+    const glowRing = this.scene.add.graphics();
+    glowRing.fillStyle(COLORS.gold, 0.3);
+    glowRing.fillCircle(cx, cy, 30);
+    glowRing.setDepth(24);
+    this.scene.tweens.add({
+      targets: glowRing, scaleX: 6, scaleY: 6, alpha: 0, duration: 500, ease: 'Power2',
+      onComplete: () => glowRing.destroy(),
+    });
+
+    const whiteFlash = this.scene.add.graphics();
+    whiteFlash.fillStyle(0xffffff, 0.6);
+    whiteFlash.fillCircle(cx, cy, 8);
+    whiteFlash.setDepth(27);
+    this.scene.tweens.add({
+      targets: whiteFlash, scaleX: 20, scaleY: 20, alpha: 0, duration: 400, ease: 'Power2',
+      onComplete: () => whiteFlash.destroy(),
+    });
+
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2;
+      const dist = 140;
       const wave = this.scene.add.graphics();
-      wave.fillStyle(0xffd700, 0.8);
-      wave.fillRect(-30, -4, 60, 8);
-      wave.setPosition(this.x, this.y);
+      wave.fillStyle(i % 2 === 0 ? 0xffd700 : 0xff6600, 0.8);
+      wave.fillRect(-24, -3, 48, 6);
+      wave.setPosition(cx, cy);
       wave.setRotation(angle);
       wave.setDepth(22);
-
       this.scene.tweens.add({
         targets: wave,
-        x: this.x + Math.cos(angle) * dist,
-        y: this.y + Math.sin(angle) * dist,
-        alpha: 0, scaleX: 1.5, duration: 500, delay: i * 30, ease: 'Power2',
+        x: cx + Math.cos(angle) * dist,
+        y: cy + Math.sin(angle) * dist,
+        alpha: 0, scaleX: 1.5, duration: 500, delay: i * 20, ease: 'Power2',
         onComplete: () => wave.destroy(),
       });
     }
 
-    // Gold & Amber particle storms radiating outwards
-    this.spawnParticles(this.x, this.y, 0xffd700, 25, 2.2);
-    this.spawnParticles(this.x, this.y, 0xff6600, 20, 1.6);
+    for (let i = 0; i < 16; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const spark = this.scene.add.graphics();
+      spark.fillStyle(Math.random() > 0.5 ? 0xffd700 : 0xffffff, 0.9);
+      spark.fillRect(-2, -2, 4, 4);
+      spark.setPosition(cx, cy);
+      spark.setDepth(25);
+      this.scene.tweens.add({
+        targets: spark,
+        x: cx + Math.cos(a) * Phaser.Math.Between(60, 180),
+        y: cy + Math.sin(a) * Phaser.Math.Between(60, 180),
+        scaleX: 0, scaleY: 0, alpha: 0, rotation: a * 3,
+        duration: Phaser.Math.Between(300, 600),
+        delay: i * 15,
+        ease: 'Cubic.easeOut',
+        onComplete: () => spark.destroy(),
+      });
+    }
+
+    this.spawnParticles(cx, cy, 0xffd700, 30, 2.5);
+    this.spawnParticles(cx, cy, 0xff6600, 25, 1.8);
+    this.spawnParticles(cx, cy, 0xffffff, 15, 2);
   }
 
   private findNearestEnemy(): Phaser.Physics.Arcade.Sprite | null {
@@ -1229,6 +1348,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     store.damagePlayer(amount);
     this.invincibleTimer = INVINCIBILITY_FRAMES;
 
+    this.playSfx('sfx_hit', 0.4, 0.8 + Math.random() * 0.4);
+
     this.scene.tweens.add({
       targets: this, alpha: 0.3, yoyo: true, repeat: 4, duration: 80,
       onComplete: () => this.setAlpha(1),
@@ -1261,16 +1382,26 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private spawnParticles(x: number, y: number, color: number, count: number = 8, speedMultiplier: number = 1) {
     const isRight = this.facingRight;
     const baseDir = isRight ? 1 : -1;
+    const colors = [color, Phaser.Display.Color.ValueToColor(color).lighten(30).color, 0xffffff];
     for (let i = 0; i < count; i++) {
+      const isStar = Math.random() > 0.7;
       const particle = this.scene.add.graphics();
-      particle.fillStyle(color, 1);
-      const size = Phaser.Math.Between(2, 5);
-      particle.fillRect(-size/2, -size/2, size, size);
+      const c = colors[Math.floor(Math.random() * colors.length)];
+      particle.fillStyle(c, 0.7 + Math.random() * 0.3);
+      if (isStar) {
+        particle.fillRect(-3, -1, 6, 2);
+        particle.fillRect(-1, -3, 2, 6);
+      } else {
+        const size = Phaser.Math.Between(2, 5);
+        particle.fillRect(-size/2, -size/2, size, size);
+      }
       particle.setPosition(x, y);
       particle.setDepth(26);
 
-      const vx = (baseDir * Phaser.Math.Between(40, 160) + Phaser.Math.Between(-30, 30)) * speedMultiplier;
-      const vy = Phaser.Math.Between(-100, 100) * speedMultiplier;
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Phaser.Math.Between(60, 200) * speedMultiplier;
+      const vx = (baseDir * Math.cos(angle) * speed + Math.cos(angle + 0.5) * 30);
+      const vy = Math.sin(angle) * speed;
 
       this.scene.tweens.add({
         targets: particle,
@@ -1279,9 +1410,26 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         scaleX: 0,
         scaleY: 0,
         alpha: 0,
-        duration: Phaser.Math.Between(250, 600),
+        rotation: Math.random() * Math.PI * 2,
+        duration: Phaser.Math.Between(200, 500),
         ease: 'Cubic.easeOut',
         onComplete: () => particle.destroy(),
+      });
+    }
+
+    if (count >= 10) {
+      const glow = this.scene.add.graphics();
+      glow.fillStyle(color, 0.25);
+      glow.fillCircle(x, y, 20);
+      glow.setDepth(24);
+      this.scene.tweens.add({
+        targets: glow,
+        scaleX: 3,
+        scaleY: 3,
+        alpha: 0,
+        duration: 350,
+        ease: 'Power2',
+        onComplete: () => glow.destroy(),
       });
     }
   }

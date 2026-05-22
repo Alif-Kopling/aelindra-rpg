@@ -59,6 +59,16 @@ export class PreloadScene extends Phaser.Scene {
     this.load.audio('sfx_footstep', 'assets/audio/footstaps.mp3');
     this.load.audio('sfx_dialog', 'assets/audio/dialog-sound.mp3');
     this.load.audio('boss_roar', 'assets/audio/Boss-Roar-sound.mp3');
+
+    // New SFX (Kenney 50 RPG pack - CC0)
+    this.load.audio('sfx_hit', 'assets/audio/chop.ogg');
+    this.load.audio('sfx_parry', 'assets/audio/metalClick.ogg');
+    this.load.audio('sfx_dash', 'assets/audio/drawKnife1.ogg');
+    this.load.audio('sfx_slash_crit', 'assets/audio/knifeSlice.ogg');
+    this.load.audio('sfx_pickup', 'assets/audio/handleCoins.ogg');
+    this.load.audio('sfx_whoosh', 'assets/audio/cloth1.ogg');
+    this.load.audio('sfx_equip', 'assets/audio/metalLatch.ogg');
+    this.load.audio('sfx_potion', 'assets/audio/handleCoins.ogg');
   }
 
   create() {

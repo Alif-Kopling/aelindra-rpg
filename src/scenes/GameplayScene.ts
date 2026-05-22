@@ -1098,6 +1098,13 @@ export class GameplayScene extends Phaser.Scene {
       this.roundActive = false;
       this.onRoundCleared();
     });
+
+    window.addEventListener('sfx:play', ((e: CustomEvent) => {
+      const { key, volume, rate } = e.detail;
+      if (this.cache.audio.exists(key)) {
+        this.sound.play(key, { volume: volume ?? 0.5, rate: rate ?? 1 });
+      }
+    }) as EventListener);
   }
 
   private isHitStopping = false;
