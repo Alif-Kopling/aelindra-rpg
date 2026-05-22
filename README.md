@@ -219,3 +219,4 @@ npx vite build
 Game universe: **Aelindra**  
 Main character: **Alden**  
 Built with Phaser + React for narrative-action hybrid gameplay.
+Dev:Alxyzz
