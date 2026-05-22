@@ -22,6 +22,10 @@ const EpilogueScreen: React.FC = () => {
   const { setScreen, settings, player } = useGameStore();
   const [visibleLines, setVisibleLines] = React.useState<Set<number>>(new Set());
   const [finished, setFinished] = React.useState(false);
+  const [autoScroll, setAutoScroll] = React.useState(true);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const lineRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+  const bottomRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     EPILOGUE_LINES.forEach((line, index) => {
@@ -37,6 +41,28 @@ const EpilogueScreen: React.FC = () => {
     setBGMVolume(settings.musicVolume, settings.masterVolume);
     playBGM('epilogue');
   }, [settings.musicVolume, settings.masterVolume]);
+
+  React.useEffect(() => {
+    if (!autoScroll) return;
+    if (visibleLines.size > 0) {
+      const lastIdx = Math.max(...Array.from(visibleLines));
+      const el = lineRefs.current[lastIdx];
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [visibleLines, autoScroll]);
+
+  React.useEffect(() => {
+    if (!autoScroll) return;
+    if (finished) {
+      setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 800);
+    }
+  }, [finished, autoScroll]);
+
+  const toggleAutoScroll = () => setAutoScroll(prev => !prev);
 
   return (
     <div
@@ -55,6 +81,13 @@ const EpilogueScreen: React.FC = () => {
           @keyframes epilogueFade {
             from { opacity: 0; transform: translateY(18px); }
             to { opacity: 1; transform: translateY(0); }
+          }
+          .custom-scrollbar {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+          .custom-scrollbar::-webkit-scrollbar {
+            display: none;
           }
         `}
       </style>
@@ -96,6 +129,7 @@ const EpilogueScreen: React.FC = () => {
         {EPILOGUE_LINES.map((line, index) => (
           <div
             key={index}
+            ref={el => { lineRefs.current[index] = el; }}
             style={{
               fontFamily: line.emphasis ? 'Cinzel, serif' : 'Lora, serif',
               fontSize: line.emphasis ? 'clamp(18px, 2.8vw, 25px)' : 'clamp(13px, 2vw, 17px)',
@@ -135,6 +169,7 @@ const EpilogueScreen: React.FC = () => {
 
       {finished && (
         <div
+          ref={bottomRef}
           className="fixed bottom-[12vh] left-1/2 z-[100]"
           style={{
             transform: 'translateX(-50%)',
@@ -161,6 +196,25 @@ const EpilogueScreen: React.FC = () => {
           </button>
         </div>
       )}
+
+      {/* Auto-scroll toggle */}
+      <button
+        onClick={toggleAutoScroll}
+        className="fixed top-[13vh] right-6 z-[100] transition-all duration-300 hover:scale-110 active:scale-95"
+        style={{
+          fontFamily: 'Cinzel, serif',
+          fontSize: 11,
+          letterSpacing: '2px',
+          color: autoScroll ? '#c8a862' : '#665544',
+          background: 'rgba(0,0,0,0.6)',
+          border: `1px solid ${autoScroll ? 'rgba(200,168,98,0.4)' : 'rgba(60,50,40,0.3)'}`,
+          padding: '8px 14px',
+          borderRadius: 2,
+          cursor: 'pointer',
+        }}
+      >
+        {autoScroll ? '⏸ PAUSE' : '▶ SCROLL'}
+      </button>
     </div>
   );
 };

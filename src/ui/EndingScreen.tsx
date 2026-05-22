@@ -30,6 +30,10 @@ const EndingScreen: React.FC = () => {
   const [visibleLines, setVisibleLines] = React.useState<Set<number>>(new Set());
   const [finished, setFinished] = React.useState(false);
   const [bgPhase, setBgPhase] = React.useState<'dark' | 'dawn' | 'bright'>('dark');
+  const [autoScroll, setAutoScroll] = React.useState(true);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const lineRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+  const bottomRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     ENDING_LINES.forEach((line, i) => {
@@ -47,6 +51,28 @@ const EndingScreen: React.FC = () => {
     setBGMVolume(settings.musicVolume, settings.masterVolume);
     playBGM('ending');
   }, [settings.musicVolume, settings.masterVolume]);
+
+  React.useEffect(() => {
+    if (!autoScroll) return;
+    if (visibleLines.size > 0) {
+      const lastIdx = Math.max(...Array.from(visibleLines));
+      const el = lineRefs.current[lastIdx];
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [visibleLines, autoScroll]);
+
+  React.useEffect(() => {
+    if (!autoScroll) return;
+    if (finished) {
+      setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 800);
+    }
+  }, [finished, autoScroll]);
+
+  const toggleAutoScroll = () => setAutoScroll(prev => !prev);
 
   const bgColors = {
     dark: 'radial-gradient(ellipse at 50% 80%, #0a0510 0%, #050208 60%, #000005 100%)',
@@ -78,15 +104,12 @@ const EndingScreen: React.FC = () => {
             from { opacity: 0; transform: translate(-50%, 20px); }
             to { opacity: 1; transform: translate(-50%, 0); }
           }
+          .custom-scrollbar {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
           .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-          }
-          .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(200, 168, 98, 0.2);
-            border-radius: 2px;
+            display: none;
           }
         `}
       </style>
@@ -144,6 +167,7 @@ const EndingScreen: React.FC = () => {
         {ENDING_LINES.map((line, i) => (
           <div
             key={i}
+            ref={el => { lineRefs.current[i] = el; }}
             style={{
               fontFamily: line.alden ? 'Lora, serif' : line.emphasis ? 'Cinzel, serif' : 'Lora, serif',
               fontSize: line.emphasis ? 'clamp(18px, 3vw, 24px)' : line.alden ? 'clamp(15px, 2.2vw, 19px)' : 'clamp(13px, 2vw, 17px)',
@@ -214,6 +238,7 @@ const EndingScreen: React.FC = () => {
       {/* Return button after everything */}
       {finished && (
         <div
+          ref={bottomRef}
           className="fixed bottom-[15vh] left-1/2 z-[100]"
           style={{
             transform: 'translateX(-50%)',
@@ -237,6 +262,25 @@ const EndingScreen: React.FC = () => {
           </button>
         </div>
       )}
+
+      {/* Auto-scroll toggle */}
+      <button
+        onClick={toggleAutoScroll}
+        className="fixed top-[13vh] right-6 z-[100] transition-all duration-300 hover:scale-110 active:scale-95"
+        style={{
+          fontFamily: 'Cinzel, serif',
+          fontSize: 11,
+          letterSpacing: '2px',
+          color: autoScroll ? '#c8a862' : '#665544',
+          background: 'rgba(0,0,0,0.6)',
+          border: `1px solid ${autoScroll ? 'rgba(200,168,98,0.4)' : 'rgba(60,50,40,0.3)'}`,
+          padding: '8px 14px',
+          borderRadius: 2,
+          cursor: 'pointer',
+        }}
+      >
+        {autoScroll ? '⏸ PAUSE' : '▶ SCROLL'}
+      </button>
     </div>
   );
 };
