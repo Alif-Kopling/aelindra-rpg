@@ -3,13 +3,14 @@ import { useGameStore } from '../store/gameStore';
 
 type DevToolsPanelProps = {
   onTriggerFinalBossDefeat: () => void;
+  onJumpZone: (zoneId: string) => void;
 };
 
 const ZONES = ['village', 'forest', 'castle', 'catacombs', 'cathedral', 'mountain', 'battlefield'] as const;
 
-const DevToolsPanel: React.FC<DevToolsPanelProps> = ({ onTriggerFinalBossDefeat }) => {
+const DevToolsPanel: React.FC<DevToolsPanelProps> = ({ onTriggerFinalBossDefeat, onJumpZone }) => {
   const [open, setOpen] = React.useState(false);
-  const { setScreen, setZone, setStoryFlag, closeDialogue, addNotification } = useGameStore();
+  const { setScreen, setStoryFlag, closeDialogue } = useGameStore();
 
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -23,17 +24,7 @@ const DevToolsPanel: React.FC<DevToolsPanelProps> = ({ onTriggerFinalBossDefeat 
   }, []);
 
   const jumpToZone = (zone: string) => {
-    closeDialogue();
-    setStoryFlag('intro_seen', true);
-    setScreen('game');
-    setZone(zone);
-    addNotification({
-      type: 'info',
-      title: 'Dev Jump',
-      message: `Jumped to zone: ${zone}`,
-      icon: '🧪',
-      duration: 1800,
-    });
+    onJumpZone(zone);
   };
 
   const jumpToEnding = () => {

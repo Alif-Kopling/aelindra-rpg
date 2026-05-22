@@ -108,6 +108,7 @@ export class GameplayScene extends Phaser.Scene {
   shutdown() {
     this.cleanupFinalCinematicState(false);
     this.events.off('player-interact');
+    this.events.off('dev-jump-zone');
     this.events.off('boss-summon-minion');
     this.events.off('boss-attack');
     this.events.off('boss-projectile-hit');
@@ -998,6 +999,17 @@ export class GameplayScene extends Phaser.Scene {
 
     this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.TAB).on('down', () => {
       useGameStore.getState().toggleInventory();
+    });
+
+    this.events.on('dev-jump-zone', (data: { zoneId: string }) => {
+      const target = data?.zoneId;
+      if (!target) return;
+      const zoneData = this.getZoneData(target);
+      if (!zoneData) return;
+      this.cleanupFinalCinematicState(true);
+      this.transitioningZone = false;
+      this.currentZone = '__dev_jump__';
+      this.transitionToZone(target);
     });
 
     this.events.on('player-interact', (data: { x: number; y: number }) => {

@@ -63,6 +63,25 @@ const GameComponent: React.FC = () => {
     });
   }, []);
 
+  const jumpToZoneForDev = React.useCallback((zoneId: string) => {
+    const store = useGameStore.getState();
+    store.setStoryFlag('intro_seen', true);
+    store.closeDialogue();
+    store.setZone(zoneId);
+    store.setScreen('game');
+
+    const scene = gameRef.current?.scene.getScene('GameplayScene') as Phaser.Scene | undefined;
+    if (!scene) return;
+    scene.events.emit('dev-jump-zone', { zoneId });
+    store.addNotification({
+      type: 'info',
+      title: 'Dev Jump',
+      message: `Forced zone jump: ${zoneId}`,
+      icon: '🧪',
+      duration: 1800,
+    });
+  }, []);
+
   return (
     <div className="flex items-center justify-center w-full h-full overflow-hidden" style={{ background: '#07070c' }}>
       <div
@@ -120,7 +139,7 @@ const GameComponent: React.FC = () => {
           <div className={isPaused ? 'pointer-events-auto' : 'pointer-events-none'}>
             <PauseMenu />
           </div>
-          <DevToolsPanel onTriggerFinalBossDefeat={triggerFinalBossDefeated} />
+          <DevToolsPanel onTriggerFinalBossDefeat={triggerFinalBossDefeated} onJumpZone={jumpToZoneForDev} />
         </div>
       </div>
     </div>
