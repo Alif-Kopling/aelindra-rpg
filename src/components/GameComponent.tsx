@@ -9,7 +9,7 @@ import Inventory from '../ui/Inventory';
 import PauseMenu from '../ui/PauseMenu';
 import Notifications from '../ui/Notifications';
 import Shop from '../ui/Shop';
-import { playBGM, stopBGM, setBGMVolume } from '../utils/bgm';
+import { playBGM, setBGMVolume } from '../utils/bgm';
 
 const GameComponent: React.FC = () => {
   const gameRef = React.useRef<Phaser.Game | null>(null);
@@ -47,7 +47,6 @@ const GameComponent: React.FC = () => {
     if (currentZone) {
       playBGM(currentZone);
     }
-    return () => stopBGM();
   }, [currentZone]);
 
   return (

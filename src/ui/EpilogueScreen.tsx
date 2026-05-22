@@ -36,7 +36,6 @@ const EpilogueScreen: React.FC = () => {
   React.useEffect(() => {
     setBGMVolume(settings.musicVolume, settings.masterVolume);
     playBGM('epilogue');
-    return () => stopBGM();
   }, [settings.musicVolume, settings.masterVolume]);
 
   return (
@@ -143,7 +142,10 @@ const EpilogueScreen: React.FC = () => {
           }}
         >
           <button
-            onClick={() => setScreen('title')}
+            onClick={() => {
+              stopBGM();
+              setScreen('title');
+            }}
             className="btn-fantasy py-4 px-14 rounded-sm transition-all duration-300 hover:scale-110 active:scale-95"
             style={{
               fontFamily: 'Cinzel, serif',

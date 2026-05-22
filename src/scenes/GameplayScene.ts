@@ -43,10 +43,10 @@ import {
   BATTLEFIELD_ROUND1_POST,
   BATTLEFIELD_ROUND2_POST,
   BATTLEFIELD_BOSS_PRE,
-  BATTLEFIELD_BOSS_POST,
   ENDING_SCENE,
 } from '../systems/storyData';
 import { GAME_WIDTH, GAME_HEIGHT } from '../utils/constants';
+import { playBGM, setBGMVolume } from '../utils/bgm';
 
 interface ZoneData {
   theme: ZoneTheme;
@@ -96,12 +96,17 @@ export class GameplayScene extends Phaser.Scene {
   private combatOverlapsInitialized = false;
   private mapWidth = 60;
   private mapHeight = 23;
+  private cinematicObjects: Phaser.GameObjects.GameObject[] = [];
+  private cinematicTweens: Phaser.Tweens.Tween[] = [];
+  private cinematicTimers: Phaser.Time.TimerEvent[] = [];
+  private isFinalCinematicPlaying = false;
 
   constructor() {
     super({ key: 'GameplayScene' });
   }
 
   shutdown() {
+    this.cleanupFinalCinematicState(false);
     this.events.off('player-interact');
     this.events.off('boss-summon-minion');
     this.events.off('boss-attack');
@@ -492,6 +497,326 @@ export class GameplayScene extends Phaser.Scene {
     });
   }
 
+  private registerCinematicObject<T extends Phaser.GameObjects.GameObject>(obj: T): T {
+    this.cinematicObjects.push(obj);
+    return obj;
+  }
+
+  private registerCinematicTween(config: Phaser.Types.Tweens.TweenBuilderConfig): Phaser.Tweens.Tween {
+    const tween = this.tweens.add(config);
+    this.cinematicTweens.push(tween);
+    return tween;
+  }
+
+  private registerCinematicTimer(delay: number, callback: () => void): Phaser.Time.TimerEvent {
+    const timer = this.time.delayedCall(delay, callback);
+    this.cinematicTimers.push(timer);
+    return timer;
+  }
+
+  private cleanupFinalCinematicState(restoreControl: boolean = true) {
+    this.cinematicTimers.forEach((timer) => timer.remove(false));
+    this.cinematicTimers = [];
+
+    this.cinematicTweens.forEach((tween) => tween.remove());
+    this.cinematicTweens = [];
+
+    this.cinematicObjects.forEach((obj) => {
+      const gameObject = obj as Phaser.GameObjects.GameObject & { scene?: Phaser.Scene };
+      if (gameObject.scene) {
+        gameObject.destroy();
+      }
+    });
+    this.cinematicObjects = [];
+
+    this.isFinalCinematicPlaying = false;
+    useGameStore.getState().setCinematicGrainActive(false);
+
+    if (restoreControl) {
+      this.transitioningZone = false;
+    }
+  }
+
+  private playFinalCinematic(onComplete: () => void) {
+    this.cleanupFinalCinematicState(false);
+    this.isFinalCinematicPlaying = true;
+    this.transitioningZone = true;
+    useGameStore.getState().setCinematicGrainActive(true);
+
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    const darkOverlay = this.registerCinematicObject(
+      this.add.rectangle(0, 0, width, height, 0x000000)
+        .setOrigin(0)
+        .setScrollFactor(0)
+        .setDepth(910)
+        .setAlpha(0.65)
+    );
+
+    const blackTransition = this.registerCinematicObject(
+      this.add.rectangle(0, 0, width, height, 0x000000)
+        .setOrigin(0)
+        .setScrollFactor(0)
+        .setDepth(915)
+        .setAlpha(0)
+    );
+
+    const scanlines = this.registerCinematicObject(
+      this.add.graphics()
+        .setScrollFactor(0)
+        .setDepth(913)
+    );
+    scanlines.lineStyle(1, 0xffffff, 0.08);
+    for (let y = 0; y <= height; y += 4) {
+      scanlines.lineBetween(0, y, width, y);
+    }
+
+    const grain = this.registerCinematicObject(
+      this.add.graphics()
+        .setScrollFactor(0)
+        .setDepth(914)
+    );
+    for (let i = 0; i < Math.floor((width * height) / 1100); i++) {
+      const alpha = Phaser.Math.FloatBetween(0.03, 0.08);
+      grain.fillStyle(0xffffff, alpha);
+      grain.fillRect(
+        Phaser.Math.Between(0, width),
+        Phaser.Math.Between(0, height),
+        1,
+        1
+      );
+    }
+
+    const barHeight = Math.round(height * 0.15);
+    const topBar = this.registerCinematicObject(
+      this.add.rectangle(0, -barHeight, width, barHeight, 0x000000)
+        .setOrigin(0)
+        .setScrollFactor(0)
+        .setDepth(916)
+    );
+    const bottomBar = this.registerCinematicObject(
+      this.add.rectangle(0, height, width, barHeight, 0x000000)
+        .setOrigin(0)
+        .setScrollFactor(0)
+        .setDepth(916)
+    );
+
+    const frameFiveNarration = this.registerCinematicObject(
+      this.add.text(centerX, height - barHeight - 28, 'He gave everything so dawn could return.', {
+        fontSize: '18px',
+        fontFamily: 'Cinzel, serif',
+        color: '#f4e4c1',
+        stroke: '#000000',
+        strokeThickness: 4,
+      })
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(917)
+        .setAlpha(0)
+    );
+
+    const jitterTimer = this.time.addEvent({
+      delay: 125,
+      loop: true,
+      callback: () => {
+        const jitterX = Phaser.Math.Between(-1, 1);
+        const jitterY = Phaser.Math.Between(-1, 1);
+        scanlines.setPosition(jitterX, jitterY);
+        grain.setPosition(-jitterX, -jitterY);
+      },
+    });
+    this.cinematicTimers.push(jitterTimer);
+
+    this.registerCinematicTween({
+      targets: topBar,
+      y: 0,
+      duration: 450,
+      ease: 'Power2.easeOut',
+    });
+    this.registerCinematicTween({
+      targets: bottomBar,
+      y: height - barHeight,
+      duration: 450,
+      ease: 'Power2.easeOut',
+    });
+
+    type FrameSpec = {
+      key: string;
+      hold: number;
+      fromScale: number;
+      toScale?: number;
+      startOffsetX?: number;
+      startOffsetY?: number;
+      endOffsetX?: number;
+      endOffsetY?: number;
+    };
+
+    const frames: FrameSpec[] = [
+      { key: 'final_cinematic_1', hold: 4000, fromScale: 1.0, toScale: 1.15 },
+      { key: 'final_cinematic_2', hold: 3000, fromScale: 1.08, endOffsetX: -30 },
+      { key: 'final_cinematic_3', hold: 5000, fromScale: 1.1, toScale: 0.95 },
+      { key: 'final_cinematic_4', hold: 4000, fromScale: 1.05 },
+      { key: 'final_cinematic_5', hold: 6000, fromScale: 1.08, endOffsetX: 40 },
+      { key: 'final_cinematic_6', hold: 3000, fromScale: 1.0 },
+    ];
+
+    const finishCinematic = () => {
+      if (!this.isFinalCinematicPlaying) return;
+      this.cleanupFinalCinematicState(true);
+      onComplete();
+    };
+
+    const playFrame = (index: number) => {
+      if (!this.isFinalCinematicPlaying) return;
+      if (index >= frames.length) {
+        finishCinematic();
+        return;
+      }
+
+      const frame = frames[index];
+      const image = this.registerCinematicObject(
+        this.add.image(centerX, centerY, frame.key)
+          .setScrollFactor(0)
+          .setDepth(912)
+          .setAlpha(0)
+      );
+
+      const baseScale = Math.max(width / image.width, height / image.height);
+      image.setScale(baseScale * frame.fromScale);
+      image.x = centerX + (frame.startOffsetX ?? 0);
+      image.y = centerY + (frame.startOffsetY ?? 0);
+
+      const startFrameHold = () => {
+        const targetScale = frame.toScale !== undefined ? baseScale * frame.toScale : image.scale;
+        const targetX = centerX + (frame.endOffsetX ?? frame.startOffsetX ?? 0);
+        const targetY = centerY + (frame.endOffsetY ?? frame.startOffsetY ?? 0);
+
+        if (
+          targetScale !== image.scale ||
+          targetX !== image.x ||
+          targetY !== image.y
+        ) {
+          this.registerCinematicTween({
+            targets: image,
+            scale: targetScale,
+            x: targetX,
+            y: targetY,
+            duration: frame.hold,
+            ease: 'Sine.easeInOut',
+          });
+        }
+
+        if (index === 4) {
+          this.registerCinematicTimer(3000, () => {
+            if (!this.isFinalCinematicPlaying) return;
+            this.registerCinematicTween({
+              targets: frameFiveNarration,
+              alpha: 1,
+              duration: 700,
+              ease: 'Sine.easeOut',
+            });
+          });
+        }
+
+        this.registerCinematicTimer(frame.hold, () => {
+          if (!this.isFinalCinematicPlaying) return;
+
+          if (index === 5) {
+            this.registerCinematicTween({
+              targets: image,
+              alpha: 0,
+              duration: 600,
+              ease: 'Sine.easeInOut',
+            });
+            this.registerCinematicTween({
+              targets: blackTransition,
+              alpha: 1,
+              duration: 1000,
+              ease: 'Sine.easeInOut',
+              onComplete: finishCinematic,
+            });
+            return;
+          }
+
+          if (index === 4) {
+            this.registerCinematicTween({
+              targets: [image, frameFiveNarration],
+              alpha: 0,
+              duration: 600,
+              ease: 'Sine.easeInOut',
+            });
+            this.registerCinematicTween({
+              targets: blackTransition,
+              alpha: 1,
+              duration: 1000,
+              ease: 'Sine.easeInOut',
+              onComplete: () => playFrame(index + 1),
+            });
+            return;
+          }
+
+          this.registerCinematicTween({
+            targets: image,
+            alpha: 0,
+            duration: 600,
+            ease: 'Sine.easeInOut',
+            onComplete: () => {
+              if (!this.isFinalCinematicPlaying) return;
+              if (index === 1) {
+                const flash = this.registerCinematicObject(
+                  this.add.rectangle(0, 0, width, height, 0xffffff)
+                    .setOrigin(0)
+                    .setScrollFactor(0)
+                    .setDepth(918)
+                    .setAlpha(0)
+                );
+                this.registerCinematicTween({
+                  targets: flash,
+                  alpha: 1,
+                  duration: 50,
+                  yoyo: true,
+                  ease: 'Linear',
+                  onComplete: () => playFrame(index + 1),
+                });
+              } else {
+                playFrame(index + 1);
+              }
+            },
+          });
+        });
+      };
+
+      if (index === 5) {
+        this.registerCinematicTween({
+          targets: image,
+          alpha: 1,
+          duration: 800,
+          ease: 'Sine.easeOut',
+          onComplete: startFrameHold,
+        });
+        this.registerCinematicTween({
+          targets: blackTransition,
+          alpha: 0.65,
+          duration: 800,
+          ease: 'Sine.easeOut',
+        });
+      } else {
+        this.registerCinematicTween({
+          targets: image,
+          alpha: 1,
+          duration: 800,
+          ease: 'Sine.easeOut',
+          onComplete: startFrameHold,
+        });
+      }
+    };
+
+    this.registerCinematicTimer(200, () => playFrame(0));
+  }
+
   private spawnRoundEnemies(round: ZoneRound) {
     const TILE = 32;
     this.roundEnemyTotal = 0;
@@ -734,15 +1059,16 @@ export class GameplayScene extends Phaser.Scene {
       });
 
       if (data.bossId === 'ashen_knight') {
-        this.time.delayedCall(2000, () => {
-          useGameStore.getState().openDialogue(BATTLEFIELD_BOSS_POST as any, () => {
-            this.time.delayedCall(1500, () => {
-              useGameStore.getState().openDialogue(ENDING_SCENE as any, () => {
-                this.time.delayedCall(1000, () => {
-                  useGameStore.getState().setScreen('ending');
-                });
-              });
-            });
+        this.roundActive = false;
+        this.transitioningZone = true;
+        const musicSettings = useGameStore.getState().settings;
+        setBGMVolume(musicSettings.musicVolume, musicSettings.masterVolume);
+        playBGM('ending');
+        this.cameras.main.flash(500, 255, 255, 255);
+        this.playFinalCinematic(() => {
+          const finalStore = useGameStore.getState();
+          finalStore.openDialogue(ENDING_SCENE as any, () => {
+            finalStore.setScreen('ending');
           });
         });
         return;
@@ -775,7 +1101,7 @@ export class GameplayScene extends Phaser.Scene {
       return;
     }
 
-    if (store.dialogue.isOpen || store.isPaused || this.isHitStopping) return;
+    if (store.dialogue.isOpen || store.isPaused || this.isHitStopping || this.transitioningZone || this.isFinalCinematicPlaying) return;
 
     this.player.update(delta);
 
@@ -1128,7 +1454,6 @@ export class GameplayScene extends Phaser.Scene {
         {
           preDialogue: BATTLEFIELD_BOSS_PRE,
           boss: { id: 'ashen_knight', name: 'Ashen Knight', title: 'Once a Guardian, Now Dust', maxHp: 3000, phases: 3, attack: 55, speed: 160 },
-          postDialogue: BATTLEFIELD_BOSS_POST,
           enemies: [],
         },
       ],

@@ -13,7 +13,22 @@ const HOTBAR_ICONS: Record<string, string> = {
 };
 
 const HUD: React.FC = () => {
-  const { player, currentZone, skillPoints, hotbar, recallToTown, returnToBattlefield, hasRecallPortal, isAutoPlay, toggleAutoPlay, isAutoDialogue, toggleAutoDialogue, killCount, inventory } = useGameStore();
+  const {
+    player,
+    currentZone,
+    skillPoints,
+    hotbar,
+    recallToTown,
+    returnToBattlefield,
+    hasRecallPortal,
+    isAutoPlay,
+    toggleAutoPlay,
+    isAutoDialogue,
+    toggleAutoDialogue,
+    killCount,
+    inventory,
+    isCinematicGrainActive,
+  } = useGameStore();
   const { stats, name, comboCount, ultimateCharge } = player;
 
   const hpPct = (stats.hp / stats.maxHp) * 100;
@@ -24,6 +39,17 @@ const HUD: React.FC = () => {
 
   return (
     <div className="absolute inset-0 pointer-events-none select-none" style={{ fontFamily: 'Cinzel, serif' }}>
+      <div
+        className="absolute inset-0"
+        style={{
+          opacity: isCinematicGrainActive ? 0.03 : 0,
+          mixBlendMode: 'overlay',
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.95) 0.5px, transparent 0.8px), radial-gradient(circle, rgba(0,0,0,0.9) 0.45px, transparent 0.75px)',
+          backgroundSize: '3px 3px, 4px 4px',
+          backgroundPosition: '0 0, 1px 1px',
+          transition: 'opacity 180ms ease',
+        }}
+      />
 
       {/* Top-left: Minimal HP + Name */}
       <div className="absolute top-6 left-6">

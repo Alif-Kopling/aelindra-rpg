@@ -19,6 +19,12 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('boss_fallen_guardian_sprite', 'assets/images/fallen_guardian_boss.png');
     this.load.image('sword_rain', 'assets/images/extract-only-the-sword-from-the-image-large-dark-f-removebg-preview.png');
     this.load.image('anim_boss_vs_mc', 'assets/images/animation/pict-animasi-boss-vs-mc.png');
+    this.load.image('final_cinematic_1', 'assets/cinematic/cinematic_1.png');
+    this.load.image('final_cinematic_2', 'assets/cinematic/cinematic_2.png');
+    this.load.image('final_cinematic_3', 'assets/cinematic/cinematic_3.png');
+    this.load.image('final_cinematic_4', 'assets/cinematic/cinematic_4.png');
+    this.load.image('final_cinematic_5', 'assets/cinematic/cinematic_5.png');
+    this.load.image('final_cinematic_6', 'assets/cinematic/cinematic_6.png');
 
     this.load.image('scene_intro_1', 'assets/images/animation/scene1-before-tragedy.jpeg');
     this.load.image('scene_intro_3', 'assets/images/animation/scene3-The-Tragedy.jpeg');

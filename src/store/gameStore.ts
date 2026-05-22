@@ -126,6 +126,8 @@ interface GameStore {
   openDialogue: (lines: DialogueLine[], onComplete?: () => void) => void;
   advanceDialogue: () => void;
   closeDialogue: () => void;
+  isCinematicGrainActive: boolean;
+  setCinematicGrainActive: (active: boolean) => void;
 
   // Boss
   activeBoss: BossData | null;
@@ -370,6 +372,10 @@ export const useGameStore = create<GameStore>()(
       s.dialogue.lines = [];
       s.dialogue.currentIndex = 0;
       s.dialogue.onComplete = undefined;
+    }),
+    isCinematicGrainActive: false,
+    setCinematicGrainActive: (active) => set((s) => {
+      s.isCinematicGrainActive = active;
     }),
 
     // Boss

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
-import { playBGM, stopBGM, setBGMVolume } from '../utils/bgm';
+import { playBGM, setBGMVolume } from '../utils/bgm';
 
 const ENDING_LINES = [
   { text: 'Kegelapan surut.', delay: 0, duration: 3000 },
@@ -46,7 +46,6 @@ const EndingScreen: React.FC = () => {
   React.useEffect(() => {
     setBGMVolume(settings.musicVolume, settings.masterVolume);
     playBGM('ending');
-    return () => stopBGM();
   }, [settings.musicVolume, settings.masterVolume]);
 
   const bgColors = {
