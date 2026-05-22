@@ -297,9 +297,12 @@ export class GameplayScene extends Phaser.Scene {
         const isCritChance = Math.random() < critChance;
         const isCritical = isCharged || (comboCount >= 4) || isCritChance;
 
+        const stats = store.player.stats;
+        const atkBonus = Math.floor(stats.attack * 0.6);
+        const critBonus = Math.floor(stats.attack * 0.5);
         const dmg = isCritical 
-          ? Math.round(Phaser.Math.Between(50, 100) * (store.unlockedSkills.includes('blood_pact') ? 1.25 : 1))
-          : Math.round((25 + Math.min(5, comboCount)) * (store.unlockedSkills.includes('blade_mastery') ? 1.2 : 1));
+          ? Math.round(Phaser.Math.Between(50 + critBonus, 90 + critBonus) * (store.unlockedSkills.includes('blood_pact') ? 1.25 : 1))
+          : Math.round((25 + atkBonus + Math.min(5, comboCount)) * (store.unlockedSkills.includes('blade_mastery') ? 1.2 : 1));
         
         const killed = enemy.takeDamage(dmg, comboCount, isCritical);
         this.player.registerHit(enemyId);
@@ -347,9 +350,12 @@ export class GameplayScene extends Phaser.Scene {
         const isCritChance = Math.random() < critChance;
         const isCritical = isCharged || (comboCount >= 4) || isCritChance;
 
+        const stats = store.player.stats;
+        const bossAtkBonus = Math.floor(stats.attack * 0.7);
+        const bossCritBonus = Math.floor(stats.attack * 0.5);
         const dmg = isCritical 
-          ? Math.round(Phaser.Math.Between(100, 180) * (store.unlockedSkills.includes('blood_pact') ? 1.25 : 1))
-          : Math.round((45 + Math.min(10, comboCount)) * (store.unlockedSkills.includes('blade_mastery') ? 1.2 : 1));
+          ? Math.round(Phaser.Math.Between(100 + bossCritBonus, 180 + bossCritBonus) * (store.unlockedSkills.includes('blood_pact') ? 1.25 : 1))
+          : Math.round((45 + bossAtkBonus + Math.min(10, comboCount)) * (store.unlockedSkills.includes('blade_mastery') ? 1.2 : 1));
         
         // Spawn partikel cipratan darah jika serangan kritikal
         if (isCritical) {

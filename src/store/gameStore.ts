@@ -28,8 +28,8 @@ const initialPlayerStats: PlayerStats = {
   maxStamina: PLAYER_DEFAULTS.maxStamina,
   mana: PLAYER_DEFAULTS.maxMana,
   maxMana: PLAYER_DEFAULTS.maxMana,
-  attack: PLAYER_DEFAULTS.attack,
-  defense: PLAYER_DEFAULTS.defense,
+  attack: PLAYER_DEFAULTS.attack + (ITEMS_DB.iron_sword?.stats?.attack || 0),
+  defense: PLAYER_DEFAULTS.defense + (ITEMS_DB.knight_armor?.stats?.defense || 0),
   speed: PLAYER_DEFAULTS.speed,
   level: 1,
   exp: 0,
@@ -232,7 +232,9 @@ export const useGameStore = create<GameStore>()(
     setPlayerName: (name) => set((s) => { s.player.name = name; }),
     updatePlayerStats: (stats) => set((s) => { Object.assign(s.player.stats, stats); }),
     damagePlayer: (amount) => set((s) => {
-      const newHp = Math.max(0, s.player.stats.hp - Math.max(0, amount - s.player.stats.defense / 2));
+      const def = s.player.stats.defense;
+      const reduced = Math.max(1, Math.round(amount * (100 / (100 + def))));
+      const newHp = Math.max(0, s.player.stats.hp - reduced);
       s.player.stats.hp = newHp;
       if (newHp <= 0) s.screen = 'gameOver';
     }),
@@ -334,9 +336,38 @@ export const useGameStore = create<GameStore>()(
     equipItem: (itemId) => set((s) => {
       const item = s.inventory.items.find(i => i.id === itemId);
       if (!item) return;
-      if (item.type === 'weapon') s.player.equippedWeapon = itemId;
-      else if (item.type === 'armor') s.player.equippedArmor = itemId;
-      else if (item.type === 'accessory') s.player.equippedAccessory = itemId;
+
+      const dbItem = ITEMS_DB[itemId];
+      if (!dbItem || !dbItem.stats) return;
+
+      let oldItemId: string | null = null;
+      if (item.type === 'weapon') {
+        oldItemId = s.player.equippedWeapon || null;
+        s.player.equippedWeapon = itemId;
+      } else if (item.type === 'armor') {
+        oldItemId = s.player.equippedArmor || null;
+        s.player.equippedArmor = itemId;
+      } else if (item.type === 'accessory') {
+        oldItemId = s.player.equippedAccessory || null;
+        s.player.equippedAccessory = itemId;
+      }
+
+      if (oldItemId && oldItemId !== itemId) {
+        const oldDb = ITEMS_DB[oldItemId];
+        if (oldDb?.stats) {
+          for (const [stat, val] of Object.entries(oldDb.stats)) {
+            if (stat in s.player.stats) {
+              (s.player.stats as Record<string, number>)[stat] -= val as number;
+            }
+          }
+        }
+      }
+
+      for (const [stat, val] of Object.entries(dbItem.stats)) {
+        if (stat in s.player.stats) {
+          (s.player.stats as Record<string, number>)[stat] += val as number;
+        }
+      }
     }),
     addGold: (amount) => set((s) => { s.inventory.gold += amount; }),
     spendGold: (amount) => {
@@ -520,7 +551,7 @@ export const useGameStore = create<GameStore>()(
 
       if (item.type === 'consumable') {
         if (itemId === 'health_potion') {
-          const healAmount = 50;
+          const healAmount = Math.max(50, Math.round(state.player.stats.maxHp * 0.35));
           set((s) => {
             s.player.stats.hp = Math.min(s.player.stats.maxHp, s.player.stats.hp + healAmount);
             const pot = s.inventory.items.find(i => i.id === itemId);

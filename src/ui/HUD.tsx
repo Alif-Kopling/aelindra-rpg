@@ -245,8 +245,22 @@ const HUD: React.FC = () => {
         </button>
       </div>
 
-      {/* Bottom: Hotbar + Ultimate + Combo */}
+      {/* Bottom: Combo + Hotbar + Ultimate */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2">
+        {/* Combo - above hotbar */}
+        {comboCount > 1 && (
+          <div style={{
+            fontSize: comboCount >= 4 ? '16px' : '12px',
+            fontWeight: 700,
+            color: comboCount >= 4 ? '#ffd700' : '#f4e4c1',
+            textShadow: `0 0 ${comboCount * 4}px rgba(${comboCount >= 4 ? '255,215,0' : '244,228,193'},0.6)`,
+            letterSpacing: '2px',
+            textAlign: 'center',
+          }}>
+            {comboCount}x
+          </div>
+        )}
+
         {/* Hotbar */}
         <div className="flex items-center gap-1" style={{ pointerEvents: 'auto' }}>
           {hotbar.map((itemId, i) => (
@@ -298,7 +312,7 @@ const HUD: React.FC = () => {
           ))}
         </div>
 
-        {/* Ultimate + Combo */}
+        {/* Ultimate bar - below hotbar */}
         {ultimateCharge > 0 && (
           <div className="flex items-center gap-2 justify-center">
             <span style={{ fontSize: '8px', color: '#b8860b', letterSpacing: '1px' }}>PASSION</span>
@@ -322,20 +336,6 @@ const HUD: React.FC = () => {
                 READY
               </span>
             )}
-          </div>
-        )}
-
-        {/* Combo */}
-        {comboCount > 1 && (
-          <div style={{
-            fontSize: comboCount >= 4 ? '16px' : '12px',
-            fontWeight: 700,
-            color: comboCount >= 4 ? '#ffd700' : '#f4e4c1',
-            textShadow: `0 0 ${comboCount * 4}px rgba(${comboCount >= 4 ? '255,215,0' : '244,228,193'},0.6)`,
-            letterSpacing: '2px',
-            textAlign: 'center',
-          }}>
-            {comboCount}x
           </div>
         )}
       </div>
