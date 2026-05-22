@@ -1,6 +1,15 @@
 import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
 
+const ITEM_IMAGES: Record<string, string> = {
+  health_potion: '/assets/images/items/health_potion.png',
+  iron_sword: '/assets/images/items/iron_sword.png',
+  forsaken_blade: '/assets/images/items/forsaken_blade.png',
+  knight_armor: '/assets/images/items/knight_armor.png',
+  wanderers_ring: '/assets/images/items/wanderers_ring.png',
+  blacksmiths_gift: '/assets/images/items/blacksmiths_gift.png',
+};
+
 const Shop: React.FC = () => {
   const {
     player,
@@ -94,7 +103,11 @@ const Shop: React.FC = () => {
             <p className="text-xs italic text-gray-400 mt-1">"Survive, boy. That's an order."</p>
           </div>
           <div className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded border border-yellow-600/30">
-            <span className="text-yellow-500 text-sm">🪙</span>
+            <svg width="18" height="18" viewBox="0 0 16 16" className="text-yellow-500">
+              <circle cx="8" cy="8" r="7" fill="currentColor" opacity="0.2"/>
+              <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+              <text x="8" y="11" textAnchor="middle" fontSize="9" fill="currentColor" fontWeight="bold">G</text>
+            </svg>
             <span className="text-yellow-400 font-bold text-sm tracking-wider">{inventory.gold} <span className="text-xs text-yellow-600">G</span></span>
           </div>
         </div>
@@ -163,7 +176,9 @@ const Shop: React.FC = () => {
                   {/* Weapon Upgrade */}
                   <div className="flex items-center justify-between p-3 rounded bg-black/25 border border-yellow-900/25 hover:border-yellow-600/35 transition-colors">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl bg-yellow-900/20 w-10 h-10 flex items-center justify-center rounded border border-yellow-800/20">⚔️</span>
+                      <span className="bg-yellow-900/20 w-10 h-10 flex items-center justify-center rounded border border-yellow-800/20">
+                        <img src={ITEM_IMAGES.iron_sword} alt="sword" className="w-7 h-7" style={{ imageRendering: 'pixelated' }} />
+                      </span>
                       <div>
                         <h4 className="text-xs font-bold text-yellow-400 tracking-wider">Pedang Ksatria (Lv. {weaponLvl})</h4>
                         <p className="text-xxs text-gray-400 mt-0.5">Meningkatkan damage tebasan Alden (+3 Attack)</p>
@@ -186,7 +201,9 @@ const Shop: React.FC = () => {
                   {/* Armor Upgrade */}
                   <div className="flex items-center justify-between p-3 rounded bg-black/25 border border-yellow-900/25 hover:border-yellow-600/35 transition-colors">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl bg-yellow-900/20 w-10 h-10 flex items-center justify-center rounded border border-yellow-800/20">🛡️</span>
+                      <span className="bg-yellow-900/20 w-10 h-10 flex items-center justify-center rounded border border-yellow-800/20">
+                        <img src={ITEM_IMAGES.knight_armor} alt="armor" className="w-7 h-7" style={{ imageRendering: 'pixelated' }} />
+                      </span>
                       <div>
                         <h4 className="text-xs font-bold text-yellow-400 tracking-wider">Zirah Pelat (Lv. {armorLvl})</h4>
                         <p className="text-xxs text-gray-400 mt-0.5">Meningkatkan ketahanan dari luka (+2 Defense)</p>
@@ -211,7 +228,9 @@ const Shop: React.FC = () => {
                   {/* Potion Purchase */}
                   <div className="flex items-center justify-between p-3 rounded bg-black/25 border border-yellow-900/25 hover:border-yellow-600/35 transition-colors">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl bg-yellow-900/20 w-10 h-10 flex items-center justify-center rounded border border-yellow-800/20">🧪</span>
+                      <span className="bg-yellow-900/20 w-10 h-10 flex items-center justify-center rounded border border-yellow-800/20">
+                        <img src={ITEM_IMAGES.health_potion} alt="potion" className="w-7 h-7" style={{ imageRendering: 'pixelated' }} />
+                      </span>
                       <div>
                         <h4 className="text-xs font-bold text-yellow-400 tracking-wider">Healing Draught (x{currentPotionCount})</h4>
                         <p className="text-xxs text-gray-400 mt-0.5">Ramuan merah untuk memulihkan HP Alden saat terluka.</p>
