@@ -1519,9 +1519,7 @@ export class GameplayScene extends Phaser.Scene {
   private playIntroSequence() {
     const store = useGameStore.getState();
     store.setStoryFlag('intro_seen', true);
-    store.openDialogue(VILLAGE_ENTRY, () => {
-      this.advanceToNextRound();
-    });
+    this.advanceToNextRound();
   }
 
   spawnBloodSpray(x: number, y: number) {
