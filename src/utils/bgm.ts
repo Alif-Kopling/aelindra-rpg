@@ -24,7 +24,15 @@ function applyVolume() {
 
 export function playBGM(track: string) {
   const src = BGM_FILES[track];
-  if (!src || currentTrack === track) return;
+  if (!src) return;
+
+  // If same audio file is already playing, just update track name (no restart)
+  if (currentAudio && currentAudio.src.endsWith(src)) {
+    currentTrack = track;
+    return;
+  }
+
+  if (currentTrack === track) return;
 
   stopBGM();
 

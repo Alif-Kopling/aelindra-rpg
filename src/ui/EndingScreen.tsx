@@ -192,7 +192,7 @@ const EndingScreen: React.FC = () => {
           </div>
         ))}
 
-        {/* Final statue scene */}
+        {/* Final framed photo scene */}
         {bgPhase === 'bright' && (
           <div
             style={{
@@ -201,28 +201,120 @@ const EndingScreen: React.FC = () => {
               borderTop: '1px solid rgba(200,168,98,0.1)',
               opacity: bgPhase === 'bright' ? 1 : 0,
               transition: 'opacity 4s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
             }}
           >
-            <div style={{ fontSize: 72, marginBottom: 24, filter: 'drop-shadow(0 0 30px rgba(255,200,100,0.5))' }}>
-              ⚔️
+            {/* Dusty glass photo frame */}
+            <div
+              style={{
+                position: 'relative',
+                width: 'min(92vw, 640px)',
+                aspectRatio: '4/3',
+                borderRadius: 4,
+                padding: 10,
+                background: 'linear-gradient(145deg, #3a2810, #1a0e05, #2d1a08, #1a0e05)',
+                boxShadow: '0 8px 40px rgba(0,0,0,0.8), 0 0 80px rgba(0,0,0,0.4), inset 0 0 30px rgba(0,0,0,0.3)',
+              }}
+            >
+              {/* Inner frame shadow */}
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 12,
+                  border: '1px solid rgba(200,168,98,0.15)',
+                  borderRadius: 2,
+                  pointerEvents: 'none',
+                  zIndex: 2,
+                }}
+              />
+
+              {/* The photo */}
+              <img
+                src="/assets/images/ending.png"
+                alt="Aelindra"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  borderRadius: 2,
+                  display: 'block',
+                }}
+              />
+
+              {/* Dusty glass overlay */}
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 12,
+                  borderRadius: 2,
+                  background: `
+                    linear-gradient(135deg, 
+                      rgba(180,160,120,0.06) 0%, 
+                      rgba(100,80,50,0.04) 30%,
+                      rgba(180,160,120,0.02) 60%,
+                      rgba(60,40,20,0.08) 100%
+                    )
+                  `,
+                  backdropFilter: 'blur(0.5px)',
+                  zIndex: 3,
+                  pointerEvents: 'none',
+                }}
+              />
+
+              {/* Dust specks */}
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 12,
+                  borderRadius: 2,
+                  backgroundImage: `
+                    radial-gradient(1.5px 1.5px at 15% 30%, rgba(200,180,150,0.4) 50%, transparent 50%),
+                    radial-gradient(1px 1px at 75% 20%, rgba(200,180,150,0.3) 50%, transparent 50%),
+                    radial-gradient(1px 1px at 45% 65%, rgba(200,180,150,0.35) 50%, transparent 50%),
+                    radial-gradient(1.5px 1.5px at 85% 70%, rgba(200,180,150,0.3) 50%, transparent 50%),
+                    radial-gradient(1px 1px at 25% 80%, rgba(200,180,150,0.25) 50%, transparent 50%),
+                    radial-gradient(1px 1px at 60% 40%, rgba(200,180,150,0.3) 50%, transparent 50%),
+                    radial-gradient(1.5px 1.5px at 10% 55%, rgba(200,180,150,0.2) 50%, transparent 50%),
+                    radial-gradient(1px 1px at 90% 45%, rgba(200,180,150,0.25) 50%, transparent 50%)
+                  `,
+                  zIndex: 4,
+                  pointerEvents: 'none',
+                }}
+              />
+
+              {/* Glass glare */}
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 12,
+                  borderRadius: 2,
+                  background: 'linear-gradient(160deg, rgba(255,255,255,0.05) 0%, transparent 40%, transparent 70%, rgba(255,255,255,0.02) 100%)',
+                  zIndex: 5,
+                  pointerEvents: 'none',
+                }}
+              />
             </div>
+
+            {/* Name and title below frame */}
             <div style={{
               fontFamily: 'Cinzel Decorative, serif',
-              fontSize: 'clamp(24px, 5vw, 42px)',
+              fontSize: 'clamp(20px, 4vw, 34px)',
               fontWeight: 900,
               color: '#c8a862',
-              letterSpacing: '6px',
-              textShadow: '0 0 40px rgba(200,168,98,0.5)',
-              animation: 'textGlow 3s ease-in-out infinite',
+              letterSpacing: '5px',
+              textShadow: '0 0 30px rgba(200,168,98,0.4)',
+              marginTop: 28,
             }}>
               {player.name}
             </div>
             <div style={{
               fontFamily: 'Lora, serif',
               fontStyle: 'italic',
-              fontSize: 16,
+              fontSize: 15,
               color: '#a09080',
-              marginTop: 12,
+              marginTop: 8,
               letterSpacing: '3px',
               textTransform: 'uppercase',
             }}>
@@ -230,7 +322,7 @@ const EndingScreen: React.FC = () => {
             </div>
 
             {/* Flowers */}
-            <div style={{ fontSize: 32, marginTop: 32, letterSpacing: 12, opacity: 0.8 }}>🌸 🌼 🌷 🌼 🌸</div>
+            <div style={{ fontSize: 30, marginTop: 28, letterSpacing: 10, opacity: 0.8 }}>🌸 🌼 🌷 🌼 🌸</div>
           </div>
         )}
       </div>
