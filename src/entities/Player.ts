@@ -136,7 +136,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   private createAttackHitbox() {
     this.attackHitbox = this.scene.add.sprite(this.x + 40, this.y, 'pixel');
-    this.attackHitbox.setDisplaySize(60, 50);
+    this.attackHitbox.setDisplaySize(40, 42);
     this.attackHitbox.setVisible(false);
     this.scene.physics.add.existing(this.attackHitbox);
     (this.attackHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
@@ -1209,18 +1209,19 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     // Melee hitbox — kept narrow so one swing does not hit the whole screen
     const finisherSwing = this.isAttacking && (this.comboCount - 1) % 3 === 2;
-    let w = finisherSwing ? 52 : 40;
-    let h = finisherSwing ? 46 : 42;
+    let w = finisherSwing ? 40 : 30;
+    let h = finisherSwing ? 38 : 36;
 
     if (this.isChargedAttack) {
-      w = 58;
-      h = 50;
+      w = 44;
+      h = 42;
     } else if (this.isUltimate) {
-      w = 72;
-      h = 54;
+      w = 56;
+      h = 48;
     }
 
     hb.setSize(w, h);
+    this.attackHitbox.setDisplaySize(w, h);
     const margin = 5;
     const dir = this.facingRight ? 1 : -1;
     const px = this.x + dir * (w / 2 + margin);
