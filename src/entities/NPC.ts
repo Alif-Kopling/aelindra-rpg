@@ -57,14 +57,21 @@ export class NPC extends Phaser.Physics.Arcade.Sprite {
       const baseScaleX = 64 / this.width;
       const baseScaleY = 92 / this.height;
       this.setScale(baseScaleX, baseScaleY);
-      const bw = this.displayWidth * 0.4;
-      const bh = this.displayHeight * 0.7;
-      body.setSize(bw, bh, false);
-      body.setOffset((this.displayWidth - bw) / 2, this.displayHeight - bh);
+      
+      // Use texture-space coordinates:
+      // We want the body to be centered horizontally and anchored near the bottom
+      const bw = this.width * 0.4;
+      const bh = this.height * 0.8;
+      body.setSize(bw, bh);
+      body.setOffset((this.width - bw) / 2, this.height - bh);
     } else {
       this.setScale(2);
-      body.setSize(20, 30, false);
-      body.setOffset((this.displayWidth - 20) / 2, this.displayHeight - 30);
+      const th = 46; // Texture height from generateTexture
+      const tw = 32; // Texture width
+      const bh = 30;
+      const bw = 20;
+      body.setSize(bw, bh);
+      body.setOffset((tw - bw) / 2, th - bh);
     }
 
     this.setDepth(8);

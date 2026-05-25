@@ -80,9 +80,15 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
       this.setScale(scale);
     }
 
-    // Anchor body to bottom of sprite so visual feet align with ground
-    body.setSize(48, 64, false);
-    body.setOffset((this.displayWidth - 48) / 2, this.displayHeight - 64);
+    // Anchor body to bottom of sprite using texture-space coordinates
+    const tex = this.texture.get();
+    const tw = tex.width;
+    const th = tex.height;
+
+    const bw = 48;
+    const bh = 64;
+    body.setSize(bw, bh);
+    body.setOffset((tw - bw) / 2, th - bh);
     this.setDepth(10);
 
     this.projectiles = scene.physics.add.group();

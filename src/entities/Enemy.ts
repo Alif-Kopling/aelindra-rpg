@@ -76,9 +76,14 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     } else {
       this.setScale(scale);
     }
-    // Anchor body to bottom of sprite so visual feet align with ground
-    body.setSize(bw, bh, false);
-    body.setOffset((this.displayWidth - bw) / 2, this.displayHeight - bh);
+
+    // Anchor body to bottom of sprite using texture-space coordinates
+    const tex = this.texture.get();
+    const tw = tex.width;
+    const th = tex.height;
+    
+    body.setSize(bw, bh);
+    body.setOffset((tw - bw) / 2, th - bh);
     this.setDepth(9);
 
     this.createHpBar();
