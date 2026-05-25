@@ -32,6 +32,8 @@
   - equipment, consumables, upgrade weapon/armor
 - **Save/Load (3 Slots)**
   - via `localStorage`
+- **Player Animation Texture Swapping**
+  - idle ↔ walk bergantian saat jalan, jump sprite saat lompat, dash sprite saat dash
 - **Final 6-Frame Cinematic Ending**
   - letterbox, scanline, grain, jitter, flash transition, fade-to-black
 - **Seamless Ending Audio Flow**
