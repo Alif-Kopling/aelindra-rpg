@@ -81,7 +81,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     body.setMaxVelocity(200, 600);
     body.setImmovable(false);
 
-    const scale = config.scale || 2.5;
+    const scale = config.scale || 3.5;
     if (scene.textures.exists(spriteKey)) {
       this.setDisplaySize(64 * scale, 80 * scale);
     } else {
@@ -195,7 +195,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
         this.setTexture(spriteKey);
       }
 
-      const baseScale = this.config.scale || 2.5;
+      const baseScale = (this.config.scale || 3.5) * this.phaseScaleMultiplier;
       const baseScaleX = (64 * baseScale) / this.width;
       const baseScaleY = (80 * baseScale) / this.height;
 
@@ -1530,16 +1530,28 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     this.scene.cameras.main.shake(600, 0.015);
     this.scene.cameras.main.flash(300, 100, 0, 0);
 
+    const baseScaleVal = this.config.scale || 3.5;
+    const nextMultiplier = newPhase === 2 ? 1.2 : 1.4;
+    const targetScale = baseScaleVal * nextMultiplier;
+
     this.scene.tweens.add({
       targets: this,
-      scaleX: 3.5,
-      scaleY: 3.5,
-      duration: 300,
+      scaleX: targetScale * 1.3,
+      scaleY: targetScale * 1.3,
+      duration: 400,
       yoyo: true,
       ease: 'Power2',
       onComplete: () => {
         this.phaseTransitioning = false;
         this.aiState = newPhase === 2 ? 'phase2' : 'phase3';
+        this.phaseScaleMultiplier = nextMultiplier;
+        
+        // Update body size to match new visual scale
+        const bw = 48 * nextMultiplier;
+        const bh = 64 * nextMultiplier;
+        body.setSize(bw, bh);
+        const tex = this.texture.get();
+        body.setOffset((tex.width - bw) / 2, tex.height - bh);
       },
     });
 
@@ -1729,21 +1741,32 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
         this.hp = 2500;
         this.config.attack += 20;
         this.config.speed += 30;
+        this.phaseScaleMultiplier = 1.3;
       } else if (newPhase === 3) {
         this.maxHp = 2000;
         this.hp = 2000;
         this.config.attack += 25;
         this.config.speed += 40;
+        this.phaseScaleMultiplier = 2.0; // 2x Lipat!
         
-        // Increase scale for final form
+        // Final form dramatic scale
         scene.tweens.add({
           targets: this,
-          scaleX: (this.config.scale || 2.5) * 1.35,
-          scaleY: (this.config.scale || 2.5) * 1.35,
+          scaleX: (this.config.scale || 3.5) * 2.5, // Visual flash peak
+          scaleY: (this.config.scale || 3.5) * 2.5,
           duration: 1200,
+          yoyo: true,
           ease: 'Cubic.easeInOut'
         });
       }
+
+      // Update body size for the new massive scale
+      const body = this.body as Phaser.Physics.Arcade.Body;
+      const bw = 48 * this.phaseScaleMultiplier;
+      const bh = 64 * this.phaseScaleMultiplier;
+      body.setSize(bw, bh);
+      const tex = this.texture.get();
+      body.setOffset((tex.width - bw) / 2, tex.height - bh);
 
       store.setBoss({
         id: this.config.id,
