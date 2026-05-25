@@ -211,7 +211,7 @@ const EndingScreen: React.FC = () => {
               style={{
                 position: 'relative',
                 width: 'min(92vw, 640px)',
-                aspectRatio: '4/3',
+                aspectRatio: '3/2',
                 borderRadius: 4,
                 padding: 10,
                 background: 'linear-gradient(145deg, #3a2810, #1a0e05, #2d1a08, #1a0e05)',
@@ -240,6 +240,7 @@ const EndingScreen: React.FC = () => {
                   objectFit: 'cover',
                   borderRadius: 2,
                   display: 'block',
+                  filter: 'brightness(1.6) contrast(1.15)',
                 }}
               />
 
