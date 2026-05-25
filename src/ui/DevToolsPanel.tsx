@@ -14,7 +14,7 @@ const DevToolsPanel: React.FC<DevToolsPanelProps> = ({ onTriggerFinalBossDefeat,
 
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'F10') {
+      if (e.key === ';') {
         e.preventDefault();
         setOpen((prev) => !prev);
       }
@@ -46,14 +46,11 @@ const DevToolsPanel: React.FC<DevToolsPanelProps> = ({ onTriggerFinalBossDefeat,
         className="absolute top-3 left-3 pointer-events-auto"
         style={{
           zIndex: 1200,
-          padding: '6px 10px',
-          fontSize: 11,
-          fontFamily: 'monospace',
-          color: '#d4c39a',
-          background: 'rgba(10,10,14,0.82)',
-          border: '1px solid rgba(212,195,154,0.4)',
-          borderRadius: 4,
-          letterSpacing: '0.5px',
+          padding: '10px',
+          width: '20px',
+          height: '20px',
+          opacity: 0,
+          cursor: 'default',
         }}
       >
         ;
