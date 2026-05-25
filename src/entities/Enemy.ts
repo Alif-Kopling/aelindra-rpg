@@ -517,6 +517,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     if (this.scene.cache.audio.exists('sfx_undead')) {
       this.scene.sound.play('sfx_undead', { volume: 0.35, rate: 0.7 + Math.random() * 0.6 });
     }
+    if (Math.random() < 0.3 && this.scene.cache.audio.exists('sfx_monster_scream')) {
+      this.scene.sound.play('sfx_monster_scream', { volume: 0.4, rate: 0.8 + Math.random() * 0.4 });
+    }
 
     this.setTint(0x666666);
 
