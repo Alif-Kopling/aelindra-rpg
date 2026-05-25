@@ -128,7 +128,7 @@ export const BOSS_DATA = [
   },
   {
     id: 'ashen_knight',
-    name: 'Ksatria Abu',
+    name: 'Ashen Knight',
     title: 'Pernah Menjadi Pelindung, Kini Hanya Debu',
     maxHp: 600,
     phases: 2,

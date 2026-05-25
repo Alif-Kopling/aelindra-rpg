@@ -280,22 +280,22 @@ export const BATTLEFIELD_ROUND2_POST: DialogueLine[] = [
 ];
 
 export const BATTLEFIELD_BOSS_PRE: DialogueLine[] = [
-  { speaker: '— Narator —', sceneImage: 'pict-animasi-boss-vs-mc.png', text: 'Ksatria Abu bangkit. Wujud Valther sekarang kolosus bengkok dari bayangan dan amarah cair — yang kuno terlahir setengah dari dagingnya.', emotion: 'shocked', isNarration: true },
+  { speaker: '— Narator —', sceneImage: 'pict-animasi-boss-vs-mc.png', text: 'Ashen Knight bangkit. Wujud Valther sekarang kolosus bengkok dari bayangan dan amarah cair — yang kuno terlahir setengah dari dagingnya.', emotion: 'shocked', isNarration: true },
   { speaker: 'Alden', portrait: 'alden', sceneImage: 'pict-animasi-boss-vs-mc.png', text: 'Valther! Kamu masih di dalem! Lawan!', emotion: 'determined' },
-  { speaker: 'Ksatria Abu', portrait: 'ashen_knight', sceneImage: 'pict-animasi-boss-vs-mc.png', text: '*suara berlapis sesuatu yang kuno dan mengerikan* Valther... SUDAH... HILANG. Sekarang cuma ada rasa lapar.', emotion: 'angry' },
+  { speaker: 'Ashen Knight', portrait: 'ashen_knight', sceneImage: 'pict-animasi-boss-vs-mc.png', text: '*suara berlapis sesuatu yang kuno dan mengerikan* Valther... SUDAH... HILANG. Sekarang cuma ada rasa lapar.', emotion: 'angry' },
   { speaker: 'Alden', portrait: 'alden', text: 'Nggak. Aku udah kehilangan terlalu banyak buat kalah sama bayangan pake muka orang mati.', emotion: 'determined' },
-  { speaker: 'Ksatria Abu', portrait: 'ashen_knight', sceneImage: 'pict-animasi-boss-vs-mc.png', text: 'Kamu udah kalah, ksatria cilik. Kamu kalah sejak kamu cinta sama kerajaan yang nggak bakal pernah balas cinta kamu.', emotion: 'angry' },
+  { speaker: 'Ashen Knight', portrait: 'ashen_knight', sceneImage: 'pict-animasi-boss-vs-mc.png', text: 'Kamu udah kalah, ksatria cilik. Kamu kalah sejak kamu cinta sama kerajaan yang nggak bakal pernah balas cinta kamu.', emotion: 'angry' },
   { speaker: 'Alden', portrait: 'alden', text: 'Mungkin. Tapi aku nggak berjuang buat kerajaannya. Aku berjuang buat orang-orang DI DALEMNYA.', emotion: 'determined' },
-  { speaker: '— Narator —', text: 'Saat kegelapan mutlak Ksatria Abu hampir menelan sisa jiwanya, Jimat Ksatria dari Tam di dadanya mendadak terasa hangat. Di saat yang sama, Pedupaan Suci dari Biarawati Pengembara memancarkan cahaya keemasan lembut, menghalau kabut hitam di sekelilingnya.', emotion: 'loving', isNarration: true },
+  { speaker: '— Narator —', text: 'Saat kegelapan mutlak Ashen Knight hampir menelan sisa jiwanya, Jimat Ksatria dari Tam di dadanya mendadak terasa hangat. Di saat yang sama, Pedupaan Suci dari Biarawati Pengembara memancarkan cahaya keemasan lembut, menghalau kabut hitam di sekelilingnya.', emotion: 'loving', isNarration: true },
   { speaker: '— Narator —', text: 'Alden mengangkat Forsaken Blade pemberian Edric satu kali terakhir. Beratnya setiap teman yang jatuh, setiap sumpah yang patah, setiap luka — disalurin ke satu tebasan mahadahsyat.', emotion: 'determined', isNarration: true },
   { speaker: 'Alden', portrait: 'alden', text: 'Demi Aelindra. Demi semua yang nggak bisa aku selametin. AKU AKHIRI INI.', emotion: 'determined' },
 ];
 
 export const BATTLEFIELD_BOSS_POST: DialogueLine[] = [
-  { speaker: 'Ksatria Abu', portrait: 'ashen_knight', text: '*hancur* Nggak mungkin... yang kuno janji... keabadian...', emotion: 'angry' },
+  { speaker: 'Ashen Knight', portrait: 'ashen_knight', text: '*hancur* Nggak mungkin... yang kuno janji... keabadian...', emotion: 'angry' },
   { speaker: 'Alden', portrait: 'alden', text: 'Dia bohong.', emotion: 'determined' },
-  { speaker: 'Ksatria Abu', portrait: 'ashen_knight', text: 'Kamu... bocah... bodoh... kamu cuma... nunda yang nggak bisa dihindarin... kegelapan... selalu... balik...', emotion: 'angry' },
-  { speaker: '— Narator —', text: 'Ksatria Abu hancur jadi abu. Pilar kegelapan pecah. Dan buat pertama kalinya dalam berbulan-bulan — matahari nyentuh medan perang.', isNarration: true, emotion: 'neutral' },
+  { speaker: 'Ashen Knight', portrait: 'ashen_knight', text: 'Kamu... bocah... bodoh... kamu cuma... nunda yang nggak bisa dihindarin... kegelapan... selalu... balik...', emotion: 'angry' },
+  { speaker: '— Narator —', text: 'Ashen Knight hancur jadi abu. Pilar kegelapan pecah. Dan buat pertama kalinya dalam berbulan-bulan — matahari nyentuh medan perang.', isNarration: true, emotion: 'neutral' },
 ];
 
 // ── ENDING ────────────────────────────────────────────────────
