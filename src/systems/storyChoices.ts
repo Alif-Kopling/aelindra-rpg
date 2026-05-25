@@ -6,25 +6,45 @@ export function enrichDialogueWithChoices(lines: DialogueLine[], sceneId: string
 
   switch (sceneId) {
     case 'village_entry':
-      injectAtSpeaker(out, 'Alden', 0, villageEdricResponseChoices());
+      injectAtSpeaker(out, 'Alden', 0, getRandomChoices(villageEdricResponseChoices(), 'edric'));
       break;
     case 'village_round2':
-      injectAtSpeaker(out, 'Alden', 1, villageTamPromiseChoices());
+      injectAtSpeaker(out, 'Alden', 1, getRandomChoices(villageTamPromiseChoices(), 'tam'));
       break;
     case 'forest_entry':
-      injectAtSpeaker(out, 'Alden', 2, forestNunTrustChoices());
+      injectAtSpeaker(out, 'Alden', 2, getRandomChoices(forestNunTrustChoices(), 'nun'));
       break;
     case 'castle_entry':
-      injectAtSpeaker(out, 'Alden', 3, castleEvelyneAccusationChoices());
+      injectAtSpeaker(out, 'Alden', 3, getRandomChoices(castleEvelyneAccusationChoices(), 'evelyne'));
       break;
     case 'battlefield_entry':
-      injectAtSpeaker(out, 'Alden', 0, battlefieldValtherChoices());
+      injectAtSpeaker(out, 'Alden', 0, getRandomChoices(battlefieldValtherChoices(), 'valther'));
       break;
     default:
       break;
   }
 
   return out;
+}
+
+function getRandomChoices(allChoices: DialogueLine['choices'], npcId: string): DialogueLine['choices'] {
+  if (!allChoices || allChoices.length <= 2) return allChoices;
+  
+  // Shuffle array
+  const shuffled = [...allChoices].sort(() => Math.random() - 0.5);
+  
+  // Determine count: 
+  // Tam is simple (always 2), Bosses/Evelyne are complex (always 3), others are random 2 or 3.
+  let count = 2;
+  if (npcId === 'tam') {
+    count = 2;
+  } else if (npcId === 'evelyne' || npcId === 'valther' || npcId === 'blind_king') {
+    count = 3;
+  } else {
+    count = Math.random() < 0.5 ? 2 : 3;
+  }
+
+  return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 
 function injectAtSpeaker(
