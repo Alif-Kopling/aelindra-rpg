@@ -290,6 +290,9 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     if (scene.cache.audio.exists('boss_roar')) {
       scene.sound.play('boss_roar', { volume: 0.8 });
     }
+    if (this.config.id === 'ashen_knight' && scene.cache.audio.exists('sfx_dragon_roar')) {
+      scene.sound.play('sfx_dragon_roar', { volume: 0.6, rate: 0.8 });
+    }
 
     // Summon 3 Ashen Soldiers at random positions
     for (let i = 0; i < 3; i++) {
@@ -370,6 +373,9 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     // Roar audio
     if (scene.cache.audio.exists('boss_roar')) {
       scene.sound.play('boss_roar', { volume: 0.6 });
+    }
+    if (scene.cache.audio.exists('sfx_dragon_roar')) {
+      scene.sound.play('sfx_dragon_roar', { volume: 0.5, rate: 0.85 });
     }
 
     const duration = 2000;
@@ -1547,6 +1553,10 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     this.scene.time.delayedCall(100, () => {
       if (!this.isDead) this.clearTint();
     });
+
+    if (this.scene.cache.audio.exists('sfx_ds_boss_pain')) {
+      this.scene.sound.play('sfx_ds_boss_pain', { volume: 0.5, rate: 0.9 + Math.random() * 0.2 });
+    }
 
     const txt = this.scene.add.text(
       this.x + Phaser.Math.Between(-20, 20),
