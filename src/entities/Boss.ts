@@ -80,6 +80,9 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     } else {
       this.setScale(scale);
     }
+
+    // Body offset must be recalculated after display size is set
+    body.setSize(48, 64, true);
     this.setDepth(10);
 
     this.projectiles = scene.physics.add.group();

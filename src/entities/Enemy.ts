@@ -67,7 +67,6 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     const body = this.body as Phaser.Physics.Arcade.Body;
     const [bw, bh] = config.bodySize || [20, 32];
-    body.setSize(bw, bh);
     body.setCollideWorldBounds(true);
     body.setMaxVelocity(150, 400);
 
@@ -77,6 +76,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     } else {
       this.setScale(scale);
     }
+    // Set body size AFTER display size so offset is calculated from final display size
+    body.setSize(bw, bh, true);
     this.setDepth(9);
 
     this.createHpBar();
