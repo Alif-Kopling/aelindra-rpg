@@ -446,7 +446,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.updateAttackHitbox();
 
-    const isCustomTexture = ['player_sprite', 'player_attack1', 'player_attack2'].includes(this.texture.key);
+    const isCustomTexture = ['player_sprite', 'player_walk', 'player_jump', 'player_dash', 'player_attack1', 'player_attack2'].includes(this.texture.key);
 
     if (vx !== 0 && this.isOnGround) {
       store.chargeUltimate(0.003 * delta);
@@ -460,6 +460,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (isCustomTexture) {
       const texInfo: Record<string, { sourceW: number; centerX: number; centerY: number }> = {
         player_sprite: { sourceW: 500, centerX: 279, centerY: 260 },
+        player_walk: { sourceW: 500, centerX: 279, centerY: 260 },
+        player_jump: { sourceW: 500, centerX: 279, centerY: 260 },
+        player_dash: { sourceW: 100, centerX: 50, centerY: 80 },
         player_attack1: { sourceW: 677, centerX: 236, centerY: 207 },
         player_attack2: { sourceW: 677, centerX: 275, centerY: 183 }
       };
@@ -779,7 +782,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (this.scene.textures.exists('player_sprite')) {
       let targetTexture = 'player_sprite';
 
-      if (anim === 'attack') {
+      if (anim === 'run') {
+        if (this.scene.textures.exists('player_walk')) {
+          const runPhase = Math.sin(this.timeAccumulator / 60);
+          targetTexture = runPhase >= 0 ? 'player_sprite' : 'player_walk';
+        }
+      } else if (anim === 'jump') {
+        if (this.scene.textures.exists('player_jump')) {
+          targetTexture = 'player_jump';
+        }
+      } else if (anim === 'dash') {
+        if (this.scene.textures.exists('player_dash')) {
+          targetTexture = 'player_dash';
+        }
+      } else if (anim === 'attack') {
         if (this.currentFrame === 0 && this.scene.textures.exists('player_attack1')) {
           targetTexture = 'player_attack1';
         } else if (this.currentFrame === 1 && this.scene.textures.exists('player_attack2')) {
@@ -793,14 +809,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.setTexture(targetTexture);
       }
 
-      const isCustomTexture = ['player_sprite', 'player_attack1', 'player_attack2'].includes(targetTexture);
+      const isCustomTexture = ['player_sprite', 'player_walk', 'player_jump', 'player_dash', 'player_attack1', 'player_attack2'].includes(targetTexture);
 
       if (isCustomTexture) {
         // Precise scales calculated to keep the character's bounding box height exactly 72px
         const texScales: Record<string, number> = {
-          player_sprite: 0.167, // 72 / 432
-          player_attack1: 0.263, // 72 / 274
-          player_attack2: 0.216  // 72 / 334
+          player_sprite: 0.167,
+          player_walk: 0.167,
+          player_jump: 0.167,
+          player_dash: 0.27,
+          player_attack1: 0.263,
+          player_attack2: 0.216
         };
         const baseScale = texScales[targetTexture] || 0.167;
 
@@ -809,7 +828,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.angle = 0;
         
         // Correct flip logic based on texture orientation
-        if (targetTexture === 'player_sprite') {
+        if (targetTexture === 'player_sprite' || targetTexture === 'player_walk' || targetTexture === 'player_jump' || targetTexture === 'player_dash') {
           this.setFlipX(this.facingRight);
         } else {
           this.setFlipX(!this.facingRight);
@@ -1017,6 +1036,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     store.incrementCombo();
 
     this.playSfx('sfx_slash_crit', 0.65, 0.85);
+    this.playSfx('sfx_ds_stab', 0.7, 0.9);
     this.spawnSlashTrail();
     this.spawnChargedSlashEffect();
 
@@ -1473,7 +1493,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     store.damagePlayer(amount);
     this.invincibleTimer = COMBAT_CONFIG.dashIFramesMs + 180;
 
-    this.playSfx('sfx_hit', 0.4, 0.8 + Math.random() * 0.4);
+    this.playSfx('sfx_sword_hit_blood', 0.4, 0.8 + Math.random() * 0.4);
 
     this.scene.tweens.add({
       targets: this, alpha: 0.3, yoyo: true, repeat: 4, duration: 80,
