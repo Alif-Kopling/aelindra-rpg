@@ -15,7 +15,7 @@ import {
   SaveSlot,
   HitEffect,
 } from '../utils/types';
-import { PLAYER_DEFAULTS, ITEMS_DB, SKILL_TREE } from '../utils/constants';
+import { PLAYER_DEFAULTS, ITEMS_DB, SKILL_TREE, zoneProgressRank } from '../utils/constants';
 
 // ============================================================
 // INITIAL STATES
@@ -236,7 +236,13 @@ export const useGameStore = create<GameStore>()(
       const reduced = Math.max(1, Math.round(amount * (100 / (100 + def))));
       const newHp = Math.max(0, s.player.stats.hp - reduced);
       s.player.stats.hp = newHp;
-      if (newHp <= 0) s.screen = 'gameOver';
+      if (newHp <= 0) {
+        s.screen = 'gameOver';
+        s.isPaused = false;
+        s.isInventoryOpen = false;
+        s.isShopOpen = false;
+        s.activeBoss = null;
+      }
     }),
     healPlayer: (amount) => set((s) => {
       s.player.stats.hp = Math.min(s.player.stats.maxHp, s.player.stats.hp + amount);
@@ -482,7 +488,10 @@ export const useGameStore = create<GameStore>()(
     currentZone: 'village',
     setZone: (zone) => set((s) => {
       s.currentZone = zone;
-      if (zone !== 'village') {
+      if (
+        zone !== 'village' &&
+        zoneProgressRank(zone) > zoneProgressRank(s.furthestClearedZone)
+      ) {
         s.furthestClearedZone = zone;
       }
     }),
@@ -746,24 +755,45 @@ export const useGameStore = create<GameStore>()(
     loadGame: (slot) => {
       const raw = localStorage.getItem(`aelindra_save_${slot}`);
       if (!raw) return;
-      const data = JSON.parse(raw);
-      set((s) => {
-        s.player = data.player;
-        s.inventory = data.inventory;
-        s.quests = data.quests;
-        s.discoveredZones = data.discoveredZones;
-        s.storyFlags = data.storyFlags;
-        s.skillPoints = data.skillPoints ?? s.skillPoints;
-        s.unlockedSkills = data.unlockedSkills ?? s.unlockedSkills;
-        s.playtime = data.playtime;
-        s.currentZone = data.currentZone || 'village';
-        s.isAutoPlay = data.isAutoPlay ?? false;
-        s.isAutoDialogue = data.isAutoDialogue ?? false;
-        s.hotbar = data.hotbar ?? ['health_potion', null, null, null, null, null, null, null];
-        s.furthestClearedZone = data.furthestClearedZone || 'village';
-        s.hasRecallPortal = data.hasRecallPortal ?? false;
-        s.screen = 'game';
-      });
+      try {
+        const data = JSON.parse(raw);
+        set((s) => {
+          s.player = data.player;
+          s.inventory = data.inventory;
+          s.quests = data.quests ?? [];
+          s.discoveredZones = data.discoveredZones ?? ['village'];
+          s.storyFlags = data.storyFlags ?? {};
+          s.skillPoints = data.skillPoints ?? s.skillPoints;
+          s.unlockedSkills = data.unlockedSkills ?? s.unlockedSkills;
+          s.playtime = data.playtime ?? 0;
+          s.currentZone = data.currentZone || 'village';
+          s.isAutoPlay = data.isAutoPlay ?? false;
+          s.isAutoDialogue = data.isAutoDialogue ?? false;
+          s.hotbar = data.hotbar ?? ['health_potion', null, null, null, null, null, null, null];
+          s.furthestClearedZone = data.furthestClearedZone || 'village';
+          s.hasRecallPortal = data.hasRecallPortal ?? false;
+          s.activeBoss = null;
+          s.isPaused = false;
+          s.isInventoryOpen = false;
+          s.isShopOpen = false;
+          s.dialogue.isOpen = false;
+          s.dialogue.lines = [];
+          s.dialogue.currentIndex = 0;
+          s.dialogue.onComplete = undefined;
+          s.screen = 'game';
+          if (s.player.stats.hp <= 0) {
+            s.player.stats.hp = Math.max(1, Math.floor(s.player.stats.maxHp * 0.4));
+          }
+        });
+      } catch {
+        get().addNotification({
+          type: 'error',
+          title: 'Load Failed',
+          message: 'Save data is corrupted or unreadable.',
+          icon: '💾',
+          duration: 4000,
+        });
+      }
     },
 
     // Playtime

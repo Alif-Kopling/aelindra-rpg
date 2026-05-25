@@ -4,6 +4,22 @@ export const TILE_SIZE = 32;
 
 export const DEBUG_HITBOXES = false;
 
+/** Story progression order for zone unlock / recall */
+export const ZONE_ORDER = [
+  'village',
+  'forest',
+  'castle',
+  'catacombs',
+  'cathedral',
+  'mountain',
+  'battlefield',
+] as const;
+
+export function zoneProgressRank(zoneId: string): number {
+  const index = ZONE_ORDER.indexOf(zoneId as (typeof ZONE_ORDER)[number]);
+  return index >= 0 ? index : 0;
+}
+
 export const PLAYER_DEFAULTS = {
   maxHp: 120,
   maxStamina: 100,

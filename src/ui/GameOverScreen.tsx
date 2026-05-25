@@ -22,8 +22,14 @@ const GameOverScreen: React.FC = () => {
   }, []);
 
   const handleRetry = () => {
-    // Restore to partial HP
     updatePlayerStats({ hp: Math.floor(player.stats.maxHp * 0.4) });
+    useGameStore.setState((s) => {
+      s.isPaused = false;
+      s.isInventoryOpen = false;
+      s.isShopOpen = false;
+      s.activeBoss = null;
+      s.dialogue.isOpen = false;
+    });
     setScreen('game');
   };
 

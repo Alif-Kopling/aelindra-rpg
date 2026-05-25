@@ -100,6 +100,8 @@ export class GameplayScene extends Phaser.Scene {
   private cinematicTweens: Phaser.Tweens.Tween[] = [];
   private cinematicTimers: Phaser.Time.TimerEvent[] = [];
   private isFinalCinematicPlaying = false;
+  private eventListenersReady = false;
+  private sfxPlayHandler: EventListener | null = null;
 
   constructor() {
     super({ key: 'GameplayScene' });
@@ -113,6 +115,11 @@ export class GameplayScene extends Phaser.Scene {
     this.events.off('boss-attack');
     this.events.off('boss-projectile-hit');
     this.events.off('boss-died');
+    if (this.sfxPlayHandler) {
+      window.removeEventListener('sfx:play', this.sfxPlayHandler);
+      this.sfxPlayHandler = null;
+    }
+    this.eventListenersReady = false;
     this.enemies.forEach(e => e.destroy());
     this.enemies = [];
     this.npcs.forEach(n => n.destroy());
@@ -171,10 +178,14 @@ export class GameplayScene extends Phaser.Scene {
     this.enemies = [];
     this.npcs = [];
     this.zonePortals.forEach(p => {
+      this.tweens.killTweensOf(p.gfx);
+      p.orbs.forEach(o => {
+        this.tweens.killTweensOf(o);
+        o.destroy();
+      });
       p.zone.destroy();
       p.label.destroy();
       p.gfx.destroy();
-      p.orbs.forEach(o => o.destroy());
     });
     this.zonePortals = [];
 
@@ -182,6 +193,7 @@ export class GameplayScene extends Phaser.Scene {
       this.boss.destroy();
       this.boss = null;
     }
+    useGameStore.getState().setBoss(null);
     if (this.bossGroup) {
       this.bossGroup.clear(true, true);
     }
@@ -908,8 +920,8 @@ export class GameplayScene extends Phaser.Scene {
   }
 
   private createPortal(x: number, y: number, targetZone: string, TILE: number) {
-    const portalX = x * TILE + TILE / 2;
-    const portalY = (this.mapHeight - 3) * TILE;
+    const portalX = (this.mapWidth - 3) * TILE;
+    const portalY = y * TILE + TILE / 2;
     const portal = this.add.zone(portalX, portalY, 4 * TILE, 3 * TILE);
     this.physics.add.existing(portal, true);
 
@@ -960,7 +972,7 @@ export class GameplayScene extends Phaser.Scene {
     }
 
     this.physics.add.overlap(this.player, portal as any, () => {
-      if (this.transitioningZone || useGameStore.getState().dialogue.isOpen) return;
+      if (!this.player || this.transitioningZone || useGameStore.getState().dialogue.isOpen) return;
       this.transitionToZone(targetZone);
     });
 
@@ -972,11 +984,17 @@ export class GameplayScene extends Phaser.Scene {
 
     this.transitioningZone = true;
     this.portalVisible = false;
+    this.isHitStopping = false;
+    this.physics.world.resume();
     this.zonePortals.forEach(p => {
+      this.tweens.killTweensOf(p.gfx);
+      p.orbs.forEach(o => {
+        this.tweens.killTweensOf(o);
+        o.destroy();
+      });
       p.zone.destroy();
       p.label.destroy();
       p.gfx.destroy();
-      p.orbs.forEach(o => o.destroy());
     });
     this.zonePortals = [];
 
@@ -986,10 +1004,18 @@ export class GameplayScene extends Phaser.Scene {
     }
 
     this.currentZone = zoneId;
+    store.setZone(zoneId);
 
     this.cameras.main.fadeOut(600, 0, 0, 0);
     this.time.delayedCall(700, () => {
-      this.buildZone(this.getZoneData(zoneId));
+      try {
+        this.buildZone(this.getZoneData(zoneId));
+      } catch (e) {
+        console.error('CRITICAL: buildZone failed during transition', e);
+        this.currentZone = 'village';
+        store.setZone('village');
+        this.buildZone(this.getZoneData('village'));
+      }
       this.time.delayedCall(300, () => {
         this.advanceToNextRound();
         this.transitioningZone = false;
@@ -999,6 +1025,9 @@ export class GameplayScene extends Phaser.Scene {
   }
 
   private setupEventListeners() {
+    if (this.eventListenersReady) return;
+    this.eventListenersReady = true;
+
     this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC).on('down', () => {
       useGameStore.getState().togglePause();
     });
@@ -1009,12 +1038,12 @@ export class GameplayScene extends Phaser.Scene {
 
     this.events.on('dev-jump-zone', (data: { zoneId: string }) => {
       const target = data?.zoneId;
-      if (!target) return;
-      const zoneData = this.getZoneData(target);
-      if (!zoneData) return;
+      if (!target || target === this.currentZone) return;
       this.cleanupFinalCinematicState(true);
-      this.transitioningZone = false;
-      this.currentZone = '__dev_jump__';
+      if (this.transitioningZone) {
+        this.transitioningZone = false;
+        this.cameras.main.fadeIn(1, 0, 0, 0);
+      }
       this.transitionToZone(target);
     });
 
@@ -1099,12 +1128,13 @@ export class GameplayScene extends Phaser.Scene {
       this.onRoundCleared();
     });
 
-    window.addEventListener('sfx:play', ((e: CustomEvent) => {
-      const { key, volume, rate } = e.detail;
-      if (this.cache.audio.exists(key)) {
+    this.sfxPlayHandler = ((e: Event) => {
+      const { key, volume, rate } = (e as CustomEvent).detail ?? {};
+      if (key && this.cache.audio.exists(key)) {
         this.sound.play(key, { volume: volume ?? 0.5, rate: rate ?? 1 });
       }
-    }) as EventListener);
+    }) as EventListener;
+    window.addEventListener('sfx:play', this.sfxPlayHandler);
   }
 
   private isHitStopping = false;
@@ -1122,6 +1152,8 @@ export class GameplayScene extends Phaser.Scene {
 
   update(time: number, delta: number) {
     const store = useGameStore.getState();
+
+    if (!this.player?.active) return;
 
     // Detect zone changes from store (triggered by recall/return)
     if (store.currentZone !== this.currentZone && !this.transitioningZone) {
