@@ -121,14 +121,14 @@
 ## Controls
 
 | Input | Action |
-|---|---|
+|---|---|---|
 | `WASD` | Move |
 | `W` / `Space` | Jump / Double Jump |
-| `Shift` / `Space` | Dash |
-| `L` / `Mouse Left` | Light Attack |
-| `Hold L/M1` | Charged Attack |
+| `Shift` | Dash |
+| `J` / `Mouse Left` | Light Attack |
+| `Hold J/M1` | Charged Attack |
+| `L` / `Mouse Right` | Ultimate (Forsaken Slash) |
 | `F` | Parry / Counter |
-| `Mouse Right` | Ultimate (Forsaken Slash) |
 | `E` | Interact / Advance Dialogue |
 | `Tab` | Inventory |
 | `Esc` | Pause Menu |
