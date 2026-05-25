@@ -20,6 +20,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     D: Phaser.Input.Keyboard.Key;
     Space: Phaser.Input.Keyboard.Key;
     E: Phaser.Input.Keyboard.Key;
+    J: Phaser.Input.Keyboard.Key;
     L: Phaser.Input.Keyboard.Key;
     F: Phaser.Input.Keyboard.Key;
     Shift: Phaser.Input.Keyboard.Key;
@@ -121,6 +122,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       D: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.D),
       Space: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
       E: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.E),
+      J: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.J),
       L: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.L),
       F: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.F),
       Shift: kbd.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT),
@@ -271,7 +273,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       canCancelAttackIntoDash(this.attackElapsedMs, this.isAttacking) &&
       this.dashCooldown <= 0 &&
       stats.stamina >= this.getDashCost() &&
-      (Phaser.Input.Keyboard.JustDown(this.keys.Space) || Phaser.Input.Keyboard.JustDown(this.keys.Shift))
+      Phaser.Input.Keyboard.JustDown(this.keys.Shift)
     ) {
       const cancelDir = this.keys.A.isDown ? -1 : this.keys.D.isDown ? 1 : this.facingRight ? 1 : -1;
       this.isAttacking = false;
@@ -284,7 +286,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     // ── CHARGE / ATTACK SYSTEM ──────────────────────────────────
 
     const pointer = this.scene.input.activePointer;
-    const attackHeld = pointer.isDown || this.keys.L.isDown;
+    const attackHeld = pointer.isDown || this.keys.J.isDown;
 
     if (Phaser.Input.Keyboard.JustDown(this.keys.F) && !this.isDashing && !this.isAttacking && !this.isCharging && this.parryCooldown <= 0 && stats.stamina >= 6) {
       this.beginParry(store);
@@ -322,7 +324,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
     }
 
-    if (Phaser.Input.Keyboard.JustDown(this.keys.L) || (pointer.isDown && !this.isCharging)) {
+    if (Phaser.Input.Keyboard.JustDown(this.keys.J) || (pointer.isDown && !this.isCharging)) {
       this.attackBufferTimer = COMBAT_CONFIG.attackBufferMs;
     }
 
@@ -372,7 +374,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (
       !this.isParrying &&
-      (Phaser.Input.Keyboard.JustDown(this.keys.Space) || Phaser.Input.Keyboard.JustDown(this.keys.Shift))
+      Phaser.Input.Keyboard.JustDown(this.keys.Shift)
     ) {
       this.dashBufferTimer = COMBAT_CONFIG.dashBufferMs;
     }
@@ -408,9 +410,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.attackBufferTimer = 0;
     }
 
-    if (!this.isParrying && this.scene.input.activePointer.rightButtonDown() &&
-        this.ultimateCharge >= 100 &&
-        this.ultimateCooldown <= 0) {
+    if (!this.isParrying && this.ultimateCharge >= 100 && this.ultimateCooldown <= 0 &&
+        (this.scene.input.activePointer.rightButtonDown() || Phaser.Input.Keyboard.JustDown(this.keys.L))) {
       this.performUltimate(store);
     }
 
