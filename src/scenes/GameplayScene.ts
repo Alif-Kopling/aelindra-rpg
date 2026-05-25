@@ -47,6 +47,7 @@ import {
 } from '../systems/storyData';
 import { GAME_WIDTH, GAME_HEIGHT } from '../utils/constants';
 import { playBGM, setBGMVolume } from '../utils/bgm';
+import { COMBAT_CONFIG, getHitstopMs, isFinisherCombo } from '../systems/combatFeel';
 
 interface ZoneData {
   theme: ZoneTheme;
@@ -102,6 +103,9 @@ export class GameplayScene extends Phaser.Scene {
   private isFinalCinematicPlaying = false;
   private eventListenersReady = false;
   private sfxPlayHandler: EventListener | null = null;
+  private dialogueCinematicHandler: EventListener | null = null;
+  private baseCameraZoom = 1;
+  private combatZoomTween: Phaser.Tweens.Tween | null = null;
 
   constructor() {
     super({ key: 'GameplayScene' });
@@ -115,10 +119,21 @@ export class GameplayScene extends Phaser.Scene {
     this.events.off('boss-attack');
     this.events.off('boss-projectile-hit');
     this.events.off('boss-died');
+    this.events.off('combat-hitstop');
+    this.events.off('combat-finisher-zoom');
     if (this.sfxPlayHandler) {
       window.removeEventListener('sfx:play', this.sfxPlayHandler);
       this.sfxPlayHandler = null;
     }
+    if (this.dialogueCinematicHandler) {
+      window.removeEventListener('dialogue-cinematic', this.dialogueCinematicHandler);
+      this.dialogueCinematicHandler = null;
+    }
+    if (this.combatZoomTween) {
+      this.combatZoomTween.remove();
+      this.combatZoomTween = null;
+    }
+    this.cameras.main.setZoom(this.baseCameraZoom);
     this.eventListenersReady = false;
     this.enemies.forEach(e => e.destroy());
     this.enemies = [];
@@ -148,7 +163,8 @@ export class GameplayScene extends Phaser.Scene {
       console.error('CRITICAL: GameplayScene create failed', e);
     }
 
-    this.fpsText = this.add.text(16, 16, '', {
+      this.baseCameraZoom = this.cameras.main.zoom;
+      this.fpsText = this.add.text(16, 16, '', {
       fontSize: '10px',
       fontFamily: 'monospace',
       color: '#ffffff',
@@ -281,7 +297,7 @@ export class GameplayScene extends Phaser.Scene {
                 icon: '⚔️',
                 duration: 1800,
               });
-              this.triggerHitStop(110);
+              this.triggerHitStop({ durationOverride: 110 });
             }
             return;
           }
@@ -316,9 +332,15 @@ export class GameplayScene extends Phaser.Scene {
           ? Math.round(Phaser.Math.Between(50 + critBonus, 90 + critBonus) * (store.unlockedSkills.includes('blood_pact') ? 1.25 : 1))
           : Math.round((25 + atkBonus + Math.min(5, comboCount)) * (store.unlockedSkills.includes('blade_mastery') ? 1.2 : 1));
         
-        const killed = enemy.takeDamage(dmg, comboCount, isCritical);
+        const finisher = isFinisherCombo(comboCount);
+        const killed = enemy.takeDamage(dmg, comboCount, isCritical, finisher);
         this.player.registerHit(enemyId);
-        this.triggerHitStop(isCritical ? 120 : 80);
+        this.triggerHitStop({
+          comboCount,
+          isCritical,
+          isFinisher: finisher,
+        });
+        if (finisher) this.triggerCombatFinisherZoom();
 
         // Apply Status Effects
         if (isCritical) {
@@ -374,9 +396,16 @@ export class GameplayScene extends Phaser.Scene {
           this.spawnBloodSpray(boss.x, boss.y);
         }
 
+        const finisher = isFinisherCombo(comboCount);
         const killed = boss.takeDamage(dmg);
         this.player.registerHit(bossId);
-        this.triggerHitStop(isCritical ? 120 : 80);
+        this.triggerHitStop({
+          comboCount,
+          isCritical,
+          isFinisher: finisher,
+          isBoss: true,
+        });
+        if (finisher) this.triggerCombatFinisherZoom();
 
         if (killed) {
           this.bossGroup.remove(boss);
@@ -413,7 +442,7 @@ export class GameplayScene extends Phaser.Scene {
     };
 
     if (round.preDialogue) {
-      store.openDialogue(round.preDialogue as any, () => {
+      this.openStoryDialogue(round.preDialogue, this.getPreRoundSceneId(), () => {
         if (round.boss && round.boss.id === 'ashen_knight') {
           this.playBossCinematic(() => {
             this.time.delayedCall(300, startCombat);
@@ -878,12 +907,40 @@ export class GameplayScene extends Phaser.Scene {
     const store = useGameStore.getState();
 
     if (round.postDialogue) {
-      store.openDialogue(round.postDialogue as any, () => {
+      this.openStoryDialogue(round.postDialogue, this.getPostRoundSceneId(), () => {
         this.time.delayedCall(500, () => this.advanceToNextRound());
       });
     } else {
       this.time.delayedCall(500, () => this.advanceToNextRound());
     }
+  }
+
+  private openStoryDialogue(
+    lines: { speaker: string; portrait?: string; text: string; emotion?: string; isNarration?: boolean; sceneImage?: string }[],
+    sceneId: string | undefined,
+    onComplete?: () => void,
+  ) {
+    useGameStore.getState().openDialogue(lines as any, onComplete, sceneId ? { sceneId } : undefined);
+  }
+
+  private getPostRoundSceneId(): string | undefined {
+    const map: Record<string, string> = {
+      village: 'village_round2',
+      forest: 'forest_entry',
+      castle: 'castle_entry',
+      battlefield: 'battlefield_entry',
+    };
+    return map[this.currentZone];
+  }
+
+  private getPreRoundSceneId(): string | undefined {
+    const map: Record<string, string> = {
+      village: 'village_entry',
+      forest: 'forest_entry',
+      castle: 'castle_entry',
+      battlefield: 'battlefield_entry',
+    };
+    return map[this.currentZone];
   }
 
   private onZoneComplete() {
@@ -1054,7 +1111,8 @@ export class GameplayScene extends Phaser.Scene {
           const onComplete = npc.getName() === 'Old Edric' ? () => {
             store.setShopOpen(true);
           } : undefined;
-          store.openDialogue(npc.getDialogue(), onComplete);
+          const npcKey = this.getNpcTrustKey(npc.getName());
+          store.openDialogue(npc.getDialogue(), onComplete, { npcId: npcKey });
           if (npc.isCheckpointNPC()) {
             store.saveGame(0);
           }
@@ -1135,17 +1193,94 @@ export class GameplayScene extends Phaser.Scene {
       }
     }) as EventListener;
     window.addEventListener('sfx:play', this.sfxPlayHandler);
+
+    this.dialogueCinematicHandler = ((e: Event) => {
+      const mode = (e as CustomEvent).detail?.mode as string;
+      this.applyDialogueCinematic(mode);
+    }) as EventListener;
+    window.addEventListener('dialogue-cinematic', this.dialogueCinematicHandler);
+
+    this.events.on('combat-hitstop', (data: { ms?: number }) => {
+      this.triggerHitStop({ comboCount: 1, isCritical: false, durationOverride: data?.ms });
+    });
+    this.events.on('combat-finisher-zoom', () => this.triggerCombatFinisherZoom());
+  }
+
+  private getNpcTrustKey(name: string): string {
+    if (name.includes('Edric')) return 'edric';
+    if (name.includes('Nun') || name.includes('Biarawati')) return 'nun';
+    if (name.includes('Evelyne')) return 'evelyne';
+    if (name.includes('Tam')) return 'tam';
+    return 'default';
+  }
+
+  private applyDialogueCinematic(mode: string) {
+    const cam = this.cameras.main;
+    if (this.combatZoomTween) {
+      this.combatZoomTween.remove();
+      this.combatZoomTween = null;
+    }
+    if (mode === 'reset') {
+      useGameStore.getState().setCinematicGrainActive(false);
+      this.tweens.add({
+        targets: cam,
+        zoom: this.baseCameraZoom,
+        duration: 400,
+        ease: 'Sine.easeOut',
+      });
+      return;
+    }
+    if (!this.player?.active) return;
+    const targetZoom = mode === 'dramatic' ? this.baseCameraZoom * 1.08 : this.baseCameraZoom * 1.04;
+    useGameStore.getState().setCinematicGrainActive(mode === 'dramatic');
+    this.tweens.add({
+      targets: cam,
+      zoom: targetZoom,
+      duration: 500,
+      ease: 'Sine.easeInOut',
+    });
+  }
+
+  private triggerCombatFinisherZoom() {
+    if (!this.player?.active) return;
+    const cam = this.cameras.main;
+    if (this.combatZoomTween) this.combatZoomTween.remove();
+    this.combatZoomTween = this.tweens.add({
+      targets: cam,
+      zoom: this.baseCameraZoom * COMBAT_CONFIG.comboFinisherZoom,
+      duration: COMBAT_CONFIG.comboFinisherZoomDurationMs,
+      ease: 'Back.easeOut',
+      yoyo: true,
+      hold: 40,
+    });
   }
 
   private isHitStopping = false;
 
-  triggerHitStop(duration: number = 80) {
-    if (this.isHitStopping) return;
+  triggerHitStop(opts: {
+    comboCount?: number;
+    isCritical?: boolean;
+    isFinisher?: boolean;
+    isBoss?: boolean;
+    durationOverride?: number;
+  } = {}) {
+    const store = useGameStore.getState();
+    if (!store.settings.screenShake && !opts.durationOverride) return;
+    if (this.isHitStopping || this.transitioningZone) return;
+
+    const duration = opts.durationOverride ?? getHitstopMs(opts);
     this.isHitStopping = true;
     this.physics.world.pause();
-    
+
+    if (store.settings.screenShake) {
+      const shake = opts.isFinisher ? 0.014 : opts.isCritical ? 0.01 : 0.006;
+      this.cameras.main.shake(duration, shake);
+    }
+
     this.time.delayedCall(duration, () => {
-      this.physics.world.resume();
+      if (!this.transitioningZone && !store.dialogue.isOpen) {
+        this.physics.world.resume();
+      }
       this.isHitStopping = false;
     });
   }
@@ -1564,7 +1699,9 @@ export class GameplayScene extends Phaser.Scene {
   private playIntroSequence() {
     const store = useGameStore.getState();
     store.setStoryFlag('intro_seen', true);
-    this.advanceToNextRound();
+    this.openStoryDialogue(CHAPTER_1, undefined, () => {
+      this.time.delayedCall(400, () => this.advanceToNextRound());
+    });
   }
 
   spawnBloodSpray(x: number, y: number) {

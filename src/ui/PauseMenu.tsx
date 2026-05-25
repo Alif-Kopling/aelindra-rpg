@@ -363,9 +363,41 @@ const SaveTab: React.FC<{ saveSlots: any[]; saveGame: (slot: number) => void; lo
 
 const ControlsTab: React.FC = () => {
   const controls = [
-    { title: 'MOVEMENT', keys: [{ key: 'WASD', desc: 'Move Character' }, { key: 'SPACE / SHIFT', desc: 'High-Stamina Dash' }, { key: 'W / SPACE', desc: 'Jump / Double Jump' }] },
-    { title: 'COMBAT', keys: [{ key: 'L / MOUSE 1', desc: 'Light Attack' }, { key: 'HOLD', desc: 'Heavy / Critical Attack' }, { key: 'F', desc: 'Parry / Counter Window' }, { key: 'RIGHT CLICK', desc: 'Forsaken Slash (Ult)' }] },
-    { title: 'ACTIONS', keys: [{ key: 'E', desc: 'Interact / Dialogue' }, { key: 'TAB', desc: 'Inventory' }, { key: 'ESC', desc: 'Pause Menu' }] },
+    {
+      title: 'MOVEMENT',
+      keys: [
+        { key: 'WASD', desc: 'Move' },
+        { key: 'SPACE / SHIFT', desc: 'Dash (i-frames, directional)' },
+        { key: 'A/D + DASH', desc: 'Dash in held direction (air OK)' },
+        { key: 'W / SPACE', desc: 'Jump / double jump' },
+      ],
+    },
+    {
+      title: 'COMBAT',
+      keys: [
+        { key: 'L / MOUSE 1', desc: 'Combo chain (5 hits → finisher)' },
+        { key: 'HOLD L', desc: 'Charged heavy slash' },
+        { key: 'MID-SWING + DASH', desc: 'Attack cancel into dash' },
+        { key: 'F', desc: 'Parry / counter' },
+        { key: 'RIGHT CLICK', desc: 'Forsaken Slash (ultimate)' },
+      ],
+    },
+    {
+      title: 'STORY',
+      keys: [
+        { key: '1–5', desc: 'Dialogue tone choice' },
+        { key: 'CLICK / Z', desc: 'Advance dialogue' },
+        { key: 'E', desc: 'Talk to NPCs' },
+      ],
+    },
+    {
+      title: 'ACTIONS',
+      keys: [
+        { key: 'TAB', desc: 'Inventory' },
+        { key: '1–8', desc: 'Hotbar' },
+        { key: 'ESC', desc: 'Pause' },
+      ],
+    },
   ];
 
   return (

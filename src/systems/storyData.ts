@@ -12,7 +12,7 @@ export const PROLOGUE_NARRATION: DialogueLine[] = [
 // ── CHAPTER HEADERS ───────────────────────────────────────────
 
 export const CHAPTER_1: DialogueLine[] = [
-  { speaker: '— Narator —', sceneImage: 'last-scene-mc-kabur-dari-penjara.jpeg', text: 'Bab I — The Forsaken Knight', emotion: 'neutral', isNarration: true },
+  { speaker: '— Narator —', sceneImage: 'last-scene-mc-kabur-dari-penjara.jpeg', text: 'Bab I — Ksatria Terbuang', emotion: 'neutral', isNarration: true },
   { speaker: '— Narator —', sceneImage: 'last-scene-mc-kabur-dari-penjara.jpeg', text: 'Dikhianati oleh orang yang dahulu ia layani. Diburu oleh orang yang dahulu ia panggil saudara. Hanya satu jalan tersisa bagi Alden: menerobos kegelapan.', emotion: 'determined', isNarration: true },
 ];
 
@@ -143,7 +143,7 @@ export const CASTLE_BOSS_POST: DialogueLine[] = [
 // ── CATACOMBS ZONE ────────────────────────────────────────────
 
 export const CATACOMBS_ENTRY: DialogueLine[] = [
-  { speaker: '— Narrator —', text: 'Katakombe Sunken. Labirin tulang dan kesunyian. Tiap langkah bergema kayak detak jantung di kegelapan.', emotion: 'sad', isNarration: true },
+  { speaker: '— Narator —', text: 'Katakombe Terkutuk. Labirin tulang dan kesunyian. Tiap langkah bergema kayak detak jantung di kegelapan.', emotion: 'sad', isNarration: true },
   { speaker: 'Valther', portrait: 'valther', text: '*tepuk tangan pelan* Bravo. Beneran, bravo. Kamu babat pion-pion aku kayak pedang panas nembus salju. Aku hampir terkesan.', emotion: 'angry' },
   { speaker: 'Alden', portrait: 'alden', text: 'Valther. Berakhir di sini.', emotion: 'determined' },
   { speaker: 'Valther', portrait: 'valther', text: 'Berakhir? Oh, ksatria bodohku sayang — ini belum dimulai. Kematian raja cuma nada pertama dari simfoni. Kamu pikir kamu pahlawan di cerita ini?', emotion: 'angry' },
@@ -155,9 +155,9 @@ export const CATACOMBS_ENTRY: DialogueLine[] = [
 
 export const CATACOMBS_ROUND1_POST: DialogueLine[] = [
   { speaker: 'Alden', portrait: 'alden', text: '*tangan nahan di tembok batu dingin, napas ngos-ngosan* ...Dalem apa sih terowongan ini?', emotion: 'neutral' },
-  { speaker: '— Narrator —', text: 'Temboknya sendiri kayak bernafas. Bisik-bisik samar melingkar di ujung pendengaran.', isNarration: true, emotion: 'sad' },
+  { speaker: '— Narator —', text: 'Temboknya sendiri kayak bernafas. Bisik-bisik samar melingkar di ujung pendengaran.', isNarration: true, emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: 'Aku nggak bakal denger. Nggak bakal.', emotion: 'determined' },
-  { speaker: '— Narrator —', text: 'Tapi bisikan itu tau namanya. Mereka udah nungguin dia.', isNarration: true, emotion: 'sad' },
+  { speaker: '— Narator —', text: 'Tapi bisikan itu tau namanya. Mereka udah nungguin dia.', isNarration: true, emotion: 'sad' },
 ];
 
 export const CATACOMBS_ROUND2_POST: DialogueLine[] = [
@@ -165,95 +165,95 @@ export const CATACOMBS_ROUND2_POST: DialogueLine[] = [
   { speaker: 'Valther', portrait: 'valther', text: '*gema dari dalam gua* Segel ketiga hampir kebuka, Alden. Kamu rasain? Dunia bergetar di ujung sesuatu yang indah?', emotion: 'angry' },
   { speaker: 'Alden', portrait: 'alden', text: 'Kamu... gila.', emotion: 'determined' },
   { speaker: 'Valther', portrait: 'valther', text: 'Bukan. Aku sadar. Segel di bawah medan perang itu yang terakhir. Dateng dan cari aku, ksatria cilik. Kalo kamu berani.', emotion: 'angry' },
-  { speaker: '— Narrator —', text: 'Tanah bergetar. Di suatu tempat jauh di bawah, segel ketiga mengerang — dan nyaris pecah.', isNarration: true, emotion: 'shocked' },
+  { speaker: '— Narator —', text: 'Tanah bergetar. Di suatu tempat jauh di bawah, segel ketiga mengerang — dan nyaris pecah.', isNarration: true, emotion: 'shocked' },
   { speaker: 'Alden', portrait: 'alden', text: '*dorong diri bangkit* Belum... belum telat...', emotion: 'determined' },
 ];
 
 // ── CATHEDRAL ZONE ─────────────────────────────────────────────
 
 export const CATHEDRAL_ENTRY: DialogueLine[] = [
-  { speaker: '— Narrator —', text: 'Cathedral of Ash berdiri di atas kota seperti doa yang gagal dikabulkan. Loncengnya retak, patung-patungnya tanpa wajah, dan altar-altar tua dipenuhi abu yang tak pernah dingin.', emotion: 'sad', isNarration: true },
+  { speaker: '— Narator —', text: 'Katedral Abu berdiri di atas kota seperti doa yang gagal dikabulkan. Loncengnya retak, patung-patungnya tanpa wajah, dan altar-altar tua dipenuhi abu yang tak pernah dingin.', emotion: 'sad', isNarration: true },
   { speaker: 'Alden', portrait: 'alden', text: 'Ini tempat penghakiman?', emotion: 'neutral' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Bukan. Ini tempat orang-orang datang buat diampuni, lalu dipaksa menanggung dosa yang bukan milik mereka.', emotion: 'sad' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Bukan. Ini tempat orang-orang datang buat diampuni, lalu dipaksa menanggung dosa yang bukan milik mereka.', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: 'Valther ada di sini?', emotion: 'determined' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Dia nyentuh altar, memelintir doa jadi rantai. Kalau kamu mau lewat, kamu harus putuskan pengakuan palsu yang dia tanam di tanah ini.', emotion: 'determined' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Dia nyentuh altar, memelintir doa jadi rantai. Kalau kamu mau lewat, kamu harus putuskan pengakuan palsu yang dia tanam di tanah ini.', emotion: 'determined' },
   { speaker: 'Alden', portrait: 'alden', text: 'Kalau begitu aku hancurin gerejanya sampai tersisa kebenaran.', emotion: 'determined' },
 ];
 
 export const CATHEDRAL_ROUND1_POST: DialogueLine[] = [
   { speaker: 'Alden', portrait: 'alden', text: '*menatap patung malaikat yang patah* ...Mereka bahkan nggak sempat mati dengan tenang.', emotion: 'sad' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Mereka dipakai sebagai saksi palsu. Valther suka tempat sakral. Di sana, rasa bersalah paling mudah dijadikan senjata.', emotion: 'sad' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Mereka dipakai sebagai saksi palsu. Valther suka tempat sakral. Di sana, rasa bersalah paling mudah dijadikan senjata.', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: 'Aku mulai ngerti kenapa dia bikin dunia ini sekarat.', emotion: 'determined' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Biar dunia lupa siapa korban dan siapa pelaku. Itu caranya bertahan hidup.', emotion: 'sad' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Biar dunia lupa siapa korban dan siapa pelaku. Itu caranya bertahan hidup.', emotion: 'sad' },
 ];
 
 export const CATHEDRAL_ROUND2_POST: DialogueLine[] = [
   { speaker: 'Alden', portrait: 'alden', text: '*terhuyung di lantai marmer retak* ...Suara-suara ini... aku dengar namaku di tiap sudut.', emotion: 'sad' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Karena tempat ini menghafal rasa malu. Napas kamu sendiri dibikin jadi hukuman.', emotion: 'determined' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Karena tempat ini menghafal rasa malu. Napas kamu sendiri dibikin jadi hukuman.', emotion: 'determined' },
   { speaker: 'Alden', portrait: 'alden', text: 'Kalau rasa malu ini palsu, kenapa masih kerasa berat?', emotion: 'neutral' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Karena kebohongan yang lama cukup untuk jadi tulang. Sekarang dengarkan aku baik-baik: ambil relik dari ruang choir. Kamu butuh itu buat memecah segel gunung.', emotion: 'determined' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Karena kebohongan yang lama cukup untuk jadi tulang. Sekarang dengarkan aku baik-baik: ambil relik dari ruang choir. Kamu butuh itu buat memecah segel gunung.', emotion: 'determined' },
   { speaker: 'Alden', portrait: 'alden', text: 'Gunung?', emotion: 'shocked' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Ya. Sisa perjalanan kamu bukan bawah tanah lagi. Ini pendakian. Dan pendakian selalu lebih kejam daripada jatuh.', emotion: 'sad' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Ya. Sisa perjalanan kamu bukan bawah tanah lagi. Ini pendakian. Dan pendakian selalu lebih kejam daripada jatuh.', emotion: 'sad' },
 ];
 
 export const CATHEDRAL_BOSS_PRE: DialogueLine[] = [
   { speaker: 'Saint of Rot', portrait: 'saint_of_rot', text: 'Doa-doamu bocor ke lantai, ksatria. Semua yang suci pada akhirnya hanya menunggu busuknya tiba.', emotion: 'angry' },
   { speaker: 'Alden', portrait: 'alden', text: 'Aku udah liat busuknya manusia. Kamu cuma versi yang nyerobot mimbar.', emotion: 'determined' },
-  { speaker: 'Saint of Rot', portrait: 'saint_of_rot', text: 'Aku dulu menjaga iman mereka. Lalu iman mereka meninggalkanku. Sekarang aku menjaga sisa-sisa yang tersisa: ketakutan.', emotion: 'sad' },
+  { speaker: 'Saint of Rot', portrait: 'saint_of_rot', text: 'Aku dulu menjaga iman mereka. Lalu iman mereka meninggalkanku. Sekarang aku menjaga sisa-isa yang tersisa: ketakutan.', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: 'Kalau begitu, aku cabut rasa takut itu dari akarnya.', emotion: 'determined' },
 ];
 
 export const CATHEDRAL_BOSS_POST: DialogueLine[] = [
   { speaker: 'Saint of Rot', portrait: 'saint_of_rot', text: '*patah* Mereka... bahkan tak pernah... mendengarkan...', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: 'Sekarang kamu bisa diem.', emotion: 'determined' },
-  { speaker: '— Narrator —', text: 'Dari bawah altar, Alden menemukan relik tua yang dingin seperti tulang. Di permukaannya terukir arah ke Frostpeak Summit — tempat segel kuno berikutnya berakar di batu dan salju.', isNarration: true, emotion: 'neutral' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Gunung itu bukan tempat buat hidup. Tapi mungkin tempat buat ngeliat kebenaran dari atas.', emotion: 'sad' },
+  { speaker: '— Narator —', text: 'Dari bawah altar, Alden menemukan relik tua yang dingin seperti tulang. Di permukaannya terukir arah ke Puncak Frostpeak — tempat segel kuno berikutnya berakar di batu dan salju.', isNarration: true, emotion: 'neutral' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Gunung itu bukan tempat buat hidup. Tapi mungkin tempat buat ngeliat kebenaran dari atas.', emotion: 'sad' },
 ];
 
 // ── MOUNTAIN ZONE ──────────────────────────────────────────────
 
 export const MOUNTAIN_ENTRY: DialogueLine[] = [
-  { speaker: '— Narrator —', text: 'Frostpeak Summit memotong langit seperti pisau beku. Angin di sana tidak bertiup, ia menghakimi.', emotion: 'sad', isNarration: true },
+  { speaker: '— Narator —', text: 'Puncak Frostpeak memotong langit seperti pisau beku. Angin di sana tidak bertiup, ia menghakimi.', emotion: 'sad', isNarration: true },
   { speaker: 'Alden', portrait: 'alden', text: 'Udara ini... kayak nggak mau aku masuk.', emotion: 'neutral' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Gunung menolak mereka yang datang dengan niat kosong. Bagus. Berarti dia masih punya pendirian.', emotion: 'determined' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Gunung menolak mereka yang datang dengan niat kosong. Bagus. Berarti dia masih punya pendirian.', emotion: 'determined' },
   { speaker: 'Alden', portrait: 'alden', text: 'Valther taruh segel di sini?', emotion: 'determined' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Bukan taruh. Dia kubur sumpah kuno di bawah es. Ada penjaga yang menolak turun dari puncak karena dia percaya tugasnya belum selesai.', emotion: 'sad' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Bukan taruh. Dia kubur sumpah kuno di bawah es. Ada penjaga yang menolak turun dari puncak karena dia percaya tugasnya belum selesai.', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: 'Kalau penjaganya jalan menghalangi, aku mintain dia minggir. Kalau nggak bisa... aku lawan.', emotion: 'determined' },
 ];
 
 export const MOUNTAIN_ROUND1_POST: DialogueLine[] = [
   { speaker: 'Alden', portrait: 'alden', text: '*menarik napas berat* ...Setiap tebing di sini kayak mau menjatuhkan aku.', emotion: 'neutral' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Karena gunung cuma peduli pada dua hal: apa yang sanggup kamu pikul, dan apa yang siap kamu tinggalkan.', emotion: 'sad' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Karena gunung cuma peduli pada dua hal: apa yang sanggup kamu pikul, dan apa yang siap kamu tinggalkan.', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: 'Aku udah ninggalin terlalu banyak.', emotion: 'sad' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Maka jangan tinggalkan dirimu sendiri.', emotion: 'determined' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Maka jangan tinggalkan dirimu sendiri.', emotion: 'determined' },
 ];
 
 export const MOUNTAIN_ROUND2_POST: DialogueLine[] = [
   { speaker: 'Alden', portrait: 'alden', text: '*lutut menyentuh salju* ...Tangan aku udah nggak kerasa.', emotion: 'sad' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Itu tanda baik. Berarti rasa sakitnya belum menang.', emotion: 'neutral' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Itu tanda baik. Berarti rasa sakitnya belum menang.', emotion: 'neutral' },
   { speaker: 'Alden', portrait: 'alden', text: 'Kamu selalu nyari cara buat bikin aku maju.', emotion: 'determined' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Karena ada hal yang harus dilihat dari puncak sebelum kamu turun lagi: manusia bisa bohong, kerajaan bisa bohong, tapi jejak darah selalu jujur.', emotion: 'sad' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Karena ada hal yang harus dilihat dari puncak sebelum kamu turun lagi: manusia bisa bohong, kerajaan bisa bohong, tapi jejak darah selalu jujur.', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: 'Dan aku harus balik turun ke medan perang.', emotion: 'determined' },
 ];
 
 export const MOUNTAIN_BOSS_PRE: DialogueLine[] = [
-  { speaker: 'Fallen Guardian', portrait: 'fallen_guardian', text: 'Siapa yang mengganggu kubur sumpah ini?', emotion: 'angry' },
+  { speaker: 'Penjaga yang Gugur', portrait: 'fallen_guardian', text: 'Siapa yang mengganggu kubur sumpah ini?', emotion: 'angry' },
   { speaker: 'Alden', portrait: 'alden', text: 'Aku bukan pengganggu. Aku penutup luka yang kamu biarkan terbuka.', emotion: 'determined' },
-  { speaker: 'Fallen Guardian', portrait: 'fallen_guardian', text: 'Aku bersumpah menjaga segel terakhir sampai nafas terakhir. Kalau aku jatuh, semuanya jatuh bersamaku.', emotion: 'sad' },
+  { speaker: 'Penjaga yang Gugur', portrait: 'fallen_guardian', text: 'Aku bersumpah menjaga segel terakhir sampai nafas terakhir. Kalau aku jatuh, semuanya jatuh bersamaku.', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: 'Kalau sumpah itu masih hidup, bantu aku selesaiin ini.', emotion: 'determined' },
 ];
 
 export const MOUNTAIN_BOSS_POST: DialogueLine[] = [
-  { speaker: 'Fallen Guardian', portrait: 'fallen_guardian', text: '...Akhirnya... ada yang mengerti beban ini...', emotion: 'sad' },
+  { speaker: 'Penjaga yang Gugur', portrait: 'fallen_guardian', text: '...Akhirnya... ada yang mengerti beban ini...', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: 'Pergilah. Sumpah kamu udah selesai.', emotion: 'sad' },
-  { speaker: 'Fallen Guardian', portrait: 'fallen_guardian', text: 'Segel terakhir ada di medan perang. Valther menunggu di sana karena dia percaya semua jalan akhirnya menuju darah.', emotion: 'sad' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Dan dia benar. Tapi kali ini darahnya bukan buat ritual. Itu buat mengakhirinya.', emotion: 'determined' },
+  { speaker: 'Penjaga yang Gugur', portrait: 'fallen_guardian', text: 'Segel terakhir ada di medan perang. Valther menunggu di sana karena dia percaya semua jalan akhirnya menuju darah.', emotion: 'sad' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Dan dia benar. Tapi kali ini darahnya bukan buat ritual. Itu buat mengakhirinya.', emotion: 'determined' },
 ];
 
 // ── BATTLEFIELD ZONE ──────────────────────────────────────────
 
 export const BATTLEFIELD_ENTRY: DialogueLine[] = [
-  { speaker: '— Narrator —', text: 'Medan Perang Ruined. Dulu tempat keberanian dan pengorbanan. Sekarang kuburan harapan — dan panggung buat babak terakhir.', emotion: 'sad', isNarration: true },
+  { speaker: '— Narator —', text: 'Reruntuhan Medan Perang. Dulu tempat keberanian dan pengorbanan. Sekarang kuburan harapan — dan panggung buat babak terakhir.', emotion: 'sad', isNarration: true },
   { speaker: 'Valther', portrait: 'valther', text: 'Selamat datang di ujung perjalanan kamu, Alden. Harus aku akui — aku nggak nyangka kamu bakal sampe sini.', emotion: 'neutral' },
   { speaker: 'Alden', portrait: 'alden', text: 'Mana segelnya, Valther?', emotion: 'determined' },
   { speaker: 'Valther', portrait: 'valther', text: 'Di mana-mana. Di bawah kaki kamu. Di udara yang kamu hirup. Segel terakhir bukan pintu — ini medan perangnya sendiri. Darah seribu prajurit yang ngasih makannya.', emotion: 'angry' },
@@ -273,47 +273,47 @@ export const BATTLEFIELD_ROUND1_POST: DialogueLine[] = [
 export const BATTLEFIELD_ROUND2_POST: DialogueLine[] = [
   { speaker: 'Alden', portrait: 'alden', text: '*berjuang berdiri, pedang gemetar* Aku... masih berdiri... Valther.', emotion: 'determined' },
   { speaker: 'Valther', portrait: 'valther', text: 'Iya. Kamu berdiri. Dan itu yang aku butuhin.', emotion: 'neutral' },
-  { speaker: '— Narrator —', text: 'Langit robek. Pilar kegelapan menyembur dari jantung medan perang. Dan Valther mulai berubah.', isNarration: true, emotion: 'shocked' },
+  { speaker: '— Narator —', text: 'Langit robek. Pilar kegelapan menyembur dari jantung medan perang. Dan Valther mulai berubah.', isNarration: true, emotion: 'shocked' },
   { speaker: 'Valther', portrait: 'valther', text: 'Yang kuno udah nunggu berabad-abad buat wadah yang layak buat kekuatannya. Kamu pikir aku bakal biarin dia MANGSA aku? Nggak, Alden. Aku yang bakal MANGSA dia.', emotion: 'angry' },
   { speaker: 'Alden', portrait: 'alden', text: 'Kamu udah gila.', emotion: 'shocked' },
   { speaker: 'Valther', portrait: 'valther', text: 'Aku nggak ilang apa-apa. Aku dapet SEGALANYA. Saksikan — kegagalan tuhan kamu yang menjelma!', emotion: 'angry' },
 ];
 
 export const BATTLEFIELD_BOSS_PRE: DialogueLine[] = [
-  { speaker: '— Narrator —', sceneImage: 'pict-animasi-boss-vs-mc.png', text: 'Ashen Knight bangkit. Wujud Valther sekarang kolosus bengkok dari bayangan dan amarah cair — yang kuno terlahir setengah dari dagingnya.', emotion: 'shocked', isNarration: true },
+  { speaker: '— Narator —', sceneImage: 'pict-animasi-boss-vs-mc.png', text: 'Ksatria Abu bangkit. Wujud Valther sekarang kolosus bengkok dari bayangan dan amarah cair — yang kuno terlahir setengah dari dagingnya.', emotion: 'shocked', isNarration: true },
   { speaker: 'Alden', portrait: 'alden', sceneImage: 'pict-animasi-boss-vs-mc.png', text: 'Valther! Kamu masih di dalem! Lawan!', emotion: 'determined' },
-  { speaker: 'Ashen Knight', portrait: 'ashen_knight', sceneImage: 'pict-animasi-boss-vs-mc.png', text: '*suara berlapis sesuatu yang kuno dan mengerikan* Valther... SUDAH... HILANG. Sekarang cuma ada rasa lapar.', emotion: 'angry' },
+  { speaker: 'Ksatria Abu', portrait: 'ashen_knight', sceneImage: 'pict-animasi-boss-vs-mc.png', text: '*suara berlapis sesuatu yang kuno dan mengerikan* Valther... SUDAH... HILANG. Sekarang cuma ada rasa lapar.', emotion: 'angry' },
   { speaker: 'Alden', portrait: 'alden', text: 'Nggak. Aku udah kehilangan terlalu banyak buat kalah sama bayangan pake muka orang mati.', emotion: 'determined' },
-  { speaker: 'Ashen Knight', portrait: 'ashen_knight', sceneImage: 'pict-animasi-boss-vs-mc.png', text: 'Kamu udah kalah, ksatria cilik. Kamu kalah sejak kamu cinta sama kerajaan yang nggak bakal pernah balas cinta kamu.', emotion: 'angry' },
+  { speaker: 'Ksatria Abu', portrait: 'ashen_knight', sceneImage: 'pict-animasi-boss-vs-mc.png', text: 'Kamu udah kalah, ksatria cilik. Kamu kalah sejak kamu cinta sama kerajaan yang nggak bakal pernah balas cinta kamu.', emotion: 'angry' },
   { speaker: 'Alden', portrait: 'alden', text: 'Mungkin. Tapi aku nggak berjuang buat kerajaannya. Aku berjuang buat orang-orang DI DALEMNYA.', emotion: 'determined' },
-  { speaker: '— Narrator —', text: 'Saat kegelapan mutlak Ashen Knight hampir menelan sisa jiwanya, Jimat Ksatria dari Tam di dadanya mendadak terasa hangat. Di saat yang sama, Pedupaan Suci dari Wandering Nun memancarkan cahaya keemasan lembut, menghalau kabut hitam di sekelilingnya.', emotion: 'loving', isNarration: true },
-  { speaker: '— Narrator —', text: 'Alden mengangkat Forsaken Blade pemberian Edric satu kali terakhir. Beratnya setiap teman yang jatuh, setiap sumpah yang patah, setiap luka — disalurin ke satu tebasan mahadahsyat.', emotion: 'determined', isNarration: true },
+  { speaker: '— Narator —', text: 'Saat kegelapan mutlak Ksatria Abu hampir menelan sisa jiwanya, Jimat Ksatria dari Tam di dadanya mendadak terasa hangat. Di saat yang sama, Pedupaan Suci dari Biarawati Pengembara memancarkan cahaya keemasan lembut, menghalau kabut hitam di sekelilingnya.', emotion: 'loving', isNarration: true },
+  { speaker: '— Narator —', text: 'Alden mengangkat Forsaken Blade pemberian Edric satu kali terakhir. Beratnya setiap teman yang jatuh, setiap sumpah yang patah, setiap luka — disalurin ke satu tebasan mahadahsyat.', emotion: 'determined', isNarration: true },
   { speaker: 'Alden', portrait: 'alden', text: 'Demi Aelindra. Demi semua yang nggak bisa aku selametin. AKU AKHIRI INI.', emotion: 'determined' },
 ];
 
 export const BATTLEFIELD_BOSS_POST: DialogueLine[] = [
-  { speaker: 'Ashen Knight', portrait: 'ashen_knight', text: '*hancur* Nggak mungkin... yang kuno janji... keabadian...', emotion: 'angry' },
+  { speaker: 'Ksatria Abu', portrait: 'ashen_knight', text: '*hancur* Nggak mungkin... yang kuno janji... keabadian...', emotion: 'angry' },
   { speaker: 'Alden', portrait: 'alden', text: 'Dia bohong.', emotion: 'determined' },
-  { speaker: 'Ashen Knight', portrait: 'ashen_knight', text: 'Kamu... bocah... bodoh... kamu cuma... nunda yang nggak bisa dihindarin... kegelapan... selalu... balik...', emotion: 'angry' },
-  { speaker: '— Narrator —', text: 'Ashen Knight hancur jadi abu. Pilar kegelapan pecah. Dan buat pertama kalinya dalam berbulan-bulan — matahari nyentuh medan perang.', isNarration: true, emotion: 'neutral' },
+  { speaker: 'Ksatria Abu', portrait: 'ashen_knight', text: 'Kamu... bocah... bodoh... kamu cuma... nunda yang nggak bisa dihindarin... kegelapan... selalu... balik...', emotion: 'angry' },
+  { speaker: '— Narator —', text: 'Ksatria Abu hancur jadi abu. Pilar kegelapan pecah. Dan buat pertama kalinya dalam berbulan-bulan — matahari nyentuh medan perang.', isNarration: true, emotion: 'neutral' },
 ];
 
 // ── ENDING ────────────────────────────────────────────────────
 
 export const ENDING_SCENE: DialogueLine[] = [
-  { speaker: '— Narrator —', text: 'Kegelapan tersegel. Yang kuno — akhirnya bungkam.', isNarration: true, emotion: 'neutral' },
-  { speaker: '— Narrator —', text: 'Tapi luka yang dibawa Alden... terlalu dalem. Bahkan buat ksatria yang udah selamat dari semuanya.', isNarration: true, emotion: 'sad' },
-  { speaker: '— Narrator —', text: 'Di tengah kesunyian medan perang, langkah kaki terburu-buru memecah keheningan. Evelyne, yang menyusul dengan rasa cemas yang tak tertahankan, jatuh terduduk di samping ksatria itu.', isNarration: true, emotion: 'sad' },
-  { speaker: 'Princess Evelyne', portrait: 'evelyne', text: '*berlutut di sampingnya, tangan nahan lukanya* Alden. Alden, jangan pergi. Please. Tabibnya dateng—', emotion: 'sad' },
+  { speaker: '— Narator —', text: 'Kegelapan tersegel. Yang kuno — akhirnya bungkam.', isNarration: true, emotion: 'neutral' },
+  { speaker: '— Narator —', text: 'Tapi luka yang dibawa Alden... terlalu dalem. Bahkan buat ksatria yang udah selamat dari semuanya.', isNarration: true, emotion: 'sad' },
+  { speaker: '— Narator —', text: 'Di tengah kesunyian medan perang, langkah kaki terburu-buru memecah keheningan. Evelyne, yang menyusul dengan rasa cemas yang tak tertahankan, jatuh terduduk di samping ksatria itu.', isNarration: true, emotion: 'sad' },
+  { speaker: 'Putri Evelyne', portrait: 'evelyne', text: '*berlutut di sampingnya, tangan nahan lukanya* Alden. Alden, jangan pergi. Please. Tabibnya dateng—', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: '...Nggak apa-apa. Aku... aku nggak dingin. Aneh ya.', emotion: 'sad' },
-  { speaker: 'Princess Evelyne', portrait: 'evelyne', text: '*air mata jatuh* Jangan berani-beraninya kamu nerima ini. Lawan.', emotion: 'sad' },
+  { speaker: 'Putri Evelyne', portrait: 'evelyne', text: '*air mata jatuh* Jangan berani-beraninya kamu nerima ini. Lawan.', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: 'Evelyne. Kerajaan ini milik kamu sekarang. Dan kamu bakal jadi... kamu bakal jadi ratu yang luar biasa. Aku selalu tau.', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: '...Bilang ke Tam kalo pahlawan yang dia percayain... itu nyata.', emotion: 'sad' },
-  { speaker: '— Narrator —', text: 'Kerajaan akhirnya tau kebenaran. Dan nangis buat ksatria yang mereka tinggalin.', isNarration: true, emotion: 'sad' },
-  { speaker: '— Narrator —', text: 'Bertahun-tahun kemudian, sebuah patung besar didirikan di ibu kota — dengan bunga yang selalu ada di kakinya.', isNarration: true, emotion: 'neutral' },
-  { speaker: '— Narrator —', text: 'Dan di tiangnya, terukir huruf emas, kata-kata yang dipilih sendiri oleh putri:', isNarration: true, emotion: 'neutral' },
-  { speaker: '— Narrator —', text: '"Di sini terbaring Alden — ksatria yang dibenci dunia... yang menyelamatkan semua orang."', isNarration: true, emotion: 'neutral' },
-  { speaker: '— Narrator —', text: 'Dan di suatu tempat di balik sinar matahari, di luar jangkauan bayangan... seorang raja dan ksatria paling setianya berjalan bersama lagi.', isNarration: true, emotion: 'loving' },
+  { speaker: '— Narator —', text: 'Kerajaan akhirnya tau kebenaran. Dan nangis buat ksatria yang mereka tinggalin.', isNarration: true, emotion: 'sad' },
+  { speaker: '— Narator —', text: 'Bertahun-tahun kemudian, sebuah patung besar didirikan di ibu kota — dengan bunga yang selalu ada di kakinya.', isNarration: true, emotion: 'neutral' },
+  { speaker: '— Narator —', text: 'Dan di tiangnya, terukir huruf emas, kata-kata yang dipilih sendiri oleh putri:', isNarration: true, emotion: 'neutral' },
+  { speaker: '— Narator —', text: '"Di sini terbaring Alden — ksatria yang dibenci dunia... yang menyelamatkan semua orang."', isNarration: true, emotion: 'neutral' },
+  { speaker: '— Narator —', text: 'Dan di suatu tempat di balik sinar matahari, di luar jangkauan bayangan... seorang raja dan ksatria paling setianya berjalan bersama lagi.', isNarration: true, emotion: 'loving' },
 ];
 
 // ── NPC SIDE DIALOGUES (optional, still available) ────────────
@@ -326,27 +326,27 @@ export const BLACKSMITH_DIALOGUE: DialogueLine[] = [
 ];
 
 export const VILLAGE_BOY_DIALOGUE: DialogueLine[] = [
-  { speaker: 'Tam (Village Boy)', portrait: 'boy', text: 'Kak ksatria! Apa kamu beneran Alden? Yang katanya bunuh raja?', emotion: 'neutral' },
+  { speaker: 'Tam (Anak Desa)', portrait: 'boy', text: 'Kak ksatria! Apa kamu beneran Alden? Yang katanya bunuh raja?', emotion: 'neutral' },
   { speaker: 'Alden', portrait: 'alden', text: '...Kamu harusnya lari dari aku, nak. Semua orang juga gitu.', emotion: 'sad' },
-  { speaker: 'Tam (Village Boy)', portrait: 'boy', text: 'Tapi kamu nyelametin mamaku dari monster tadi malem. Orang jahat nggak bakal ngelakuin itu.', emotion: 'determined' },
+  { speaker: 'Tam (Anak Desa)', portrait: 'boy', text: 'Tapi kamu nyelametin mamaku dari monster tadi malem. Orang jahat nggak bakal ngelakuin itu.', emotion: 'determined' },
   { speaker: 'Alden', portrait: 'alden', text: '...', emotion: 'sad' },
-  { speaker: 'Tam (Village Boy)', portrait: 'boy', text: 'Aku percaya sama kamu, Kak. Aku bakal selalu percaya.', emotion: 'happy' },
+  { speaker: 'Tam (Anak Desa)', portrait: 'boy', text: 'Aku percaya sama kamu, Kak. Aku bakal selalu percaya.', emotion: 'happy' },
 ];
 
 export const NUN_DIALOGUE: DialogueLine[] = [
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Kamu udah dateng jauh, anak. Lebih jauh dari yang berani kebanyakan orang.', emotion: 'neutral' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Kamu udah dateng jauh, anak. Lebih jauh dari yang berani kebanyakan orang.', emotion: 'neutral' },
   { speaker: 'Alden', portrait: 'alden', text: 'Jalan di depan masih panjang.', emotion: 'determined' },
-  { speaker: 'Wandering Nun', portrait: 'nun', text: 'Semua jalan berakhir di suatu tempat. Pastiin jalan kamu berakhir dengan kamu berdiri — bukan berlutut.', emotion: 'determined' },
+  { speaker: 'Biarawati Pengembara', portrait: 'nun', text: 'Semua jalan berakhir di suatu tempat. Pastiin jalan kamu berakhir dengan kamu berdiri — bukan berlutut.', emotion: 'determined' },
 ];
 
 export const EVELYNE_TURNING_POINT: DialogueLine[] = [
-  { speaker: 'Princess Evelyne', portrait: 'evelyne', text: 'Aku nemu buku harian ayah. Dia nulis... dia nulis kalo Valther sering nanya aneh-aneh tentang segel.', emotion: 'shocked' },
+  { speaker: 'Putri Evelyne', portrait: 'evelyne', text: 'Aku nemu buku harian ayah. Dia nulis... dia nulis kalo Valther sering nanya aneh-aneh tentang segel.', emotion: 'shocked' },
   { speaker: 'Alden', portrait: 'alden', text: 'Putri—', emotion: 'neutral' },
-  { speaker: 'Princess Evelyne', portrait: 'evelyne', text: 'Jangan. Belum. Aku harus ngomong ini. Aku... aku salah tentang kamu.', emotion: 'sad' },
+  { speaker: 'Putri Evelyne', portrait: 'evelyne', text: 'Jangan. Belum. Aku harus ngomong ini. Aku... aku salah tentang kamu.', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: '...Kamu punya alasan buat percaya apa yang kamu percayain.', emotion: 'sad' },
-  { speaker: 'Princess Evelyne', portrait: 'evelyne', text: 'Aku punya alasan buat nanya yang bener duluan. Aku nggak. Maaf, Alden.', emotion: 'sad' },
+  { speaker: 'Putri Evelyne', portrait: 'evelyne', text: 'Aku punya alasan buat nanya yang bener duluan. Aku nggak. Maaf, Alden.', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', text: 'Kamu nggak perlu minta maaf ke aku.', emotion: 'sad' },
-  { speaker: 'Princess Evelyne', portrait: 'evelyne', text: 'Harus.', emotion: 'determined' },
+  { speaker: 'Putri Evelyne', portrait: 'evelyne', text: 'Harus.', emotion: 'determined' },
 ];
 
 // ── OLD DIALOGUES (kept for backward compat but not used in rounds) ──
@@ -359,21 +359,21 @@ export const CASTLE_DIALOGUE_INTRO: DialogueLine[] = [
 ];
 
 export const BETRAYAL_SCENE: DialogueLine[] = [
-  { speaker: '— Narrator —', sceneImage: 'scene3-The-Tragedy.jpeg', text: 'Tiga jam kemudian. Teriakan robek tembok kastil.', isNarration: true, emotion: 'shocked' },
+  { speaker: '— Narator —', sceneImage: 'scene3-The-Tragedy.jpeg', text: 'Tiga jam kemudian. Teriakan robek tembok kastil.', isNarration: true, emotion: 'shocked' },
   { speaker: 'Valther', portrait: 'valther', sceneImage: 'scene3-The-Tragedy.jpeg', text: 'TANGKAP DIA! Ksatria Alden udah bunuh raja kita! Aku liat sendiri!', emotion: 'angry' },
   { speaker: 'Alden', portrait: 'alden', sceneImage: 'scene3-The-Tragedy.jpeg', text: 'Apa— Nggak! Aku nemuin dia kayak gini! Valther, kamu TAU aku nggak bakal pernah—', emotion: 'shocked' },
   { speaker: 'Valther', portrait: 'valther', sceneImage: 'scene3-The-Tragedy.jpeg', text: 'Pedangnya di tangan kamu, pengkhianat. Nggak ada yang perlu dibahas lagi.', emotion: 'neutral' },
-  { speaker: 'Princess Evelyne', portrait: 'evelyne', sceneImage: 'scene4-evelyn-marah-kepada-mc.png', text: '...Kamu... Kamu bunuh dia. Kamu bunuh ayahku.', emotion: 'sad' },
+  { speaker: 'Putri Evelyne', portrait: 'evelyne', sceneImage: 'scene4-evelyn-marah-kepada-mc.png', text: '...Kamu... Kamu bunuh dia. Kamu bunuh ayahku.', emotion: 'sad' },
   { speaker: 'Alden', portrait: 'alden', sceneImage: 'scene4-evelyn-marah-kepada-mc.png', text: 'Putri, tolong— aku sumpah demi apapun yang aku punya—', emotion: 'sad' },
-  { speaker: 'Princess Evelyne', portrait: 'evelyne', sceneImage: 'scene4-evelyn-marah-kepada-mc.png', text: 'Bawa dia pergi. Aku nggak sanggup liat dia.', emotion: 'angry' },
+  { speaker: 'Putri Evelyne', portrait: 'evelyne', sceneImage: 'scene4-evelyn-marah-kepada-mc.png', text: 'Bawa dia pergi. Aku nggak sanggup liat dia.', emotion: 'angry' },
 ];
 
 export const ESCAPE_NARRATION: DialogueLine[] = [
-  { speaker: '— Narrator —', sceneImage: 'scene5-mc-dipenjara-atas-fitnah.jpeg', text: 'Mereka seret dia ke halaman eksekusi saat fajar.', isNarration: true, emotion: 'sad' },
-  { speaker: '— Narrator —', sceneImage: 'scene5-mc-dipenjara-atas-fitnah.jpeg', text: 'Tapi pandai besi tua, Edric — satu-satunya orang yang masih percaya — potong rantai dia di gelap sebelum lonceng berbunyi.', isNarration: true, emotion: 'neutral' },
+  { speaker: '— Narator —', sceneImage: 'scene5-mc-dipenjara-atas-fitnah.jpeg', text: 'Mereka seret dia ke halaman eksekusi saat fajar.', isNarration: true, emotion: 'sad' },
+  { speaker: '— Narator —', sceneImage: 'scene5-mc-dipenjara-atas-fitnah.jpeg', text: 'Tapi pandai besi tua, Edric — satu-satunya orang yang masih percaya — potong rantai dia di gelap sebelum lonceng berbunyi.', isNarration: true, emotion: 'neutral' },
   { speaker: 'Old Edric', portrait: 'blacksmith', sceneImage: 'scene6-mc-diselamatkan-oleh-seseorang.jpeg', text: 'Kamu nggak ngelakuin itu. Tau ini tulang-tulang tua aku. Sekarang LARI, nak. Lari dan cari kebenaran.', emotion: 'determined' },
   { speaker: 'Alden', portrait: 'alden', sceneImage: 'scene6-mc-diselamatkan-oleh-seseorang.jpeg', text: '...Edric...', emotion: 'sad' },
-  { speaker: 'Old Edric', portrait: 'blacksmith', sceneImage: 'scene6-mc-diselamatkan-oleh-seseorang.jpeg', text: 'Jangan berani nangis. Belum. Bertahan dulu. Nanti baru bersedih.', emotion: 'determined' },
+  { speaker: 'Old Edric', portrait: 'blacksmith', sceneImage: 'scene6-mc-diselamatkan-oleh-seseorang.jpeg', text: 'Jangan berani nangis. Belum. Bertahan dulu. Napi baru bersedih.', emotion: 'determined' },
 ];
 
 export const FINAL_BATTLE_DIALOGUE: DialogueLine[] = [
@@ -387,4 +387,3 @@ export const QUEST_INTRO_VILLAGE: DialogueLine[] = [
   { speaker: 'Frightened Villager', text: 'Mayat hidup udah nyerang ladang kami tiap malem! Tolong, kami nggak punya tempat tujuan!', emotion: 'shocked' },
   { speaker: 'Alden', portrait: 'alden', text: 'Tetap di dalem kalo udah gelap. Aku yang urus.', emotion: 'determined' },
 ];
-  

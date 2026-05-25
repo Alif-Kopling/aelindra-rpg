@@ -55,88 +55,89 @@ export interface SkillDefinition {
 export const SKILL_TREE: SkillDefinition[] = [
   {
     id: 'blade_mastery',
-    name: 'Blade Mastery',
-    description: 'Basic and charged attacks deal more damage, rewarding disciplined offense.',
+    name: 'Kemahiran Pedang',
+    description: 'Serangan dasar dan serangan berat menghasilkan kerusakan lebih tinggi, menghargai serangan yang disiplin.',
     cost: 1,
     category: 'combat',
     prerequisites: [],
   },
   {
     id: 'relentless_step',
-    name: 'Relentless Step',
-    description: 'Dodge cost is lower and invincibility lasts slightly longer.',
+    name: 'Langkah Tanpa Henti',
+    description: 'Biaya menghindar lebih rendah dan durasi kekebalan bertahan sedikit lebih lama.',
     cost: 1,
     category: 'survival',
     prerequisites: [],
   },
   {
     id: 'iron_reflex',
-    name: 'Iron Reflex',
-    description: 'Parry window widens and successful parries restore more stamina.',
+    name: 'Refleks Besi',
+    description: 'Jeda parry melebar dan parry yang berhasil memulihkan lebih banyak stamina.',
     cost: 1,
     category: 'combat',
     prerequisites: ['blade_mastery'],
   },
   {
     id: 'blood_pact',
-    name: 'Blood Pact',
-    description: 'Critical hits hit harder and bleed lasts longer.',
+    name: 'Pakta Darah',
+    description: 'Serangan kritis lebih mematikan dan efek pendarahan bertahan lebih lama.',
     cost: 2,
     category: 'passive',
     prerequisites: ['iron_reflex'],
   },
 ];
 
-export const COMBO_TIMEOUT = 1200; // ms between combo hits
-export const DASH_COOLDOWN = 600;
-export const DASH_DURATION = 200;
-export const DASH_SPEED = 600;
-export const INVINCIBILITY_FRAMES = 400;
+/** @deprecated Prefer COMBAT_CONFIG from systems/combatFeel.ts */
+export const COMBO_TIMEOUT = 1400;
+export const DASH_COOLDOWN = 480;
+export const DASH_DURATION = 180;
+export const DASH_SPEED = 680;
+export const INVINCIBILITY_FRAMES = 280;
 
 export const STORY_CHAPTERS = [
-  { id: 'prologue', title: 'The Night the Kingdom Wept' },
-  { id: 'ch1', title: 'The Forsaken Knight' },
-  { id: 'ch2', title: 'Ashes of the Crown' },
-  { id: 'ch3', title: 'The Wandering Nun\'s Secret' },
-  { id: 'ch4', title: 'Beyond the Fogbound Forest' },
-  { id: 'ch5', title: 'The Princess\'s Doubt' },
-  { id: 'ch6', title: 'Shattered Seals' },
-  { id: 'ch7', title: 'Valther\'s True Face' },
-  { id: 'finale', title: 'The Last Knight' },
+  { id: 'prologue', title: 'Malam Saat Kerajaan Menangis' },
+  { id: 'ch1', title: 'Ksatria Terbuang' },
+  { id: 'ch2', title: 'Abu Sang Mahkota' },
+  { id: 'ch3', title: 'Rahasia Biarawati Pengembara' },
+  { id: 'ch4', title: 'Di Balik Hutan Fogbound' },
+  { id: 'ch5', title: 'Keraguan Sang Putri' },
+  { id: 'ch6', title: 'Segel yang Hancur' },
+  { id: 'ch7', title: 'Wajah Asli Valther' },
+  { id: 'finale', title: 'Ksatria Terakhir' },
 ];
 
 export const ZONES = {
-  village: { name: 'Harrowmere Village', music: 'village_peaceful', ambience: 'rain_soft' },
-  tavern: { name: 'The Iron Lantern Tavern', music: 'tavern_warm', ambience: 'fireplace' },
-  forest: { name: 'Fogbound Forest', music: 'forest_dark', ambience: 'wind_leaves' },
-  castle: { name: 'Aelindra Royal Castle', music: 'castle_haunted', ambience: 'wind_stone' },
-  cathedral: { name: 'Cathedral of Ash', music: 'cathedral_choir', ambience: 'silence' },
-  mountain: { name: 'Frostpeak Summit', music: 'mountain_lonely', ambience: 'blizzard' },
-  catacombs: { name: 'Sunken Catacombs', music: 'catacombs_dread', ambience: 'drip_echo' },
-  battlefield: { name: 'Ruined Battlefields', music: 'battlefield_tragic', ambience: 'wind_haunting' },
+  village: { name: 'Desa Harrowmere', music: 'village_peaceful', ambience: 'rain_soft' },
+  tavern: { name: 'Kedai Iron Lantern', music: 'tavern_warm', ambience: 'fireplace' },
+  forest: { name: 'Hutan Fogbound', music: 'forest_dark', ambience: 'wind_leaves' },
+  castle: { name: 'Kastil Kerajaan Aelindra', music: 'castle_haunted', ambience: 'wind_stone' },
+  cathedral: { name: 'Katedral Abu', music: 'cathedral_choir', ambience: 'silence' },
+  mountain: { name: 'Puncak Frostpeak', music: 'mountain_lonely', ambience: 'blizzard' },
+  catacombs: { name: 'Katakombe Terkutuk', music: 'catacombs_dread', ambience: 'drip_echo' },
+  battlefield: { name: 'Reruntuhan Medan Perang', music: 'battlefield_tragic', ambience: 'wind_haunting' },
 };
 
 export const BOSS_DATA = [
   {
     id: 'blind_king',
-    name: 'The Blind King',
-    title: 'Former Ruler, Now Hollow',
+    name: 'Blind King',
+    title: 'Mantan Penguasa, Kini Hampa',
     maxHp: 800,
     phases: 2,
     zone: 'castle',
   },
   {
     id: 'ashen_knight',
-    name: 'Ashen Knight',
-    title: 'Once a Guardian, Now Dust',
+    name: 'Ksatria Abu',
+    title: 'Pernah Menjadi Pelindung, Kini Hanya Debu',
     maxHp: 600,
     phases: 2,
     zone: 'battlefield',
   },
   {
     id: 'saint_of_rot',
-    name: 'Saint of Rot',
-    title: 'Corrupted Servant of the Faith',
+    name: 'Saint Pembusukan',
+    title: 'Pelayan Iman yang Terkorupsi',
     maxHp: 700,
     phases: 3,
     zone: 'cathedral',
@@ -144,15 +145,15 @@ export const BOSS_DATA = [
   {
     id: 'hollow_beast',
     name: 'Hollow Beast',
-    title: 'The Forest\'s Despair Given Form',
+    title: 'Keputusasaan Hutan yang Menjelma',
     maxHp: 900,
     phases: 2,
     zone: 'forest',
   },
   {
     id: 'fallen_guardian',
-    name: 'Fallen Guardian',
-    title: 'Who Swore to Protect All',
+    name: 'Penjaga yang Gugur',
+    title: 'Yang Bersumpah Melindungi Segalanya',
     maxHp: 1000,
     phases: 3,
     zone: 'mountain',
@@ -160,7 +161,7 @@ export const BOSS_DATA = [
   {
     id: 'valther',
     name: 'Valther',
-    title: 'The Architect of Ruin',
+    title: 'Arsitek Kehancuran',
     maxHp: 1500,
     phases: 4,
     zone: 'castle',
@@ -170,20 +171,20 @@ export const BOSS_DATA = [
 export const ITEMS_DB: Record<string, any> = {
   health_potion: {
     id: 'health_potion',
-    name: 'Healing Draught',
+    name: 'Ramuan Pemulih',
     type: 'consumable',
     rarity: 'common',
-    description: 'A crimson tincture that mends wounds. Tastes of iron and desperate hope.',
+    description: 'Cairan merah yang menyembuhkan luka. Rasanya seperti besi dan harapan yang tipis.',
     icon: '🧪',
     quantity: 1,
     stackable: true,
   },
   iron_sword: {
     id: 'iron_sword',
-    name: 'Iron Longsword',
+    name: 'Pedang Panjang Besi',
     type: 'weapon',
     rarity: 'common',
-    description: 'Standard-issue blade of Aelindra knights. Once it stood for honor.',
+    description: 'Pedang standar ksatria Aelindra. Dahulu merupakan simbol kehormatan.',
     icon: '⚔️',
     stats: { attack: 5 },
     quantity: 1,
@@ -194,7 +195,7 @@ export const ITEMS_DB: Record<string, any> = {
     name: 'Forsaken Blade',
     type: 'weapon',
     rarity: 'rare',
-    description: 'Forged by the Old Blacksmith for Alden\'s journey. Carries the weight of innocence.',
+    description: 'Ditempa oleh Pandai Besi Tua untuk perjalanan Alden. Memikul beban kemurnian.',
     icon: '🗡️',
     stats: { attack: 14 },
     quantity: 1,
@@ -202,10 +203,10 @@ export const ITEMS_DB: Record<string, any> = {
   },
   knight_armor: {
     id: 'knight_armor',
-    name: 'Tattered Knight\'s Plate',
+    name: 'Zirah Ksatria Sobek',
     type: 'armor',
     rarity: 'uncommon',
-    description: 'Once polished and proud. Now scratched and stained with his own blood.',
+    description: 'Dulu mengkilap dan membanggakan. Kini tergores dan ternoda oleh darahnya sendiri.',
     icon: '🛡️',
     stats: { defense: 8 },
     quantity: 1,
@@ -213,10 +214,10 @@ export const ITEMS_DB: Record<string, any> = {
   },
   wanderers_ring: {
     id: 'wanderers_ring',
-    name: 'Ring of the Wanderer',
+    name: 'Cincin Pengembara',
     type: 'accessory',
     rarity: 'rare',
-    description: 'Given by the Wandering Nun. Glows faintly when ancient seals are near.',
+    description: 'Diberikan oleh Biarawati Pengembara. Bersinar redup saat segel kuno berada di dekatnya.',
     icon: '💍',
     stats: { mana: 20, speed: 15 },
     quantity: 1,
@@ -224,10 +225,10 @@ export const ITEMS_DB: Record<string, any> = {
   },
   blacksmiths_gift: {
     id: 'blacksmiths_gift',
-    name: 'Blacksmith\'s Memento',
+    name: 'Kenang-kenangan Pandai Besi',
     type: 'questItem',
     rarity: 'legendary',
-    description: '"Survive, boy. That\'s an order from an old fool who still believes in you." — Old Edric',
+    description: '"Bertahanlah, nak. Itu perintah dari orang tua bodoh yang masih percaya padamu." — Edric Tua',
     icon: '🔨',
     quantity: 1,
     stackable: false,

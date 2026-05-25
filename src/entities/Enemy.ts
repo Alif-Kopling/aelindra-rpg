@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { useGameStore } from '../store/gameStore';
 import { EnemyStats } from '../utils/types';
+import { COMBAT_CONFIG } from '../systems/combatFeel';
 
 export interface EnemyConfig {
   key: string;
@@ -44,6 +45,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private aiTimer: Phaser.Time.TimerEvent | null = null;
   private stunTimerId: Phaser.Time.TimerEvent | null = null;
   private bleedTimerId: Phaser.Time.TimerEvent | null = null;
+  private telegraphGfx: Phaser.GameObjects.Graphics | null = null;
+  private comboHitsInWindow = 0;
+  private comboWindowTimer = 0;
 
   constructor(scene: Phaser.Scene, x: number, y: number, config: EnemyConfig) {
 
@@ -142,8 +146,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
           this.aiState = 'patrol';
         } else if (dist < this.attackRange && this.attackCooldown <= 0) {
           this.aiState = 'attack';
-          this.attackWindup = 280;
-          this.setTint(0xffaa00);
+          this.attackWindup = COMBAT_CONFIG.enemyTelegraphMs;
+          this.showAttackTelegraph();
         }
         break;
       case 'attack':
@@ -175,6 +179,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     this.attackCooldown = Math.max(0, this.attackCooldown - delta);
     this.staggerTimer = Math.max(0, this.staggerTimer - delta);
+    this.comboWindowTimer = Math.max(0, this.comboWindowTimer - delta);
+    if (this.comboWindowTimer <= 0) {
+      this.comboHitsInWindow = 0;
+    }
     this.frameTimer += delta;
 
     if (this.isStunned) {
@@ -244,6 +252,28 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.animateFrames(delta, 4, 150);
   }
 
+  private showAttackTelegraph() {
+    this.clearTelegraph();
+    this.setTint(0xffaa00);
+    this.telegraphGfx = this.scene.add.graphics();
+    this.telegraphGfx.lineStyle(2, 0xff4444, 0.85);
+    this.telegraphGfx.strokeCircle(this.x, this.y, this.attackRange + 8);
+    this.telegraphGfx.setDepth(7);
+    this.scene.tweens.add({
+      targets: this.telegraphGfx,
+      alpha: { from: 0.9, to: 0.25 },
+      duration: COMBAT_CONFIG.enemyTelegraphMs,
+      yoyo: true,
+    });
+  }
+
+  private clearTelegraph() {
+    if (this.telegraphGfx?.active) {
+      this.telegraphGfx.destroy();
+    }
+    this.telegraphGfx = null;
+  }
+
   private handleAttack(body: Phaser.Physics.Arcade.Body, delta: number) {
     body.setVelocityX(0);
     this.animateFrames(delta, 4, 200);
@@ -253,6 +283,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       if (this.attackWindup > 0) {
         return;
       }
+      this.clearTelegraph();
     }
 
     if (this.attackCooldown <= 0 && this.target) {
@@ -331,14 +362,19 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  takeDamage(amount: number, comboCount = 1, isCritical = false): boolean {
+  takeDamage(amount: number, comboCount = 1, isCritical = false, isFinisher = false): boolean {
     if (this.isDead) return false;
 
     const totalDmg = amount;
     this.hp = Math.max(0, this.hp - totalDmg);
 
+    this.comboWindowTimer = COMBAT_CONFIG.enemyComboStaggerWindowMs;
+    this.comboHitsInWindow += 1;
+    const pressureStagger =
+      this.comboHitsInWindow >= COMBAT_CONFIG.enemyComboStaggerThreshold || isFinisher;
+
     this.aiState = 'stagger' as AIState;
-    this.staggerTimer = 300;
+    this.staggerTimer = pressureStagger ? (isFinisher ? 520 : 400) : 220;
 
     this.setTint(0xff0000);
     this.scene.time.delayedCall(150, () => {
@@ -349,15 +385,14 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     if (this.target) {
       const dx = Math.sign(this.x - this.target.x);
       
-      if (isCritical) {
-        // Critical Knockback: Slammed downward! (arah jatuh crit)
-        body.setVelocityX(dx * 250);
-        body.setVelocityY(350); // Slammed down!
+      const kbMult = isFinisher ? 1.35 : pressureStagger ? 1.15 : 1;
+      if (isCritical || isFinisher) {
+        body.setVelocityX(dx * 250 * kbMult);
+        body.setVelocityY(isFinisher ? 280 : 350);
         this.spawnCriticalImpactEffect();
       } else {
-        // Basic Attack Knockback: Lurus (straight horizontal knockback)
-        body.setVelocityX(dx * 180);
-        body.setVelocityY(0); // Lurus
+        body.setVelocityX(dx * 180 * kbMult);
+        body.setVelocityY(pressureStagger ? -80 : 0);
       }
     }
 
@@ -568,6 +603,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     if (this.bleedTimerId) { this.bleedTimerId.remove(); this.bleedTimerId = null; }
     if (this.hpBar?.active) this.hpBar.destroy();
     if (this.nameText?.active) this.nameText.destroy();
+    this.clearTelegraph();
     this.scene.tweens.killTweensOf(this);
     super.destroy(fromScene);
   }

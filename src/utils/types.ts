@@ -138,6 +138,8 @@ export interface BossData {
 // DIALOGUE / STORY
 // ============================================================
 
+export type DialogueTone = 'calm' | 'sarcastic' | 'determined' | 'emotional' | 'silent';
+
 export interface DialogueLine {
   speaker: string;
   portrait?: string;
@@ -147,10 +149,27 @@ export interface DialogueLine {
   isNarration?: boolean;
   /** Optional full-screen scene art (under public/assets/images/animation/) */
   sceneImage?: string;
+  /** Brief hold after line completes (ms) */
+  pauseAfterMs?: number;
+  cinematic?: 'none' | 'zoom' | 'dramatic';
 }
 
 export interface DialogueChoice {
   text: string;
+  tone: DialogueTone;
+  /** Short label shown on choice button */
+  label?: string;
+  npcId?: string;
+  trustDelta?: number;
+  flavorFlag?: string;
+  /** Alden's voiced response after picking */
+  aldenLine?: string;
+  /** Inline NPC reactions (overrides templates) */
+  reactionLines?: DialogueLine[];
+  reactions?: Record<string, DialogueLine>;
+  pauseMs?: number;
+  cinematic?: 'none' | 'zoom' | 'dramatic';
+  /** Legacy fields — ignored; canon path preserved */
   consequence?: string;
   nextDialogue?: string;
 }
@@ -161,6 +180,8 @@ export interface DialogueState {
   currentIndex: number;
   speakerName: string;
   onComplete?: () => void;
+  awaitingChoice: boolean;
+  lastTone?: DialogueTone;
 }
 
 // ============================================================

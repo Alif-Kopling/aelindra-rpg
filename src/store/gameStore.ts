@@ -9,6 +9,7 @@ import {
   Quest,
   DialogueState,
   DialogueLine,
+  DialogueTone,
   BossData,
   Notification,
   GameSettings,
@@ -16,6 +17,13 @@ import {
   HitEffect,
 } from '../utils/types';
 import { PLAYER_DEFAULTS, ITEMS_DB, SKILL_TREE, zoneProgressRank } from '../utils/constants';
+import {
+  clampTrust,
+  resolveChoiceReactions,
+  toneToEmotion,
+  applyNpcFlavorLine,
+} from '../systems/dialogueEngine';
+import { enrichDialogueWithChoices, sceneIdFromLines } from '../systems/storyChoices';
 
 // ============================================================
 // INITIAL STATES
@@ -83,6 +91,7 @@ const initialDialogue: DialogueState = {
   lines: [],
   currentIndex: 0,
   speakerName: '',
+  awaitingChoice: false,
 };
 
 // ============================================================
@@ -123,9 +132,13 @@ interface GameStore {
 
   // Dialogue
   dialogue: DialogueState;
-  openDialogue: (lines: DialogueLine[], onComplete?: () => void) => void;
+  openDialogue: (lines: DialogueLine[], onComplete?: () => void, options?: { sceneId?: string; npcId?: string }) => void;
   advanceDialogue: () => void;
+  pickDialogueChoice: (choiceIndex: number) => void;
   closeDialogue: () => void;
+  playerTone: DialogueTone | null;
+  npcTrust: Record<string, number>;
+  npcMood: Record<string, string>;
   isCinematicGrainActive: boolean;
   setCinematicGrainActive: (active: boolean) => void;
 
@@ -384,24 +397,113 @@ export const useGameStore = create<GameStore>()(
 
     // Dialogue
     dialogue: initialDialogue,
-    openDialogue: (lines, onComplete) => set((s) => {
-      s.dialogue.isOpen = true;
-      s.dialogue.lines = lines;
-      s.dialogue.currentIndex = 0;
-      s.dialogue.speakerName = lines[0]?.speaker || '';
-      s.dialogue.onComplete = onComplete;
-    }),
+    playerTone: null,
+    npcTrust: { edric: 55, nun: 50, evelyne: 45, tam: 60 },
+    npcMood: {},
+    openDialogue: (lines, onComplete, options) => {
+      const sceneId = options?.sceneId ?? sceneIdFromLines(lines);
+      let enriched = sceneId ? enrichDialogueWithChoices(lines, sceneId) : [...lines];
+      const npcId = options?.npcId;
+      if (npcId) {
+        const state = get();
+        enriched = applyNpcFlavorLine(enriched, npcId, state.npcTrust[npcId] ?? 50, state.npcMood[npcId]);
+      }
+      set((s) => {
+        s.dialogue.isOpen = true;
+        s.dialogue.lines = enriched;
+        s.dialogue.currentIndex = 0;
+        s.dialogue.speakerName = enriched[0]?.speaker || '';
+        s.dialogue.onComplete = onComplete;
+        s.dialogue.awaitingChoice = false;
+        s.dialogue.lastTone = undefined;
+      });
+      const first = enriched[0];
+      if (first?.cinematic && first.cinematic !== 'none') {
+        window.dispatchEvent(new CustomEvent('dialogue-cinematic', { detail: { mode: first.cinematic } }));
+      }
+    },
+    pickDialogueChoice: (choiceIndex) => {
+      const { dialogue, npcTrust, npcMood } = get();
+      const line = dialogue.lines[dialogue.currentIndex];
+      const choice = line?.choices?.[choiceIndex];
+      if (!line || !choice) return;
+
+      const reactions = resolveChoiceReactions(choice, {
+        npcTrust,
+        npcMood,
+        speakerPortrait: line.portrait,
+      });
+
+      set((s) => {
+        s.playerTone = choice.tone;
+        s.dialogue.lastTone = choice.tone;
+        s.dialogue.awaitingChoice = false;
+
+        if (choice.npcId) {
+          const key = choice.npcId;
+          s.npcTrust[key] = clampTrust((s.npcTrust[key] ?? 50) + (choice.trustDelta ?? 0));
+          s.npcMood[key] = choice.tone;
+        }
+        if (choice.flavorFlag) {
+          s.storyFlags[choice.flavorFlag] = true;
+        }
+
+        const insert: DialogueLine[] = [];
+        if (choice.aldenLine) {
+          insert.push({
+            speaker: 'Alden',
+            portrait: 'alden',
+            text: choice.aldenLine,
+            emotion: toneToEmotion(choice.tone),
+            cinematic: choice.cinematic,
+          });
+        }
+        insert.push(...reactions);
+
+        s.dialogue.lines[dialogue.currentIndex] = { ...line, choices: undefined };
+        if (insert.length > 0) {
+          s.dialogue.lines.splice(dialogue.currentIndex + 1, 0, ...insert);
+        }
+      });
+
+      if (choice.cinematic && choice.cinematic !== 'none') {
+        window.dispatchEvent(new CustomEvent('dialogue-cinematic', { detail: { mode: choice.cinematic } }));
+      }
+
+      const pause = choice.pauseMs ?? 350;
+      setTimeout(() => get().advanceDialogue(), pause);
+    },
     advanceDialogue: () => {
       const { dialogue } = get();
-      if (dialogue.currentIndex < dialogue.lines.length - 1) {
-        set((s) => {
-          s.dialogue.currentIndex += 1;
-          s.dialogue.speakerName = s.dialogue.lines[s.dialogue.currentIndex]?.speaker || '';
-        });
+      const line = dialogue.lines[dialogue.currentIndex];
+      if (line?.choices?.length && dialogue.awaitingChoice) {
+        return;
+      }
+
+      const pause = line?.pauseAfterMs ?? 0;
+      const goNext = () => {
+        const d = get().dialogue;
+        if (d.currentIndex < d.lines.length - 1) {
+          set((s) => {
+            s.dialogue.currentIndex += 1;
+            s.dialogue.speakerName = s.dialogue.lines[s.dialogue.currentIndex]?.speaker || '';
+            s.dialogue.awaitingChoice = false;
+          });
+          const next = get().dialogue.lines[get().dialogue.currentIndex];
+          if (next?.cinematic && next.cinematic !== 'none') {
+            window.dispatchEvent(new CustomEvent('dialogue-cinematic', { detail: { mode: next.cinematic } }));
+          }
+        } else {
+          const cb = d.onComplete;
+          get().closeDialogue();
+          cb?.();
+        }
+      };
+
+      if (pause > 0) {
+        setTimeout(goNext, pause);
       } else {
-        const cb = dialogue.onComplete;
-        get().closeDialogue();
-        cb?.();
+        goNext();
       }
     },
     closeDialogue: () => set((s) => {
@@ -409,6 +511,8 @@ export const useGameStore = create<GameStore>()(
       s.dialogue.lines = [];
       s.dialogue.currentIndex = 0;
       s.dialogue.onComplete = undefined;
+      s.dialogue.awaitingChoice = false;
+      window.dispatchEvent(new CustomEvent('dialogue-cinematic', { detail: { mode: 'reset' } }));
     }),
     isCinematicGrainActive: false,
     setCinematicGrainActive: (active) => set((s) => {
@@ -734,6 +838,9 @@ export const useGameStore = create<GameStore>()(
         hotbar: state.hotbar,
         furthestClearedZone: state.furthestClearedZone,
         hasRecallPortal: state.hasRecallPortal,
+        npcTrust: state.npcTrust,
+        npcMood: state.npcMood,
+        playerTone: state.playerTone,
         timestamp: Date.now(),
         slot,
       };
@@ -772,6 +879,9 @@ export const useGameStore = create<GameStore>()(
           s.hotbar = data.hotbar ?? ['health_potion', null, null, null, null, null, null, null];
           s.furthestClearedZone = data.furthestClearedZone || 'village';
           s.hasRecallPortal = data.hasRecallPortal ?? false;
+          s.npcTrust = data.npcTrust ?? s.npcTrust;
+          s.npcMood = data.npcMood ?? s.npcMood;
+          s.playerTone = data.playerTone ?? null;
           s.activeBoss = null;
           s.isPaused = false;
           s.isInventoryOpen = false;

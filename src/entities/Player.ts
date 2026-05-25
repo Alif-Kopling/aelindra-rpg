@@ -1,14 +1,16 @@
 import Phaser from 'phaser';
 import { useGameStore } from '../store/gameStore';
 import {
-  DASH_COOLDOWN,
-  DASH_DURATION,
-  DASH_SPEED,
-  COMBO_TIMEOUT,
-  INVINCIBILITY_FRAMES,
   COLORS,
   DEBUG_HITBOXES,
 } from '../utils/constants';
+import {
+  COMBAT_CONFIG,
+  comboStepIndex,
+  getComboLungeSpeed,
+  canCancelAttackIntoDash,
+  isFinisherCombo,
+} from '../systems/combatFeel';
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
   private keys!: {
@@ -72,6 +74,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private cachedBaseScaleX = 2;
   private cachedBaseScaleY = 2;
   private hitboxDebugGfx!: Phaser.GameObjects.Graphics;
+  private attackBufferTimer = 0;
+  private dashBufferTimer = 0;
+  private attackElapsedMs = 0;
+  private lastDamageAt = 0;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, scene.textures.exists('player_sprite') ? 'player_sprite' : 'player_idle_0');
@@ -200,9 +206,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.coyoteTimer = Math.max(0, this.coyoteTimer - delta);
     }
 
-    if (Date.now() - this.lastComboTime > COMBO_TIMEOUT && this.comboCount > 0) {
+    if (Date.now() - this.lastComboTime > COMBAT_CONFIG.comboTimeoutMs && this.comboCount > 0) {
       this.comboCount = 0;
       store.resetCombo();
+    }
+
+    this.attackBufferTimer = Math.max(0, this.attackBufferTimer - delta);
+    this.dashBufferTimer = Math.max(0, this.dashBufferTimer - delta);
+    if (this.isAttacking) {
+      this.attackElapsedMs += delta;
+    } else {
+      this.attackElapsedMs = 0;
     }
 
     if (this.staminaRegenTimer > 200 && stats.stamina < stats.maxStamina) {
@@ -236,10 +250,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (this.isDashing) {
       this.dashTimer -= delta;
-      body.setVelocityX(this.dashDirX * DASH_SPEED);
-      body.setVelocityY(0);
+      body.setVelocityX(this.dashDirX * COMBAT_CONFIG.dashSpeed);
+      body.setVelocityY(this.keys.W.isDown ? -120 : this.keys.S.isDown ? 80 : 0);
       body.allowGravity = false;
-      this.setAlpha(0.7);
+      this.invincibleTimer = Math.max(this.invincibleTimer, COMBAT_CONFIG.dashIFramesMs);
+      this.setAlpha(0.65);
       this.updateFrame('dash', delta);
       if (this.dashTimer <= 0) {
         this.isDashing = false;
@@ -249,6 +264,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
       this.updateAttackHitbox();
       this.clearCharge();
+      return;
+    }
+
+    if (
+      canCancelAttackIntoDash(this.attackElapsedMs, this.isAttacking) &&
+      this.dashCooldown <= 0 &&
+      stats.stamina >= this.getDashCost() &&
+      (Phaser.Input.Keyboard.JustDown(this.keys.Space) || Phaser.Input.Keyboard.JustDown(this.keys.Shift))
+    ) {
+      const cancelDir = this.keys.A.isDown ? -1 : this.keys.D.isDown ? 1 : this.facingRight ? 1 : -1;
+      this.isAttacking = false;
+      store.setPlayerAttacking(false);
+      (this.attackHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
+      this.startDash(cancelDir * 200, store);
       return;
     }
 
@@ -284,9 +313,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         if (this.chargeTime >= this.CHARGE_THRESHOLD && stats.stamina >= 20) {
           this.performChargedAttack(store);
         } else if (stats.stamina >= 8) {
-          this.performAttack(store);
+          if (isFinisherCombo(this.comboCount + 1)) {
+            this.performFinisherAttack(store);
+          } else {
+            this.performAttack(store);
+          }
         }
       }
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(this.keys.L) || (pointer.isDown && !this.isCharging)) {
+      this.attackBufferTimer = COMBAT_CONFIG.attackBufferMs;
     }
 
     // ── MOVEMENT ────────────────────────────────────────────────
@@ -333,10 +370,42 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       body.setVelocityY(body.velocity.y * 0.5);
     }
 
-    if (!this.isParrying && (Phaser.Input.Keyboard.JustDown(this.keys.Space) || Phaser.Input.Keyboard.JustDown(this.keys.Shift)) &&
-        this.dashCooldown <= 0 &&
-        stats.stamina >= this.getDashCost() && vx !== 0 && !this.isDashing) {
-      this.startDash(vx, store);
+    if (
+      !this.isParrying &&
+      (Phaser.Input.Keyboard.JustDown(this.keys.Space) || Phaser.Input.Keyboard.JustDown(this.keys.Shift))
+    ) {
+      this.dashBufferTimer = COMBAT_CONFIG.dashBufferMs;
+    }
+    const dashIntent = this.dashBufferTimer > 0;
+    const dashDir =
+      this.keys.A.isDown ? -1 : this.keys.D.isDown ? 1 : vx !== 0 ? (vx > 0 ? 1 : -1) : this.facingRight ? 1 : -1;
+    const canAirDash = COMBAT_CONFIG.airDashAllowed || this.isOnGround;
+    if (
+      dashIntent &&
+      !this.isDashing &&
+      this.dashCooldown <= 0 &&
+      stats.stamina >= this.getDashCost() &&
+      canAirDash &&
+      !this.isAttacking
+    ) {
+      this.startDash(dashDir * 200, store);
+      this.dashBufferTimer = 0;
+    }
+
+    if (
+      this.attackBufferTimer > 0 &&
+      !this.isAttacking &&
+      this.attackCooldown <= 0 &&
+      !this.isCharging &&
+      !this.isParrying &&
+      stats.stamina >= 8
+    ) {
+      if (isFinisherCombo(this.comboCount + 1)) {
+        this.performFinisherAttack(store);
+      } else {
+        this.performAttack(store);
+      }
+      this.attackBufferTimer = 0;
     }
 
     if (!this.isParrying && this.scene.input.activePointer.rightButtonDown() &&
@@ -886,51 +955,102 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (store.player.stats.stamina < 8) return;
 
     this.isAttacking = true;
+    this.attackElapsedMs = 0;
     this.currentFrame = 0;
     this.currentAnim = 'attack';
     this.frameTimer = 0;
-    this.attackCooldown = 320;
+    this.attackCooldown = COMBAT_CONFIG.attackCooldownMs;
 
     store.drainStamina(8);
     store.setPlayerAttacking(true);
 
-    this.comboCount = Math.min(this.comboCount + 1, 5);
+    this.comboCount = Math.min(this.comboCount + 1, COMBAT_CONFIG.maxCombo);
     this.lastComboTime = Date.now();
     store.incrementCombo();
 
     this.playSlashSound();
+    this.spawnSlashTrail();
 
-    const comboStep = (this.comboCount - 1) % 3;
+    const comboStep = comboStepIndex(this.comboCount);
     const body = this.body as Phaser.Physics.Arcade.Body;
-    const dir = this.facingRight ? 1 : -1;
+    const lunge = getComboLungeSpeed(comboStep, this.facingRight);
 
-    this.resetHitTracking(); // Clear hits for the new swing
+    this.resetHitTracking();
 
-    const damageMultiplier = this.getAttackMultiplier();
+    body.setVelocityX(lunge.vx);
+    if (lunge.vy !== 0) body.setVelocityY(lunge.vy);
 
-    if (comboStep === 0) {
-      body.setVelocityX(dir * 180);
-      this.spawnSlashEffect(0);
-    } else if (comboStep === 1) {
-      body.setVelocityX(dir * 120);
-      body.setVelocityY(-140);
-      this.spawnSlashEffect(1);
-    } else {
-      // 3rd hit branching: Cyclone Slash (shorter lunge so hits don't sweep the whole map)
-      body.setVelocityX(dir * 260);
+    if (comboStep === 2) {
       this.spawnCycloneEffect();
-      this.scene.cameras.main.shake(150, 0.01);
+    } else {
+      this.spawnSlashEffect(comboStep);
     }
 
     const hb = this.attackHitbox.body as Phaser.Physics.Arcade.Body;
     hb.enable = true;
-    this.scene.time.delayedCall(20, () => {
+    this.scene.time.delayedCall(16, () => {
       this.setTint(0xf0f8ff);
-      this.scene.time.delayedCall(80, () => this.clearTint());
+      this.scene.time.delayedCall(70, () => this.clearTint());
     });
 
-    this.scene.time.delayedCall(220, () => {
+    this.scene.time.delayedCall(200, () => {
       hb.enable = false;
+    });
+  }
+
+  private performFinisherAttack(store: ReturnType<typeof useGameStore.getState>) {
+    if (store.player.stats.stamina < 12) return;
+
+    this.isAttacking = true;
+    this.attackElapsedMs = 0;
+    this.currentFrame = 0;
+    this.currentAnim = 'attack';
+    this.frameTimer = 0;
+    this.attackCooldown = COMBAT_CONFIG.finisherCooldownMs;
+    this.isChargedAttack = true;
+
+    store.drainStamina(12);
+    store.setPlayerAttacking(true);
+
+    this.comboCount = COMBAT_CONFIG.finisherAtCombo;
+    this.lastComboTime = Date.now();
+    store.incrementCombo();
+
+    this.playSfx('sfx_slash_crit', 0.65, 0.85);
+    this.spawnSlashTrail();
+    this.spawnChargedSlashEffect();
+
+    const body = this.body as Phaser.Physics.Arcade.Body;
+    const dir = this.facingRight ? 1 : -1;
+    this.resetHitTracking();
+    body.setVelocityX(dir * 320);
+    body.setVelocityY(-60);
+
+    const hb = this.attackHitbox.body as Phaser.Physics.Arcade.Body;
+    hb.enable = true;
+    this.scene.events.emit('combat-finisher-zoom');
+    this.scene.time.delayedCall(280, () => {
+      hb.enable = false;
+      this.isChargedAttack = false;
+    });
+  }
+
+  private spawnSlashTrail() {
+    const dir = this.facingRight ? 1 : -1;
+    const trail = this.scene.add.graphics();
+    trail.lineStyle(3, 0x88ccff, 0.75);
+    trail.beginPath();
+    trail.moveTo(this.x - dir * 8, this.y - 8);
+    trail.lineTo(this.x + dir * 48, this.y + 4);
+    trail.strokePath();
+    trail.setDepth(24);
+    this.scene.tweens.add({
+      targets: trail,
+      alpha: 0,
+      x: trail.x + dir * 24,
+      duration: 120,
+      ease: 'Cubic.easeOut',
+      onComplete: () => trail.destroy(),
     });
   }
 
@@ -1007,13 +1127,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   private startDash(vx: number, store: ReturnType<typeof useGameStore.getState>) {
     this.isDashing = true;
-    this.dashTimer = DASH_DURATION;
-    this.dashCooldown = DASH_COOLDOWN;
-    this.invincibleTimer = INVINCIBILITY_FRAMES + (this.hasSkill('relentless_step') ? 120 : 0);
+    this.dashTimer = COMBAT_CONFIG.dashDurationMs;
+    this.dashCooldown = COMBAT_CONFIG.dashCooldownMs;
+    this.invincibleTimer =
+      COMBAT_CONFIG.dashIFramesMs + (this.hasSkill('relentless_step') ? 90 : 0);
     store.setPlayerDashing(true);
     store.drainStamina(this.getDashCost());
 
-    this.dashDirX = vx > 0 ? 1 : -1;
+    this.dashDirX = vx >= 0 ? 1 : -1;
+    if (vx !== 0) this.facingRight = vx > 0;
     this.spawnDashTrail();
     this.playSfx('sfx_dash', 0.35, 0.9 + Math.random() * 0.2);
   }
@@ -1343,10 +1465,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   takeDamage(amount: number) {
     if (this.invincibleTimer > 0 || this.isDashing) return;
+    const now = Date.now();
+    if (now - this.lastDamageAt < COMBAT_CONFIG.playerHitGraceMs) return;
+    this.lastDamageAt = now;
 
     const store = useGameStore.getState();
     store.damagePlayer(amount);
-    this.invincibleTimer = INVINCIBILITY_FRAMES;
+    this.invincibleTimer = COMBAT_CONFIG.dashIFramesMs + 180;
 
     this.playSfx('sfx_hit', 0.4, 0.8 + Math.random() * 0.4);
 
