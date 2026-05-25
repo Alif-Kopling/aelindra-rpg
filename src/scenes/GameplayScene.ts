@@ -660,7 +660,7 @@ export class GameplayScene extends Phaser.Scene {
     );
 
     const frameFiveNarration = this.registerCinematicObject(
-      this.add.text(centerX, height - barHeight - 28, 'He gave everything so dawn could return.', {
+      this.add.text(centerX, height - barHeight - 28, 'dia berkorban dan memberikan segalanya demi sang fajar kembali', {
         fontSize: '18px',
         fontFamily: 'Cinzel, serif',
         color: '#f4e4c1',
