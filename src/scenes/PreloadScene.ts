@@ -19,7 +19,9 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('boss_blind_king_phase3_sprite', 'assets/images/blind-boss-phase-3.png');
     this.load.image('boss_ashen_knight_sprite', 'assets/images/boss_ashen_knight.png');
     this.load.image('boss_saint_of_rot_sprite', 'assets/images/saint_of_rot_boss.png');
+    this.load.image('boss_saint_of_rot_attack', 'assets/images/saint-of-boss-rot-attack.png');
     this.load.image('boss_fallen_guardian_sprite', 'assets/images/fallen_guardian_boss.png');
+    this.load.image('boss_fallen_guardian_attack', 'assets/images/fallen-guardian-boss-attack.png');
     this.load.image('sword_rain', 'assets/images/extract-only-the-sword-from-the-image-large-dark-f-removebg-preview.png');
     this.load.image('anim_boss_vs_mc', 'assets/images/animation/pict-animasi-boss-vs-mc.png');
     this.load.image('final_cinematic_1', 'assets/cinematic/cinematic_1.png');

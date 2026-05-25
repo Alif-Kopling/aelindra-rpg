@@ -28,6 +28,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   private currentFrame = 0;
   private frameTimer = 0;
   private isDead = false;
+  private isAttacking = false;
   private phaseTransitioning = false;
   private introComplete = false;
   private enrageMode = false;
@@ -47,6 +48,13 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private getSpriteKey(): string {
+    if (this.isAttacking) {
+      const attackKey = `boss_${this.config.id}_attack`;
+      if (this.scene.textures.exists(attackKey)) {
+        return attackKey;
+      }
+    }
+
     if (
       this.config.id === 'blind_king' &&
       this.phase >= 3 &&
@@ -481,6 +489,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private darkWave() {
+    this.setAttacking(1000);
     const dir = this.flipX ? -1 : 1;
     const scene = this.scene;
     const waveColor = this.config.id === 'blind_king' ? 0x9b59b6
@@ -609,7 +618,16 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
 
   // ── BLIND KING SKILLS ─────────────────────────────────────
 
+  private setAttacking(duration: number) {
+    this.isAttacking = true;
+    const t = this.scene.time.delayedCall(duration, () => {
+      this.isAttacking = false;
+    });
+    this.activeTimers.push(t);
+  }
+
   private sonarPulse() {
+    this.setAttacking(1000);
     const scene = this.scene;
     scene.cameras.main.shake(200, 0.005);
 
@@ -684,6 +702,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   // ── SAINT OF ROT SKILLS ────────────────────────────────────
 
   private rotProjectile() {
+    this.setAttacking(800);
     if (!this.target) return;
     const angle = Phaser.Math.Angle.Between(this.x, this.y, this.target.x, this.target.y);
     const proj = this.scene.add.graphics();
@@ -724,6 +743,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private decayAura() {
+    this.setAttacking(1500);
     const scene = this.scene;
     const aura = scene.add.graphics();
     aura.fillStyle(0x2d5a1e, 0.25);
@@ -757,6 +777,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private plagueBurst() {
+    this.setAttacking(1200);
     const scene = this.scene;
     scene.cameras.main.shake(300, 0.008);
 
@@ -800,6 +821,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private sporePod() {
+    this.setAttacking(1000);
     const scene = this.scene;
     const px = Phaser.Math.Between(this.arenaLeft + 80, this.arenaRight - 80);
 
@@ -844,6 +866,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private corruptingWave() {
+    this.setAttacking(1000);
     const scene = this.scene;
     scene.cameras.main.shake(400, 0.01);
 
@@ -883,6 +906,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private rotExplosion() {
+    this.setAttacking(1500);
     const scene = this.scene;
     scene.cameras.main.shake(600, 0.015);
     scene.cameras.main.flash(200, 50, 100, 0);
@@ -926,6 +950,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   // ── FALLEN GUARDIAN SKILLS ─────────────────────────────────
 
   private shieldBash() {
+    this.setAttacking(600);
     if (!this.target) return;
     const dx = this.target.x - this.x;
     const body = this.body as Phaser.Physics.Arcade.Body;
@@ -990,6 +1015,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private judgmentStrike() {
+    this.setAttacking(1200);
     if (!this.target) return;
     const scene = this.scene;
 
@@ -1033,6 +1059,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private guardianFury() {
+    this.setAttacking(1000);
     const scene = this.scene;
     for (let i = 0; i < 4; i++) {
       const t = scene.time.delayedCall(i * 150, () => {
@@ -1057,6 +1084,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private shockwaveStomp() {
+    this.setAttacking(1200);
     const scene = this.scene;
     scene.cameras.main.shake(500, 0.015);
 
@@ -1122,6 +1150,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private basicAttack() {
+    this.setAttacking(500);
     if (!this.target) return;
     this.scene.events.emit('boss-attack', { boss: this, damage: this.config.attack, type: 'melee' });
 
@@ -1175,6 +1204,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private groundSlam() {
+    this.setAttacking(800);
     const scene = this.scene;
     scene.cameras.main.shake(400, 0.012);
 
@@ -1248,6 +1278,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private projectileBarrage() {
+    this.setAttacking(1000);
     const count = this.phase >= 3 ? 8 : 5;
     const projColor = this.config.id === 'blind_king' ? 0x9b59b6
       : this.config.id === 'saint_of_rot' ? 0x4a7c3f
@@ -1333,6 +1364,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private chargeAttack() {
+    this.setAttacking(1000);
     if (!this.target) return;
 
     const dx = this.target.x - this.x;
@@ -1391,6 +1423,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private darkExplosion() {
+    this.setAttacking(1500);
     const scene = this.scene;
     scene.cameras.main.shake(500, 0.015);
     scene.cameras.main.flash(150, 80, 0, 0);
