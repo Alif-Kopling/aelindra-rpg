@@ -69,7 +69,6 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
 
     const body = this.body as Phaser.Physics.Arcade.Body;
-    body.setSize(48, 64);
     body.setCollideWorldBounds(true);
     body.setMaxVelocity(200, 600);
     body.setImmovable(false);
@@ -81,8 +80,9 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
       this.setScale(scale);
     }
 
-    // Body offset must be recalculated after display size is set
-    body.setSize(48, 64, true);
+    // Anchor body to bottom of sprite so visual feet align with ground
+    body.setSize(48, 64, false);
+    body.setOffset((this.displayWidth - 48) / 2, this.displayHeight - 64);
     this.setDepth(10);
 
     this.projectiles = scene.physics.add.group();

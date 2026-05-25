@@ -57,10 +57,14 @@ export class NPC extends Phaser.Physics.Arcade.Sprite {
       const baseScaleX = 64 / this.width;
       const baseScaleY = 92 / this.height;
       this.setScale(baseScaleX, baseScaleY);
-      body.setSize(this.displayWidth * 0.4, this.displayHeight * 0.7);
+      const bw = this.displayWidth * 0.4;
+      const bh = this.displayHeight * 0.7;
+      body.setSize(bw, bh, false);
+      body.setOffset((this.displayWidth - bw) / 2, this.displayHeight - bh);
     } else {
-      body.setSize(20, 30);
       this.setScale(2);
+      body.setSize(20, 30, false);
+      body.setOffset((this.displayWidth - 20) / 2, this.displayHeight - 30);
     }
 
     this.setDepth(8);

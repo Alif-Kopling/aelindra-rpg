@@ -76,8 +76,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     } else {
       this.setScale(scale);
     }
-    // Set body size AFTER display size so offset is calculated from final display size
-    body.setSize(bw, bh, true);
+    // Anchor body to bottom of sprite so visual feet align with ground
+    body.setSize(bw, bh, false);
+    body.setOffset((this.displayWidth - bw) / 2, this.displayHeight - bh);
     this.setDepth(9);
 
     this.createHpBar();
