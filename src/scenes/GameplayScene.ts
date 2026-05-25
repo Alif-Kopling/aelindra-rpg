@@ -414,7 +414,7 @@ export class GameplayScene extends Phaser.Scene {
     );
   }
 
-  private advanceToNextRound() {
+  private advanceToNextRound(skipStory = false) {
     this.currentRoundIndex++;
     if (this.currentRoundIndex >= this.zoneRounds.length) {
       this.onZoneComplete();
@@ -441,7 +441,7 @@ export class GameplayScene extends Phaser.Scene {
       }
     };
 
-    if (round.preDialogue) {
+    if (round.preDialogue && !skipStory) {
       this.openStoryDialogue(round.preDialogue, this.getPreRoundSceneId(), () => {
         if (round.boss && round.boss.id === 'ashen_knight') {
           this.playBossCinematic(() => {
@@ -1036,8 +1036,9 @@ export class GameplayScene extends Phaser.Scene {
     this.zonePortals.push({ zone: portal, targetZone, label, gfx: portalGfx, orbs });
   }
 
-  private transitionToZone(zoneId: string) {
+  private transitionToZone(zoneId: string, options?: { skipStory?: boolean }) {
     if (this.transitioningZone || this.currentZone === zoneId) return;
+    const skipStory = options?.skipStory ?? false;
 
     this.transitioningZone = true;
     this.portalVisible = false;
@@ -1063,8 +1064,14 @@ export class GameplayScene extends Phaser.Scene {
     this.currentZone = zoneId;
     store.setZone(zoneId);
 
-    this.cameras.main.fadeOut(600, 0, 0, 0);
-    this.time.delayedCall(700, () => {
+    if (skipStory) {
+      this.cameras.main.fadeOut(200, 0, 0, 0);
+    } else {
+      this.cameras.main.fadeOut(600, 0, 0, 0);
+    }
+    const fadeDelay = skipStory ? 220 : 700;
+    const fadeInMs = skipStory ? 250 : 600;
+    this.time.delayedCall(fadeDelay, () => {
       try {
         this.buildZone(this.getZoneData(zoneId));
       } catch (e) {
@@ -1073,12 +1080,26 @@ export class GameplayScene extends Phaser.Scene {
         store.setZone('village');
         this.buildZone(this.getZoneData('village'));
       }
-      this.time.delayedCall(300, () => {
-        this.advanceToNextRound();
+      store.closeDialogue();
+      window.dispatchEvent(new CustomEvent('dialogue-cinematic', { detail: { mode: 'reset' } }));
+      this.cameras.main.setZoom(this.baseCameraZoom);
+      this.time.delayedCall(skipStory ? 80 : 300, () => {
+        if (skipStory) {
+          this.startZoneRoundImmediate();
+        } else {
+          this.advanceToNextRound();
+        }
         this.transitioningZone = false;
       });
-      this.cameras.main.fadeIn(600, 0, 0, 0);
+      this.cameras.main.fadeIn(fadeInMs, 0, 0, 0);
     });
+  }
+
+  /** Dev jump: rebuild map and start round 1 combat without zone entry dialogue */
+  private startZoneRoundImmediate() {
+    this.currentRoundIndex = -1;
+    useGameStore.getState().closeDialogue();
+    this.advanceToNextRound(true);
   }
 
   private setupEventListeners() {
@@ -1101,7 +1122,7 @@ export class GameplayScene extends Phaser.Scene {
         this.transitioningZone = false;
         this.cameras.main.fadeIn(1, 0, 0, 0);
       }
-      this.transitionToZone(target);
+      this.transitionToZone(target, { skipStory: true });
     });
 
     this.events.on('player-interact', (data: { x: number; y: number }) => {
