@@ -253,4 +253,11 @@ export class NPC extends Phaser.Physics.Arcade.Sprite {
   isCheckpointNPC(): boolean {
     return this.config.isCheckpoint || false;
   }
+
+  destroy(fromScene?: boolean) {
+    if (this.nameLabel) this.nameLabel.destroy();
+    if (this.interactPrompt) this.interactPrompt.destroy();
+    if (this.glowEffect) this.glowEffect.destroy();
+    super.destroy(fromScene);
+  }
 }
