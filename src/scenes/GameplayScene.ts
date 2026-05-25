@@ -189,6 +189,11 @@ export class GameplayScene extends Phaser.Scene {
     const W = 60;
     const H = 23;
 
+    // Destroy all physics colliders/overlaps to avoid stale refs to destroyed groups
+    this.physics.world.colliders.destroy();
+    this.combatOverlapsInitialized = false;
+
+    console.log(`[buildZone] Destroying ${this.enemies.length} enemies, ${this.npcs.length} NPCs`);
     this.enemies.forEach(e => e.destroy());
     this.npcs.forEach(n => n.destroy());
     this.enemies = [];
@@ -416,7 +421,9 @@ export class GameplayScene extends Phaser.Scene {
 
   private advanceToNextRound(skipStory = false) {
     this.currentRoundIndex++;
+    console.log(`[Zone ${this.currentZone}] advanceToNextRound → index ${this.currentRoundIndex}/${this.zoneRounds.length - 1}`);
     if (this.currentRoundIndex >= this.zoneRounds.length) {
+      console.log(`[Zone ${this.currentZone}] All rounds done → onZoneComplete`);
       this.onZoneComplete();
       return;
     }
@@ -902,12 +909,13 @@ export class GameplayScene extends Phaser.Scene {
 
   private onRoundCleared() {
     const round = this.zoneRounds[this.currentRoundIndex];
-    if (!round) return;
+    if (!round) { console.warn(`[Zone ${this.currentZone}] onRoundCleared — round not found at index ${this.currentRoundIndex}`); return; }
 
-    const store = useGameStore.getState();
+    console.log(`[Zone ${this.currentZone}] onRoundCleared — round ${this.currentRoundIndex} hasPostDialogue=${!!round.postDialogue}`);
 
     if (round.postDialogue) {
       this.openStoryDialogue(round.postDialogue, this.getPostRoundSceneId(), () => {
+        console.log(`[Zone ${this.currentZone}] postDialogue completed — scheduling advanceToNextRound`);
         this.time.delayedCall(500, () => this.advanceToNextRound());
       });
     } else {
@@ -944,8 +952,10 @@ export class GameplayScene extends Phaser.Scene {
   }
 
   private onZoneComplete() {
+    console.log(`[Zone ${this.currentZone}] onZoneComplete called`);
     const zoneData = this.getZoneData(this.currentZone);
     if (zoneData.nextZone && !this.portalVisible) {
+      console.log(`[Zone ${this.currentZone}] Creating portal to ${zoneData.nextZone.zone}`);
       this.createPortal(
         zoneData.nextZone.x,
         zoneData.nextZone.y,
@@ -1075,6 +1085,7 @@ export class GameplayScene extends Phaser.Scene {
       }
     }
 
+    this.cameras.main.resetFX();
     if (skipStory) {
       this.cameras.main.fadeOut(200, 0, 0, 0);
     } else {
@@ -1103,6 +1114,11 @@ export class GameplayScene extends Phaser.Scene {
         this.transitioningZone = false;
       });
       this.cameras.main.fadeIn(fadeInMs, 0, 0, 0);
+
+      // Safety: ensure screen is visible after transition
+      this.time.delayedCall(fadeInMs + 200, () => {
+        this.cameras.main.resetFX();
+      });
     });
   }
 

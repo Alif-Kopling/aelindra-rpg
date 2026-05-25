@@ -607,7 +607,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     if (this.hpBar?.active) this.hpBar.destroy();
     if (this.nameText?.active) this.nameText.destroy();
     this.clearTelegraph();
-    this.scene.tweens.killTweensOf(this);
+    if (this.scene) this.scene.tweens.killTweensOf(this);
     super.destroy(fromScene);
   }
 }

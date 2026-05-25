@@ -14,7 +14,7 @@ export class MapSystem {
   private scene: Phaser.Scene;
   private config: MapConfig;
   private platformGroup!: Phaser.Physics.Arcade.StaticGroup;
-  private bgLayers: Phaser.GameObjects.Graphics[] = [];
+  private bgLayers: Phaser.GameObjects.GameObject[] = [];
   private decorations: Phaser.GameObjects.GameObject[] = [];
   private ambientTimers: Phaser.Time.TimerEvent[] = [];
 
@@ -62,13 +62,15 @@ export class MapSystem {
       const bgImg = this.scene.add.image(viewW / 2, viewH / 2, key);
       bgImg.setOrigin(0.5, 0.5);
       bgImg.setDepth(-10);
-      bgImg.setScrollFactor(0.15, 0.05); // Light parallax scrolling
+      bgImg.setScrollFactor(0.15, 0.05);
       const scale = Math.max(viewW / bgImg.width, viewH / bgImg.height);
       const parallaxScale = scale * 1.25;
       bgImg.setDisplaySize(bgImg.width * parallaxScale, bgImg.height * parallaxScale);
+      this.bgLayers.push(bgImg);
     } else {
       const sky = this.scene.add.graphics();
       sky.setDepth(-10);
+      this.bgLayers.push(sky);
 
       const bgColors: Record<ZoneTheme, { top: number; bottom: number }> = {
         village: { top: 0x1a1a2e, bottom: 0x2d1b2e },
@@ -147,18 +149,18 @@ export class MapSystem {
 
       // 2. Draw Visuals for the platforms
       const gfx = this.scene.add.graphics();
-      gfx.setDepth(5); // Bring ground visuals in front of background
+      gfx.setDepth(5);
+      this.decorations.push(gfx);
 
       const startX = p.x * T;
       const startY = p.y * T;
       const width = p.w * T;
       const height = T;
 
-      // Solid ground rectangle (one smooth surface instead of per-tile blocks)
       gfx.fillStyle(floorClr[0], 1);
       gfx.fillRect(startX, startY, width, height);
       gfx.fillStyle(floorClr[1], 1);
-      gfx.fillRect(startX, startY + 2, width, 4); // Thicker top line for better visibility
+      gfx.fillRect(startX, startY + 2, width, 4);
     }
   }
 
@@ -166,15 +168,15 @@ export class MapSystem {
     const v = this.scene.add.graphics();
     v.setDepth(100);
     v.setScrollFactor(0);
+    this.decorations.push(v);
     
     const cam = this.scene.cameras.main;
     const viewW = cam.width || 1280;
     const viewH = cam.height || 720;
 
-    // Fixed vignette for the entire screen
     v.fillStyle(0x000000, 0.25);
-    v.fillRect(0, 0, viewW, 40); // Top bar
-    v.fillRect(0, viewH - 40, viewW, 40); // Bottom bar
+    v.fillRect(0, 0, viewW, 40);
+    v.fillRect(0, viewH - 40, viewW, 40);
   }
 
   getPlatforms(): Phaser.Physics.Arcade.StaticGroup {
