@@ -7,6 +7,9 @@ export class PreloadScene extends Phaser.Scene {
 
   preload() {
     this.load.image('player_sprite', 'assets/images/knight_player.png');
+    this.load.image('player_walk', 'assets/images/player-walk.png');
+    this.load.image('player_jump', 'assets/images/player-jump.png');
+    this.load.image('player_dash', 'assets/images/player-dash.png');
     this.load.image('player_attack1', 'assets/images/knight_player_attack1.png');
     this.load.image('player_attack2', 'assets/images/knight_player_attack2.png');
     this.load.image('enemy_undead_sprite', 'assets/images/undead_enemy.png');
@@ -27,6 +30,7 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('final_cinematic_6', 'assets/cinematic/cinematic_6.png');
 
     this.load.image('scene_intro_1', 'assets/images/animation/scene1-before-tragedy.jpeg');
+    this.load.image('scene_intro_2', 'assets/images/animation/Scene2-evelyn-and-mc.png');
     this.load.image('scene_intro_3', 'assets/images/animation/scene3-The-Tragedy.jpeg');
     this.load.image('scene_intro_4', 'assets/images/animation/scene4-evelyn-marah-kepada-mc.png');
     this.load.image('scene_intro_5', 'assets/images/animation/scene5-mc-dipenjara-atas-fitnah.jpeg');
@@ -69,6 +73,17 @@ export class PreloadScene extends Phaser.Scene {
     this.load.audio('sfx_whoosh', 'assets/audio/cloth1.ogg');
     this.load.audio('sfx_equip', 'assets/audio/metalLatch.ogg');
     this.load.audio('sfx_potion', 'assets/audio/handleCoins.ogg');
+
+    // Myinstants dark fantasy SFX
+    this.load.audio('sfx_sword_hit_blood', 'assets/audio/sfx_sword_hit_blood.mp3');
+    this.load.audio('sfx_ds_stab', 'assets/audio/sfx_ds_stab.mp3');
+    this.load.audio('sfx_ds_item_get', 'assets/audio/sfx_ds_item_get.mp3');
+    this.load.audio('sfx_skyrim_levelup', 'assets/audio/sfx_skyrim_levelup.mp3');
+    this.load.audio('sfx_ds_boss_pain', 'assets/audio/sfx_ds_boss_pain.mp3');
+    this.load.audio('sfx_dragon_roar', 'assets/audio/sfx_dragon_roar.mp3');
+    this.load.audio('sfx_ominous_bell', 'assets/audio/sfx_ominous_bell.mp3');
+    this.load.audio('sfx_monster_scream', 'assets/audio/sfx_monster_scream.mp3');
+    this.load.audio('sfx_lightning', 'assets/audio/sfx_lightning.mp3');
   }
 
   create() {

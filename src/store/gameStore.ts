@@ -275,28 +275,31 @@ export const useGameStore = create<GameStore>()(
         player = get().player;
       }
     },
-    levelUp: () => set((s) => {
-      const p = s.player.stats;
-      p.level += 1;
-      p.exp = p.exp - p.expToNext;
-      p.expToNext = Math.floor(p.expToNext * 1.4);
-      p.maxHp += 15;
-      p.hp = p.maxHp;
-      p.maxStamina += 5;
-      p.stamina = p.maxStamina;
-      p.maxMana += 8;
-      p.mana = p.maxMana;
-      p.attack += 3;
-      p.defense += 2;
-      s.skillPoints += 1;
-      get().addNotification({
-        type: 'success',
-        title: `Level ${p.level}!`,
-        message: 'You grow stronger with every wound endured. 1 skill point gained.',
-        icon: '⬆️',
-        duration: 4000,
+    levelUp: () => {
+      set((s) => {
+        const p = s.player.stats;
+        p.level += 1;
+        p.exp = p.exp - p.expToNext;
+        p.expToNext = Math.floor(p.expToNext * 1.4);
+        p.maxHp += 15;
+        p.hp = p.maxHp;
+        p.maxStamina += 5;
+        p.stamina = p.maxStamina;
+        p.maxMana += 8;
+        p.mana = p.maxMana;
+        p.attack += 3;
+        p.defense += 2;
+        s.skillPoints += 1;
+        get().addNotification({
+          type: 'success',
+          title: `Level ${p.level}!`,
+          message: 'You grow stronger with every wound endured. 1 skill point gained.',
+          icon: '⬆️',
+          duration: 4000,
+        });
       });
-    }),
+      window.dispatchEvent(new CustomEvent('sfx:play', { detail: { key: 'sfx_skyrim_levelup', volume: 0.6, rate: 1 } }));
+    },
     setPlayerAttacking: (val) => set((s) => { s.player.isAttacking = val; }),
     setPlayerDashing: (val) => set((s) => { s.player.isDashing = val; }),
     incrementCombo: () => set((s) => {

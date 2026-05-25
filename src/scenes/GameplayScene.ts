@@ -1064,6 +1064,17 @@ export class GameplayScene extends Phaser.Scene {
     this.currentZone = zoneId;
     store.setZone(zoneId);
 
+    if (zoneId === 'catacombs' || zoneId === 'cathedral') {
+      if (this.cache.audio.exists('sfx_ominous_bell')) {
+        this.sound.play('sfx_ominous_bell', { volume: 0.5 });
+      }
+    }
+    if (zoneId === 'battlefield') {
+      if (this.cache.audio.exists('sfx_lightning')) {
+        this.sound.play('sfx_lightning', { volume: 0.7 });
+      }
+    }
+
     if (skipStory) {
       this.cameras.main.fadeOut(200, 0, 0, 0);
     } else {
