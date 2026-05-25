@@ -43,8 +43,8 @@ const Shop: React.FC = () => {
   const weaponLvl = player.weaponLevel || 1;
   const armorLvl = player.armorLevel || 1;
 
-  const weaponUpgradeCost = 100 + (weaponLvl - 1) * 50;
-  const armorUpgradeCost = 80 + (armorLvl - 1) * 40;
+  const weaponUpgradeCost = 60 + (weaponLvl - 1) * 30;
+  const armorUpgradeCost = 50 + (armorLvl - 1) * 25;
   const potionCost = 30;
 
   const handleWeaponUpgrade = () => {
