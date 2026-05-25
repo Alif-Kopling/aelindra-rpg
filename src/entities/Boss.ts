@@ -327,9 +327,10 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
         if (this.attackTimer <= 0) {
           this.attackTimer = 1000;
           const roll = Math.random();
-          if (roll < 0.35) this.sonarPulse();
-          else if (roll < 0.6) this.blindTeleport();
-          else if (roll < 0.8) this.royalSummon();
+          if (roll < 0.25) this.sonarPulse();
+          else if (roll < 0.45) this.blindTeleport();
+          else if (roll < 0.65) this.royalSummon();
+          else if (roll < 0.85) this.swordRain();
           else this.darkWave();
         }
         if (this.specialTimer <= 0) { this.specialTimer = 3000; this.darkExplosion(); }
@@ -386,6 +387,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   }
 
   private swordRain() {
+    this.setAttacking(2000);
     const scene = this.scene;
     // Roar audio
     if (scene.cache.audio.exists('boss_roar')) {
@@ -464,7 +466,11 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
       const roll = Math.random();
       switch (this.config.id) {
         case 'blind_king':
-          roll < 0.4 ? this.sonarPulse() : roll < 0.7 ? this.blindTeleport() : this.basicAttack();
+          const r = Math.random();
+          if (r < 0.3) this.sonarPulse();
+          else if (r < 0.6) this.blindTeleport();
+          else if (r < 0.8) this.swordRain();
+          else this.basicAttack();
           break;
         case 'saint_of_rot':
           roll < 0.4 ? this.corruptingWave() : roll < 0.7 ? this.plagueBurst() : this.rotProjectile();
