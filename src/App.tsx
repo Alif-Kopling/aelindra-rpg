@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useGameStore } from './store/gameStore';
 import TitleScreen from './ui/TitleScreen';
+import DeviceSelectScreen from './ui/DeviceSelectScreen';
 import PrologueScreen from './ui/PrologueScreen';
 import NameInputScreen from './ui/NameInputScreen';
 import GameComponent from './components/GameComponent';
@@ -55,6 +56,9 @@ const App: React.FC = () => {
       className="relative w-full h-full overflow-hidden"
       style={{ background: '#0a0a0f', fontFamily: 'Cinzel, serif' }}
     >
+      {/* Device Select */}
+      {screen === 'deviceSelect' && <DeviceSelectScreen />}
+
       {/* Title Screen */}
       {screen === 'title' && <TitleScreen />}
 

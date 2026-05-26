@@ -2,7 +2,9 @@
 // CORE GAME TYPES
 // ============================================================
 
-export type GameScreen = 'title' | 'prologue' | 'nameInput' | 'game' | 'paused' | 'gameOver' | 'ending' | 'epilogue';
+export type GameScreen = 'deviceSelect' | 'title' | 'prologue' | 'nameInput' | 'game' | 'paused' | 'gameOver' | 'ending' | 'epilogue';
+export type DeviceType = 'pc' | 'mobile' | 'console';
+
 
 export interface Vector2 {
   x: number;

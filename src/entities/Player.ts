@@ -64,6 +64,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private hitEntities = new Set<string>();
   private ghostTimer = 0;
   private unlimitedStaminaTimer = 0;
+  private prevGamepadButtons: boolean[] = [];
 
   private moveSpeed = 180;
   private jumpForce = -380;
@@ -199,6 +200,74 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const body = this.body as Phaser.Physics.Arcade.Body;
     const stats = store.player.stats;
 
+    // Gamepad detection
+    const gamepad = (this.scene.input.gamepad && this.scene.input.gamepad.total > 0)
+      ? this.scene.input.gamepad.getPad(0)
+      : null;
+
+    const isConsole = store.deviceType === 'console';
+    const isMobile = store.deviceType === 'mobile';
+
+    const gamepadJustPressed = (btnIndex: number) => {
+      if (!gamepad) return false;
+      const isPressed = gamepad.buttons[btnIndex]?.pressed || false;
+      const wasPressed = this.prevGamepadButtons[btnIndex] || false;
+      return isPressed && !wasPressed;
+    };
+
+    // Unified inputs
+    const goLeft = this.keys.A.isDown ||
+      (isMobile && store.touchInput.left) ||
+      (isConsole && gamepad && (gamepad.left || gamepad.leftStick.x < -0.3));
+
+    const goRight = this.keys.D.isDown ||
+      (isMobile && store.touchInput.right) ||
+      (isConsole && gamepad && (gamepad.right || gamepad.leftStick.x > 0.3));
+
+    const jumpPressed = Phaser.Input.Keyboard.JustDown(this.keys.W) ||
+      Phaser.Input.Keyboard.JustDown(this.keys.Space) ||
+      (isMobile && store.touchInput.jump) ||
+      (isConsole && gamepad && gamepadJustPressed(0)); // Button A
+
+    const jumpHeld = this.keys.W.isDown || this.keys.Space.isDown ||
+      (isMobile && store.touchInput.jump) ||
+      (isConsole && gamepad && gamepad.buttons[0].pressed);
+
+    const attackPressed = (this.scene.input.activePointer.isDown || this.keys.J.isDown) ||
+      (isMobile && store.touchInput.attack) ||
+      (isConsole && gamepad && gamepad.buttons[2].pressed); // Button X
+
+    const attackJustDown = Phaser.Input.Keyboard.JustDown(this.keys.J) ||
+      (isMobile && store.touchInput.attack) ||
+      (isConsole && gamepad && gamepadJustPressed(2)); // Button X
+
+    const dashPressed = Phaser.Input.Keyboard.JustDown(this.keys.Shift) ||
+      (isMobile && store.touchInput.dash) ||
+      (isConsole && gamepad && gamepadJustPressed(1)); // Button B
+
+    const parryPressed = Phaser.Input.Keyboard.JustDown(this.keys.F) ||
+      (isMobile && store.touchInput.parry) ||
+      (isConsole && gamepad && gamepadJustPressed(3)); // Button Y
+
+    const ultimatePressed = Phaser.Input.Keyboard.JustDown(this.keys.L) ||
+      (this.scene.input.activePointer.rightButtonDown()) ||
+      (isMobile && store.touchInput.ultimate) ||
+      (isConsole && gamepad && gamepadJustPressed(5)); // R1 / RB
+
+    const interactPressed = Phaser.Input.Keyboard.JustDown(this.keys.E) ||
+      (isMobile && store.touchInput.interact) ||
+      (isConsole && gamepad && gamepadJustPressed(4)); // L1 / LB
+
+    // Toggling Menus for Gamepad
+    if (isConsole && gamepad) {
+      if (gamepadJustPressed(9)) { // Start button
+        store.togglePause();
+      }
+      if (gamepadJustPressed(8)) { // Select/Back button
+        store.toggleInventory();
+      }
+    }
+
     this.dashCooldown = Math.max(0, this.dashCooldown - delta);
     this.attackCooldown = Math.max(0, this.attackCooldown - delta);
     this.invincibleTimer = Math.max(0, this.invincibleTimer - delta);
@@ -273,12 +342,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.ghostTimer -= delta;
       
       if (this.ghostTimer <= 0) {
-        this.spawnGhost();
-        this.ghostTimer = 35; // Spawn a ghost every 35ms
+        // TODO: implement spawnGhost (dash trail effect)
+        this.ghostTimer = 35;
       }
 
       const dashVx = this.dashDirX * COMBAT_CONFIG.dashSpeed;
-      const dashVy = (this.keys.W.isDown ? -180 : this.keys.S.isDown ? 150 : 0);
+      const dashVy = (this.keys.W.isDown || (isMobile && store.touchInput.up) || (isConsole && gamepad && gamepad.up) ? -180 : (this.keys.S.isDown || (isMobile && store.touchInput.down) || (isConsole && gamepad && gamepad.down) ? 150 : 0));
       body.setVelocityX(dashVx);
       body.setVelocityY(dashVy);
       body.allowGravity = false;
@@ -292,6 +361,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
       this.updateAttackHitbox();
       this.clearCharge();
+
+      // Save gamepad button states
+      if (gamepad) {
+        this.prevGamepadButtons = gamepad.buttons.map(b => b.pressed);
+      }
       return;
     }
 
@@ -299,26 +373,28 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       canCancelAttackIntoDash(this.attackElapsedMs, this.isAttacking) &&
       this.dashCooldown <= 0 &&
       stats.stamina >= this.getDashCost() &&
-      Phaser.Input.Keyboard.JustDown(this.keys.Shift)
+      dashPressed
     ) {
-      const cancelDir = this.keys.A.isDown ? -1 : this.keys.D.isDown ? 1 : this.facingRight ? 1 : -1;
+      const cancelDir = goLeft ? -1 : goRight ? 1 : this.facingRight ? 1 : -1;
       this.isAttacking = false;
       store.setPlayerAttacking(false);
       (this.attackHitbox.body as Phaser.Physics.Arcade.Body).enable = false;
       this.startDash(cancelDir * 200, store);
+
+      // Save gamepad button states
+      if (gamepad) {
+        this.prevGamepadButtons = gamepad.buttons.map(b => b.pressed);
+      }
       return;
     }
 
     // ── CHARGE / ATTACK SYSTEM ──────────────────────────────────
 
-    const pointer = this.scene.input.activePointer;
-    const attackHeld = pointer.isDown || this.keys.J.isDown;
-
-    if (Phaser.Input.Keyboard.JustDown(this.keys.F) && !this.isDashing && !this.isAttacking && !this.isCharging && this.parryCooldown <= 0 && stats.stamina >= 6) {
+    if (parryPressed && !this.isDashing && !this.isAttacking && !this.isCharging && this.parryCooldown <= 0 && stats.stamina >= 6) {
       this.beginParry(store);
     }
 
-    if (attackHeld && !this.isAttacking && this.attackCooldown <= 0 && !this.isUltimate && !this.isParrying) {
+    if (attackPressed && !this.isAttacking && this.attackCooldown <= 0 && !this.isUltimate && !this.isParrying) {
       if (!this.isCharging && !this.isAttacking) {
         this.isCharging = true;
         this.chargeTime = 0;
@@ -334,7 +410,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.spawnChargeReadyEffect();
       }
 
-      if (!attackHeld) {
+      if (!attackPressed) {
         this.isCharging = false;
         this.clearChargeVisual();
 
@@ -350,7 +426,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
     }
 
-    if (Phaser.Input.Keyboard.JustDown(this.keys.J) || (pointer.isDown && !this.isCharging)) {
+    if (attackJustDown && !this.isCharging) {
       this.attackBufferTimer = COMBAT_CONFIG.attackBufferMs;
     }
 
@@ -376,14 +452,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
     } else if (!store.isAutoPlay) {
       if (!this.isCharging && !this.isParrying) {
-        if (this.keys.A.isDown) { vx = -this.moveSpeed; this.facingRight = false; }
-        else if (this.keys.D.isDown) { vx = this.moveSpeed; this.facingRight = true; }
+        if (goLeft) { vx = -this.moveSpeed; this.facingRight = false; }
+        else if (goRight) { vx = this.moveSpeed; this.facingRight = true; }
       }
     }
 
     body.setVelocityX(vx);
 
-    if (Phaser.Input.Keyboard.JustDown(this.keys.W) || Phaser.Input.Keyboard.JustDown(this.keys.Space)) {
+    if (jumpPressed) {
       this.jumpBufferTimer = this.jumpBufferTime;
     }
     this.jumpBufferTimer = Math.max(0, this.jumpBufferTimer - delta);
@@ -394,19 +470,18 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.jumpBufferTimer = 0;
     }
 
-    if (this.keys.W.isUp && !this.keys.Space.isDown && body.velocity.y < -100) {
+    if (!jumpHeld && body.velocity.y < -100) {
       body.setVelocityY(body.velocity.y * 0.5);
     }
 
     if (
       !this.isParrying &&
-      Phaser.Input.Keyboard.JustDown(this.keys.Shift)
+      dashPressed
     ) {
       this.dashBufferTimer = COMBAT_CONFIG.dashBufferMs;
     }
     const dashIntent = this.dashBufferTimer > 0;
-    const dashDir =
-      this.keys.A.isDown ? -1 : this.keys.D.isDown ? 1 : vx !== 0 ? (vx > 0 ? 1 : -1) : this.facingRight ? 1 : -1;
+    const dashDir = goLeft ? -1 : goRight ? 1 : vx !== 0 ? (vx > 0 ? 1 : -1) : this.facingRight ? 1 : -1;
     const canAirDash = COMBAT_CONFIG.airDashAllowed || this.isOnGround;
     if (
       dashIntent &&
@@ -436,8 +511,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.attackBufferTimer = 0;
     }
 
-    if (!this.isParrying && this.ultimateCharge >= 100 && this.ultimateCooldown <= 0 &&
-        (this.scene.input.activePointer.rightButtonDown() || Phaser.Input.Keyboard.JustDown(this.keys.L))) {
+    if (!this.isParrying && this.ultimateCharge >= 100 && this.ultimateCooldown <= 0 && ultimatePressed) {
       this.performUltimate(store);
     }
 
@@ -448,8 +522,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
     }
 
-    if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
+    if (interactPressed) {
       this.checkInteraction(store);
+    }
+
+    // Save gamepad button states for the next frame
+    if (gamepad) {
+      this.prevGamepadButtons = gamepad.buttons.map(b => b.pressed);
+    } else {
+      this.prevGamepadButtons = [];
     }
 
     // ── ANIMATION ───────────────────────────────────────────────

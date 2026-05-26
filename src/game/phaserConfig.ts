@@ -20,6 +20,9 @@ export function createPhaserGame(parent: string): Phaser.Game {
         debug: false,
       },
     },
+    input: {
+      gamepad: true,
+    },
     scene: [PreloadScene, GameplayScene],
     scale: {
       mode: Phaser.Scale.FIT,

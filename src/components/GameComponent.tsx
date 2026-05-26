@@ -10,6 +10,7 @@ import PauseMenu from '../ui/PauseMenu';
 import Notifications from '../ui/Notifications';
 import Shop from '../ui/Shop';
 import DevToolsPanel from '../ui/DevToolsPanel';
+import MobileControlsOverlay from '../ui/MobileControlsOverlay';
 import { playBGM, setBGMVolume } from '../utils/bgm';
 
 const GameComponent: React.FC = () => {
@@ -124,6 +125,7 @@ const GameComponent: React.FC = () => {
         <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 50 }}>
           <HUD />
           <BossHealthBar />
+          <MobileControlsOverlay />
           <div className="pointer-events-none">
             <Notifications />
           </div>

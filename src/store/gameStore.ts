@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import {
   GameScreen,
+  DeviceType,
   PlayerState,
   PlayerStats,
   InventoryState,
@@ -102,6 +103,34 @@ interface GameStore {
   // Screen management
   screen: GameScreen;
   setScreen: (screen: GameScreen) => void;
+
+  // Device selection & touch inputs
+  deviceType: DeviceType;
+  setDeviceType: (device: DeviceType) => void;
+  touchInput: {
+    left: boolean;
+    right: boolean;
+    up: boolean;
+    down: boolean;
+    jump: boolean;
+    attack: boolean;
+    dash: boolean;
+    parry: boolean;
+    interact: boolean;
+    ultimate: boolean;
+  };
+  setTouchInput: (input: Partial<{
+    left: boolean;
+    right: boolean;
+    up: boolean;
+    down: boolean;
+    jump: boolean;
+    attack: boolean;
+    dash: boolean;
+    parry: boolean;
+    interact: boolean;
+    ultimate: boolean;
+  }>) => void;
 
   // Player
   player: PlayerState;
@@ -237,8 +266,27 @@ interface GameStore {
 export const useGameStore = create<GameStore>()(
   immer((set, get) => ({
     // Screen
-    screen: 'title',
+    screen: 'deviceSelect',
     setScreen: (screen) => set((s) => { s.screen = screen; }),
+
+    // Device selection & touch inputs
+    deviceType: 'pc',
+    setDeviceType: (device) => set((s) => { s.deviceType = device; }),
+    touchInput: {
+      left: false,
+      right: false,
+      up: false,
+      down: false,
+      jump: false,
+      attack: false,
+      dash: false,
+      parry: false,
+      interact: false,
+      ultimate: false,
+    },
+    setTouchInput: (input) => set((s) => {
+      Object.assign(s.touchInput, input);
+    }),
 
     // Player
     player: initialPlayer,
