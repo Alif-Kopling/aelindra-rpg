@@ -106,6 +106,8 @@ export class GameplayScene extends Phaser.Scene {
   private dialogueCinematicHandler: EventListener | null = null;
   private baseCameraZoom = 1;
   private combatZoomTween: Phaser.Tweens.Tween | null = null;
+  private escKey!: Phaser.Input.Keyboard.Key;
+  private tabKey!: Phaser.Input.Keyboard.Key;
 
   constructor() {
     super({ key: 'GameplayScene' });
@@ -133,12 +135,17 @@ export class GameplayScene extends Phaser.Scene {
       this.combatZoomTween.remove();
       this.combatZoomTween = null;
     }
+    this.escKey?.removeAllListeners();
+    this.tabKey?.removeAllListeners();
     this.cameras.main.setZoom(this.baseCameraZoom);
     this.eventListenersReady = false;
     this.enemies.forEach(e => e.destroy());
     this.enemies = [];
     this.npcs.forEach(n => n.destroy());
     this.npcs = [];
+    if (this.enemyGroup) {
+      this.enemyGroup.clear(true, true);
+    }
     if (this.boss) { this.boss.destroy(); this.boss = null; }
     if (this.ambientTimer) { this.ambientTimer.remove(); this.ambientTimer = null; }
   }
@@ -198,6 +205,9 @@ export class GameplayScene extends Phaser.Scene {
     this.npcs.forEach(n => n.destroy());
     this.enemies = [];
     this.npcs = [];
+    if (this.enemyGroup) {
+      this.enemyGroup.clear(true, true);
+    }
     this.zonePortals.forEach(p => {
       this.tweens.killTweensOf(p.gfx);
       p.orbs.forEach(o => {
@@ -901,8 +911,9 @@ export class GameplayScene extends Phaser.Scene {
   }
 
   private onEnemyKilled() {
+    if (!this.roundActive) return;
     this.roundEnemyKilled++;
-    if (this.roundEnemyKilled >= this.roundEnemyTotal && this.roundActive) {
+    if (this.roundEnemyKilled >= this.roundEnemyTotal) {
       this.roundActive = false;
       this.onRoundCleared();
     }
@@ -1134,11 +1145,20 @@ export class GameplayScene extends Phaser.Scene {
     if (this.eventListenersReady) return;
     this.eventListenersReady = true;
 
-    this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC).on('down', () => {
-      useGameStore.getState().togglePause();
+    this.escKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    this.escKey.removeAllListeners();
+    this.escKey.on('down', () => {
+      const store = useGameStore.getState();
+      if (store.dialogue.isOpen) {
+        store.closeDialogue();
+      } else {
+        store.togglePause();
+      }
     });
 
-    this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.TAB).on('down', () => {
+    this.tabKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.TAB);
+    this.tabKey.removeAllListeners();
+    this.tabKey.on('down', () => {
       useGameStore.getState().toggleInventory();
     });
 
@@ -1231,8 +1251,10 @@ export class GameplayScene extends Phaser.Scene {
         return;
       }
 
-      this.roundActive = false;
-      this.onRoundCleared();
+      if (this.roundActive) {
+        this.roundActive = false;
+        this.onRoundCleared();
+      }
     });
 
     this.sfxPlayHandler = ((e: Event) => {

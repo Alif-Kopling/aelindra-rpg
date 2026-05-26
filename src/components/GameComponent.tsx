@@ -32,13 +32,13 @@ const GameComponent: React.FC = () => {
     if (!gameRef.current) return;
     const scene = gameRef.current.scene.getScene('GameplayScene');
     if (scene) {
-      if (isPaused || dialogue.isOpen || isShopOpen) {
+      if (isPaused || dialogue.isOpen || isShopOpen || isInventoryOpen) {
         scene.physics.world.pause();
       } else {
         scene.physics.world.resume();
       }
     }
-  }, [isPaused, dialogue.isOpen, isShopOpen]);
+  }, [isPaused, dialogue.isOpen, isShopOpen, isInventoryOpen]);
 
   React.useEffect(() => {
     setBGMVolume(settings.musicVolume, settings.masterVolume);

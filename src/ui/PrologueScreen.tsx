@@ -193,12 +193,13 @@ const PrologueScreen: React.FC = () => {
   const fullTextRef = React.useRef('');
   const typingTimerRef = React.useRef<NodeJS.Timeout | null>(null);
   const charIndexRef = React.useRef(0);
+  const transitionTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentLine = PROLOGUE_CINEMATIC[lineIndex];
 
   React.useEffect(() => {
-    // Fade in scene wrapper
-    setTimeout(() => setBgOpacity(1), 100);
+    const t = setTimeout(() => setBgOpacity(1), 100);
+    return () => clearTimeout(t);
   }, []);
 
   React.useEffect(() => {
@@ -225,7 +226,7 @@ const PrologueScreen: React.FC = () => {
     } else {
       // Transition to Name Input Screen
       setFadeOut(true);
-      setTimeout(() => setScreen('nameInput'), 1200);
+      transitionTimerRef.current = setTimeout(() => setScreen('nameInput'), 1200);
     }
   }, [isTyping, finishTyping, lineIndex, setScreen]);
 
@@ -265,12 +266,15 @@ const PrologueScreen: React.FC = () => {
       }
     };
     window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+    };
   }, [handleAdvance]);
 
   const handleSkip = () => {
     setFadeOut(true);
-    setTimeout(() => setScreen('nameInput'), 1000);
+    transitionTimerRef.current = setTimeout(() => setScreen('nameInput'), 1000);
   };
 
   const isNarration = currentLine?.isNarration;

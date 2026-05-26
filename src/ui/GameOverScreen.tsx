@@ -18,7 +18,8 @@ const GameOverScreen: React.FC = () => {
 
   React.useEffect(() => {
     setQuote(DEATH_QUOTES[Math.floor(Math.random() * DEATH_QUOTES.length)]);
-    setTimeout(() => setVisible(true), 300);
+    const t = setTimeout(() => setVisible(true), 300);
+    return () => clearTimeout(t);
   }, []);
 
   const handleRetry = () => {

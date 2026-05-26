@@ -867,6 +867,9 @@ export const useGameStore = create<GameStore>()(
       if (!raw) return;
       try {
         const data = JSON.parse(raw);
+        if (typeof data.player?.stats?.hp !== 'number' || typeof data.player?.stats?.maxHp !== 'number') {
+          throw new Error('Corrupted player stats');
+        }
         set((s) => {
           s.player = data.player;
           s.inventory = data.inventory;

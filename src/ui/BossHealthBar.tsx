@@ -22,7 +22,8 @@ const BossHealthBar: React.FC = () => {
     if (!activeBoss) return;
     if (activeBoss.hp < prevHpRef.current) {
       setDamageFlash(true);
-      setTimeout(() => setDamageFlash(false), 200);
+      const t = setTimeout(() => setDamageFlash(false), 200);
+      return () => clearTimeout(t);
     }
     prevHpRef.current = activeBoss.hp;
     setPrevHp(activeBoss.hp);
@@ -30,7 +31,7 @@ const BossHealthBar: React.FC = () => {
 
   if (!visible || !activeBoss) return null;
 
-  const hpPct = Math.max(0, (activeBoss.hp / activeBoss.maxHp) * 100);
+  const hpPct = activeBoss.maxHp > 0 ? Math.max(0, (activeBoss.hp / activeBoss.maxHp) * 100) : 0;
   const phaseThresholds = activeBoss.maxPhase >= 2 ? [50] : [];
   if (activeBoss.maxPhase >= 3) phaseThresholds.push(25);
 

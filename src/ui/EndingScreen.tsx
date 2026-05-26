@@ -36,15 +36,17 @@ const EndingScreen: React.FC = () => {
   const bottomRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
     ENDING_LINES.forEach((line, i) => {
-      setTimeout(() => {
+      timers.push(setTimeout(() => {
         setVisibleLines(prev => new Set([...prev, i]));
-      }, line.delay);
+      }, line.delay));
     });
 
-    setTimeout(() => setBgPhase('dawn'), 40000);
-    setTimeout(() => setBgPhase('bright'), 55000);
-    setTimeout(() => setFinished(true), 76000);
+    timers.push(setTimeout(() => setBgPhase('dawn'), 40000));
+    timers.push(setTimeout(() => setBgPhase('bright'), 55000));
+    timers.push(setTimeout(() => setFinished(true), 76000));
+    return () => timers.forEach(clearTimeout);
   }, []);
 
   React.useEffect(() => {

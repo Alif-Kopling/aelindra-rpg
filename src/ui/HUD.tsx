@@ -285,15 +285,19 @@ const HUD: React.FC = () => {
             >
               {itemId && (
                 <>
-                  <img
-                    src={ITEM_IMAGES[itemId] || ''}
-                    alt={itemId}
-                    style={{
-                      width: 24,
-                      height: 24,
-                      imageRendering: 'pixelated',
-                    }}
-                  />
+                  {ITEM_IMAGES[itemId] ? (
+                    <img
+                      src={ITEM_IMAGES[itemId]}
+                      alt={itemId}
+                      style={{
+                        width: 24,
+                        height: 24,
+                        imageRendering: 'pixelated',
+                      }}
+                    />
+                  ) : (
+                    <div style={{ width: 24, height: 24, background: 'rgba(60,60,80,0.3)', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, color: '#666' }}>?</div>
+                  )}
                   <span style={{
                     fontSize: '6px',
                     color: '#b8860b',

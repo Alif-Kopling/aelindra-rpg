@@ -89,12 +89,12 @@ const Inventory: React.FC = () => {
           <div className="p-4 flex-1">
             <div className="grid" style={{ gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
               {/* Filled slots */}
-              {inventory.items.map((item) => {
+              {inventory.items.map((item, idx) => {
                 const rarity = RARITY_COLORS[item.rarity];
                 const equipped = isEquipped(item);
                 return (
                   <div
-                    key={item.id + Math.random()}
+                    key={item.id + '_' + idx}
                     className="relative cursor-pointer transition-transform duration-100 hover:scale-105"
                     style={{
                       width: 72,
@@ -111,11 +111,15 @@ const Inventory: React.FC = () => {
                     onMouseLeave={() => setHoveredItem(null)}
                   >
                     <div className="flex items-center justify-center h-full">
-                      <img
-                        src={ITEM_IMAGES[item.id] || ''}
-                        alt={item.id}
-                        style={{ width: 32, height: 32, imageRendering: 'pixelated' }}
-                      />
+                      {ITEM_IMAGES[item.id] ? (
+                        <img
+                          src={ITEM_IMAGES[item.id]}
+                          alt={item.id}
+                          style={{ width: 32, height: 32, imageRendering: 'pixelated' }}
+                        />
+                      ) : (
+                        <div style={{ width: 32, height: 32, background: 'rgba(60,60,80,0.3)', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#666' }}>?</div>
+                      )}
                     </div>
 
                     {/* Quantity badge */}
@@ -211,7 +215,11 @@ const Inventory: React.FC = () => {
                   }}
                 >
                   {item ? (
-                    <img src={ITEM_IMAGES[item.id] || ''} alt={item.id} style={{ width: 24, height: 24, imageRendering: 'pixelated' }} />
+                    ITEM_IMAGES[item.id] ? (
+                      <img src={ITEM_IMAGES[item.id]} alt={item.id} style={{ width: 24, height: 24, imageRendering: 'pixelated' }} />
+                    ) : (
+                      <div style={{ width: 24, height: 24, background: 'rgba(60,60,80,0.3)', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, color: '#666' }}>?</div>
+                    )
                   ) : (
                     <span style={{ fontSize: 14, color: '#555' }}>—</span>
                   )}
@@ -235,11 +243,15 @@ const ItemDetail: React.FC<{ item: Item; onAction: (item: Item) => void; readonl
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
-        <img
-          src={ITEM_IMAGES[item.id] || ''}
-          alt={item.id}
-          style={{ width: 32, height: 32, imageRendering: 'pixelated' }}
-        />
+        {ITEM_IMAGES[item.id] ? (
+          <img
+            src={ITEM_IMAGES[item.id]}
+            alt={item.id}
+            style={{ width: 32, height: 32, imageRendering: 'pixelated' }}
+          />
+        ) : (
+          <div style={{ width: 32, height: 32, background: 'rgba(60,60,80,0.3)', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#666' }}>?</div>
+        )}
         <div>
           <div style={{ fontFamily: 'Cinzel, serif', fontSize: 12, fontWeight: 700, color: '#f4e4c1' }}>{item.name}</div>
           <div style={{ fontSize: '9px', fontFamily: 'Cinzel, serif', color: rarity.label }}>

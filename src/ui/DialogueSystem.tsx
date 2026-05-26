@@ -34,8 +34,10 @@ const playBlip = () => {
     blipAudio = new Audio('/assets/audio/dialog-sound.mp3');
     blipAudio.volume = 0.15;
   }
-  blipAudio.currentTime = 0;
-  blipAudio.play().catch(() => {});
+  if (blipAudio.ended || blipAudio.paused) {
+    blipAudio.currentTime = 0;
+    blipAudio.play().catch(() => {});
+  }
 };
 
 const DialogueSystem: React.FC = () => {
@@ -163,7 +165,7 @@ const DialogueSystem: React.FC = () => {
         handleAdvance();
       }
       if (e.key === 'Escape') {
-        closeDialogue();
+        return;
       }
     };
     window.addEventListener('keydown', handleKey);

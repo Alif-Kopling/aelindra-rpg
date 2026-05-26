@@ -28,13 +28,15 @@ const EpilogueScreen: React.FC = () => {
   const bottomRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
     EPILOGUE_LINES.forEach((line, index) => {
-      setTimeout(() => {
+      timers.push(setTimeout(() => {
         setVisibleLines(prev => new Set([...prev, index]));
-      }, line.delay);
+      }, line.delay));
     });
 
-    setTimeout(() => setFinished(true), 56000);
+    timers.push(setTimeout(() => setFinished(true), 56000));
+    return () => timers.forEach(clearTimeout);
   }, []);
 
   React.useEffect(() => {
