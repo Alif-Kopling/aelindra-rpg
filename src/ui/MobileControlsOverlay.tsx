@@ -104,40 +104,6 @@ const MobileControlsOverlay: React.FC = () => {
         </button>
       </div>
 
-      {/* D-Pad Area - Left Bottom (Ergonomic placement) */}
-      <div className="absolute bottom-10 left-10 flex gap-6 pointer-events-auto">
-        <div
-          {...createHandlers('left')}
-          style={{
-            ...buttonStyle,
-            position: 'static',
-            width: 72,
-            height: 72,
-            boxShadow: touchInput.left ? '0 0 15px rgba(200, 168, 98, 0.6)' : buttonStyle.boxShadow,
-            borderColor: touchInput.left ? '#ffd700' : buttonStyle.borderColor,
-            background: touchInput.left ? 'rgba(200, 168, 98, 0.3)' : buttonStyle.background,
-            transform: touchInput.left ? 'scale(0.95)' : 'scale(1)',
-          }}
-        >
-          <ArrowLeft size={28} />
-        </div>
-        <div
-          {...createHandlers('right')}
-          style={{
-            ...buttonStyle,
-            position: 'static',
-            width: 72,
-            height: 72,
-            boxShadow: touchInput.right ? '0 0 15px rgba(200, 168, 98, 0.6)' : buttonStyle.boxShadow,
-            borderColor: touchInput.right ? '#ffd700' : buttonStyle.borderColor,
-            background: touchInput.right ? 'rgba(200, 168, 98, 0.3)' : buttonStyle.background,
-            transform: touchInput.right ? 'scale(0.95)' : 'scale(1)',
-          }}
-        >
-          <ArrowRight size={28} />
-        </div>
-      </div>
-
       {/* Action Buttons Area - Crescent Layout Bottom Right */}
       <div className="absolute bottom-0 right-0 w-[320px] h-[320px] pointer-events-auto">
         
@@ -281,6 +247,40 @@ const MobileControlsOverlay: React.FC = () => {
         >
           <Heart size={16} color="#ff6b6b" />
           <span>POTION</span>
+        </div>
+      </div>
+
+      {/* D-Pad Area - Left Bottom (rendered last so it's on top) */}
+      <div className="absolute bottom-10 left-10 flex gap-6 pointer-events-auto" style={{ zIndex: 50 }}>
+        <div
+          {...createHandlers('left')}
+          style={{
+            ...buttonStyle,
+            position: 'static',
+            width: 72,
+            height: 72,
+            boxShadow: touchInput.left ? '0 0 15px rgba(200, 168, 98, 0.6)' : buttonStyle.boxShadow,
+            borderColor: touchInput.left ? '#ffd700' : buttonStyle.borderColor,
+            background: touchInput.left ? 'rgba(200, 168, 98, 0.3)' : buttonStyle.background,
+            transform: touchInput.left ? 'scale(0.95)' : 'scale(1)',
+          }}
+        >
+          <ArrowLeft size={28} />
+        </div>
+        <div
+          {...createHandlers('right')}
+          style={{
+            ...buttonStyle,
+            position: 'static',
+            width: 72,
+            height: 72,
+            boxShadow: touchInput.right ? '0 0 15px rgba(200, 168, 98, 0.6)' : buttonStyle.boxShadow,
+            borderColor: touchInput.right ? '#ffd700' : buttonStyle.borderColor,
+            background: touchInput.right ? 'rgba(200, 168, 98, 0.3)' : buttonStyle.background,
+            transform: touchInput.right ? 'scale(0.95)' : 'scale(1)',
+          }}
+        >
+          <ArrowRight size={28} />
         </div>
       </div>
     </div>

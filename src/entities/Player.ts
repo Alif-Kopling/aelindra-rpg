@@ -65,6 +65,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private ghostTimer = 0;
   private unlimitedStaminaTimer = 0;
   private prevGamepadButtons: boolean[] = [];
+  private prevTouchAttack = false;
 
   private moveSpeed = 180;
   private jumpForce = -380;
@@ -233,12 +234,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       (isMobile && store.touchInput.jump) ||
       (isConsole && gamepad && gamepad.buttons[0].pressed);
 
-    const attackPressed = (this.scene.input.activePointer.isDown || this.keys.J.isDown) ||
+    const attackPressed = this.keys.J.isDown ||
       (isMobile && store.touchInput.attack) ||
+      (!isMobile && this.scene.input.activePointer.isDown) ||
       (isConsole && gamepad && gamepad.buttons[2].pressed); // Button X
 
+    const attackJustDownFromTouch = isMobile && store.touchInput.attack && !this.prevTouchAttack;
+    this.prevTouchAttack = isMobile ? !!store.touchInput.attack : false;
     const attackJustDown = Phaser.Input.Keyboard.JustDown(this.keys.J) ||
-      (isMobile && store.touchInput.attack) ||
+      attackJustDownFromTouch ||
       (isConsole && gamepad && gamepadJustPressed(2)); // Button X
 
     const dashPressed = Phaser.Input.Keyboard.JustDown(this.keys.Shift) ||
@@ -250,7 +254,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       (isConsole && gamepad && gamepadJustPressed(3)); // Button Y
 
     const ultimatePressed = Phaser.Input.Keyboard.JustDown(this.keys.L) ||
-      (this.scene.input.activePointer.rightButtonDown()) ||
+      (!isMobile && this.scene.input.activePointer.rightButtonDown()) ||
       (isMobile && store.touchInput.ultimate) ||
       (isConsole && gamepad && gamepadJustPressed(5)); // R1 / RB
 
