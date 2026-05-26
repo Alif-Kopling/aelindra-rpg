@@ -5,9 +5,9 @@ export const COMBAT_CONFIG = {
   maxCombo: 5,
   finisherAtCombo: 5,
 
-  dashDurationMs: 90,
-  dashCooldownMs: 380,
-  dashSpeed: 1400,
+  dashDurationMs: 220,
+  dashCooldownMs: 550,
+  dashSpeed: 2100,
   dashIFramesMs: 280,
   airDashAllowed: true,
 

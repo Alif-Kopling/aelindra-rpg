@@ -253,19 +253,24 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (this.isDashing) {
       this.dashTimer -= delta;
+      this.ghostTimer -= delta;
+      
+      if (this.ghostTimer <= 0) {
+        this.spawnGhost();
+        this.ghostTimer = 35; // Spawn a ghost every 35ms
+      }
+
       const dashVx = this.dashDirX * COMBAT_CONFIG.dashSpeed;
       const dashVy = (this.keys.W.isDown ? -180 : this.keys.S.isDown ? 150 : 0);
       body.setVelocityX(dashVx);
       body.setVelocityY(dashVy);
       body.allowGravity = false;
       this.invincibleTimer = Math.max(this.invincibleTimer, COMBAT_CONFIG.dashIFramesMs);
-      this.setAlpha(0);
       this.updateFrame('dash', delta);
       if (this.dashTimer <= 0) {
         this.isDashing = false;
         body.allowGravity = true;
         store.setPlayerDashing(false);
-        this.setAlpha(1);
         this.spawnBlinkArrival();
       }
       this.updateAttackHitbox();
@@ -1679,6 +1684,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (count >= 10) {
       const glow = this.scene.add.graphics();
       glow.fillStyle(color, 0.25);
+      glow.fillCircle(x, y, 20);
+      glow.setDepth(24);
+      this.scene.tweens.add({
+        targets: glow,
+        scaleX: 3,
+        scaleY: 3,
+        alpha: 0,
+        duration: 350,
+        ease: 'Power2',
+        onComplete: () => glow.destroy(),
+      });
+    }
+  }
+}
+color, 0.25);
       glow.fillCircle(x, y, 20);
       glow.setDepth(24);
       this.scene.tweens.add({
