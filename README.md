@@ -131,22 +131,21 @@
 | `F` | Parry / Counter |
 | `E` | Interact / Advance Dialogue |
 | `Tab` | Inventory |
-| `Esc` | Pause Menu |
+| `Esc` | Pause Menu (tutup dialog dulu jika sedang open) |
+| `;` | Dev Tools Launcher |
+| `F10` | Toggle Dev Tools Panel |
 
 ---
 
 ## Dev Tools (Testing)
 
-Panel dev tersedia di dalam game untuk QA flow cepat:
-
-- tombol launcher: `;`
-- toggle panel: `F10`
+Panel dev tersedia di dalam game untuk QA flow cepat. Tekan **`;`** lalu **`F10`** untuk toggle.
 
 Fitur:
 
-- jump ke zone mana pun
-- open ending/epilogue langsung
-- trigger event `boss-died (ashen_knight)` untuk test final cinematic flow
+- Jump ke zone mana pun (skip story atau full)
+- Open ending/epilogue langsung
+- Trigger `boss-died (ashen_knight)` untuk test final cinematic flow
 
 ---
 
@@ -194,25 +193,58 @@ npm install
 npm run dev
 ```
 
-### 3. Type Check
+### 3. Production Build
+
+```bash
+npm run build    # tsc + vite → dist/
+```
+
+### 4. Type Check Only
 
 ```bash
 npx tsc --noEmit
-```
-
-### 4. Production Build
-
-```bash
-npx vite build
 ```
 
 ---
 
 ## Audio Notes
 
-- tiap zone punya BGM berbeda
+- tiap zone punya BGM berbeda (7 zone tracks + ending/epilogue/prologue)
 - `ending` dan `epilogue` memakai track yang sama untuk transisi emosional kontinu
-- final boss path sekarang memainkan track ending dari momen boss clear
+- final boss path memainkan track ending dari momen boss clear
+- semua asset audio terverifikasi — **0 missing files** (35 audio files, semuanya referenced)
+
+---
+
+## Changelog (26 Mei 2026)
+
+### 🔴 Critical Fixes
+- Keyboard listener leak (ESC/TAB) — `removeAllListeners()` di setiap setup + cleanup `shutdown()`
+- `enemyGroup` tidak pernah clear saat ganti zone — ghost physics sprites menumpuk
+- Boss `onRoundCleared()` double fire — guard `roundActive` di `onEnemyKilled()` + handler `boss-died`
+- `Math.random()` di React key — Inventory item flashing tiap render
+- `setTimeout` leak di 6 file (`BossHealthBar`, `GameOverScreen`, `EndingScreen`, `EpilogueScreen`, `PrologueScreen`, `BossHealthBar` damage flash)
+
+### 🟠 High Fixes
+- Physics resume saat hitstop tidak cek menu — `triggerHitStop()` pake fresh `getState()`, cek pause/inventory/shop
+- Physics tidak pause saat inventory open — `isInventoryOpen` di kondisi + dependency
+- `loadGame()` tanpa validasi — cek `typeof stats.hp === 'number'` sebelum assign (cegah NaN state)
+- Dialogue audio blip glitch — `playBlip()` guard `ended || paused` sebelum play
+- Boss HP NaN — guard `maxHp > 0` di kalkulasi `hpPct`
+- Ashen Knight phase shift store delay 3 detik — `store.setBoss()` langsung, bukan di `delayedCall`
+- ESC bentrok dialog vs pause — dialog handle ESC lewat Phaser, cek `dialogue.isOpen` → `closeDialogue()` else `togglePause()`
+
+### 🟢 Low Fixes
+- Stamina regen jalan terus saat attack — tambah `!this.isAttacking`
+- Loot drop numpuk posisi sama — random offset `Phaser.Math.Between(-30, 30)`
+- Hotbar/item missing image placeholder — render `div` placeholder kalo `ITEM_IMAGES[itemId]` falsy
+- `spawnGhost()` unimplemented method — commented out + TODO
+
+### Asset Audit
+- **0 missing assets** dari 81 total file (46 gambar + 35 audio)
+- 1 orphan file: `footstep00.ogg` (tidak dipakai)
+- 1 filename dengan spasi: `village bg.jpeg` (aman di Windows, potensi issue di Linux hosting)
+- 1 dead config: `hollow_beast` di `BOSS_DATA` (tanpa sprite/implementasi)
 
 ---
 
@@ -220,5 +252,5 @@ npx vite build
 
 Game universe: **Aelindra**  
 Main character: **Alden**  
-Built with Phaser + React for narrative-action hybrid gameplay.
-Dev:Alxyzz
+Built with Phaser + React for narrative-action hybrid gameplay.  
+Dev: Alxyzz

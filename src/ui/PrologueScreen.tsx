@@ -191,7 +191,7 @@ const PrologueScreen: React.FC = () => {
   const [bgOpacity, setBgOpacity] = React.useState(0);
 
   const fullTextRef = React.useRef('');
-  const typingTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const typingTimerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
   const charIndexRef = React.useRef(0);
   const transitionTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
