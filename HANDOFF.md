@@ -1,6 +1,6 @@
 # Aelindra RPG — Status Proyek & Lanjutan Dev
 
-Dokumen ini untuk **melanjutkan development tanpa konteks chat lama**. Terakhir di-update setelah pass stabilisasi + dialogue choices + combat feel.
+Dokumen ini untuk **melanjutkan development tanpa konteks chat lama**. Terakhir di-update: **26 Mei 2026** — setelah **16 bug fix** (critical/high) + asset audit.
 
 ---
 
@@ -82,28 +82,44 @@ Kontrol lengkap: **Pause → tab Controls**.
 
 ---
 
-## Bug map / portal — status
+## Bug fixes (batch stabilisasi 26 Mei 2026)
 
-### Sudah diperbaiki (`Bug1-portal.md` + lanjutan)
+### 🔴 Critical
+| # | Fix | File |
+|---|-----|------|
+| 1 | **Keyboard listener leak** — ESC/TAB listeners `removeAllListeners()` tiap setup + cleanup di `shutdown()` | `GameplayScene.ts` |
+| 2 | **enemyGroup tdk pernah clear** pas ganti zone — tambah `enemyGroup.clear(true,true)` di `buildZone()` + `shutdown()` | `GameplayScene.ts` |
+| 3 | **Boss `onRoundCleared()` double fire** — guard `if (!this.roundActive) return` di `onEnemyKilled()` + guard di handler `boss-died` | `GameplayScene.ts` |
+| 4 | **`Math.random()` di React key** — Inventory item key `item.id + '_' + idx` | `Inventory.tsx` |
+| 5 | **setTimeout leak** (6 file) — semua timer pake `clearTimeout` di cleanup effect | `BossHealthBar.tsx`, `GameOverScreen.tsx`, `EndingScreen.tsx`, `EpilogueScreen.tsx`, `PrologueScreen.tsx` |
 
-1. Layar hitam stuck → `try/catch` + `fadeIn` tetap jalan di `transitionToZone`.
-2. `store.currentZone` sync → `setZone()` saat pindah zona.
-3. Portal posisi → kanan map (`mapWidth - 3`), Y dari config `nextZone.y`.
-4. Dev jump race → hapus `__dev_jump__`, satu jalur `transitionToZone`.
-5. Boss HUD ghost → `setBoss(null)` saat `buildZone`.
-6. Memory kecil → sfx listener cleanup, enemy destroy HP bar, portal tween kill.
+### 🟠 High
+| # | Fix | File |
+|---|-----|------|
+| 6 | **Physics resume pas hitstop gak cek menu** — `triggerHitStop()` pake fresh `getState()`, cek `isPaused`/`isInventoryOpen`/`isShopOpen` | `GameplayScene.ts` |
+| 7 | **Physics jalan pas inventory buka** — `isInventoryOpen` ditambah ke kondisi + dependency array | `GameComponent.tsx` |
+| 8 | **loadGame tanpa validasi** — cek `typeof data.player?.stats?.hp === 'number'` sebelum `set()` | `gameStore.ts` |
+| 9 | **DialogueSystem audio glitch** — `playBlip()` guard `ended || paused` sebelum `.play()` | `DialogueSystem.tsx` |
+| 10 | **Boss HP bisa NaN** — guard `maxHp > 0` di kalkulasi `hpPct` | `BossHealthBar.tsx` |
+| 11 | **Ashen Knight phase shift store delay 3s** — `store.setBoss()` dipindah ke luar `delayedCall(3000)`, UI update langsung | `Boss.ts` |
+| 12 | **ESC bentrok dialog vs pause** — `DialogueSystem.tsx` ESC handler `return` (abaikan), `GameplayScene.ts` ESC cek `dialogue.isOpen` → `closeDialogue()` else `togglePause()` | `DialogueSystem.tsx`, `GameplayScene.ts` |
 
-### Dev Tools (F10)
+### 🟢 Low
+| # | Fix | File |
+|---|-----|------|
+| 13 | **Stamina regen jalan pas attack** — tambah `!this.isAttacking` di kondisi regen | `Player.ts` |
+| 14 | **Loot drop numpuk posisi sama** — tambah `Phaser.Math.Between(-30,30)` offset random | `Enemy.ts` |
+| 15 | **Hotbar/item missing image placeholder** — render `div` placeholder kalo `ITEM_IMAGES[itemId]` falsy | `HUD.tsx`, `Inventory.tsx` |
 
-- **Bukan** tes portal — langsung rebuild zona.
-- Sekarang: `skipStory: true` → fade cepat, **tanpa** dialog entry zona, langsung combat round 1.
-- Portal tetap hanya muncul setelah **clear semua round** di zona itu.
+---
 
-### Cara tes portal (main play)
+## Asset audit (26 Mei 2026)
 
-1. Village → bunuh semua wave tiap round.
-2. Notifikasi **"Path Clear!"**
-3. Portal di **ujung kanan** → overlap → fade → zona baru.
+**Semua asset references bersih — 0 missing files.** Detail:
+- 81 file assets total (46 gambar, 35 audio)
+- Hanya 1 orphan file: `public/assets/audio/footstep00.ogg` (ga direference, udah diganti `footstaps.mp3`)
+- 1 potensi issue: `public/assets/images/village bg.jpeg` ada **spasi** → aman di Windows, potensi broken di Linux hosting
+- `constants.ts` `BOSS_DATA` berisi `hollow_beast` yang gak punya sprite/implementasi (dead config)
 
 ---
 
@@ -114,6 +130,8 @@ Kontrol lengkap: **Pause → tab Controls**.
 Field penting: `player`, `inventory`, `storyFlags`, `currentZone`, `furthestClearedZone`, `npcTrust`, `npcMood`, `hotbar`, `unlockedSkills`, dll.
 
 Load reset: boss null, pause/dialogue tutup, HP min 1 jika 0.
+
+**⚠ Validasi:** `loadGame()` sekarang validasi `typeof data.player?.stats?.hp === 'number'` sebelum assign — cegah NaN state.
 
 ---
 
@@ -144,8 +162,9 @@ Load reset: boss null, pause/dialogue tutup, HP min 1 jika 0.
 ### P2 — Tech debt
 
 - [ ] Bundle ~1.9MB — code-split Phaser atau dynamic import scene.
-- [ ] `GameComponent.tsx` di editor kadang beda dengan disk (pastikan DevTools + `jumpToZoneForDev` tersimpan).
-- [ ] ESC bentrok: pause vs tutup dialog.
+- [ ] Rename `village bg.jpeg` → `village-bg.jpeg` (spasi) + update `PreloadScene.ts`.
+- [ ] Hapus file orphan `footstep00.ogg`.
+- [ ] Hapus dead config `hollow_beast` dari `constants.ts:BOSS_DATA`.
 - [ ] Unit test minimal: `zoneProgressRank`, `resolveChoiceReactions`, save round-trip.
 - [ ] CI: `npm run build` di GitHub Actions.
 
@@ -163,21 +182,24 @@ Load reset: boss null, pause/dialogue tutup, HP min 1 jika 0.
 
 ---
 
-## File referensi bug lama
-
-- `Bug1-portal.md` — root cause portal (historical, mostly fixed).
-
----
-
 ## Prompt singkat untuk agent berikutnya
 
 ```
-Baca HANDOFF.md dan Bug1-portal.md.
+Baca HANDOFF.md.
 Jangan branch ending/quest utama.
 Dialogue: extend storyChoices + dialogueEngine, canon tetap.
 Combat: tune combatFeel.ts, jangan duplikasi logic di Player.
 Map: transitionToZone + buildZone + onZoneComplete portal.
 Tes portal via main play, bukan hanya dev jump.
+
+Sudah di-fix (batch 26 Mei 2026):
+- Keyboard leak, enemyGroup leak, boss double-fire onRoundCleared
+- React key Math.random, setTimeout leaks (6 file)
+- Physics resume tanpa cek menu, inventory physics pause
+- loadGame validation, boss HP NaN, audio blip glitch
+- Ashen Knight phase shift store delay, ESC bentrok dialog/pause
+- Missing image placeholder, stamina regen pas attack, loot overlap
+- Asset audit: 0 missing files (1 orphan + 1 space-in-filename)
 ```
 
 ---
@@ -186,14 +208,17 @@ Tes portal via main play, bukan hanya dev jump.
 
 | Input | Aksi |
 |--------|------|
-| F10 | Dev Tools (zone jump, boss trigger, skip ke ending UI) |
+| `;` | Dev Tools launcher |
+| F10 | Toggle Dev Tools panel (zone jump, boss trigger, skip ending) |
 | 1–5 | Pilih tone dialog (saat choice muncul) |
-| Space/Shift | Dash |
-| L / LMB | Combo |
-| Hold L | Charged attack |
-| F | Parry |
-| RMB | Ultimate |
-| E | Interact NPC |
+| WASD | Move |
+| Space / Shift | Dash |
+| L / LMB | Light Attack (hold = charged) |
+| RMB | Ultimate (Forsaken Slash) |
+| F | Parry / Counter |
+| E | Interact NPC / Advance Dialogue |
+| Tab | Toggle Inventory |
+| Esc | **Pause** (tutup dialog dulu jika sedang open) |
 | Recall/Return | HUD kanan bawah (setelah pernah leave village) |
 
 ---
@@ -201,8 +226,12 @@ Tes portal via main play, bukan hanya dev jump.
 ## Catatan untuk user (Alxyzz)
 
 - **Dialog pilihan = cuma Alden**, NPC cuma reaksi, **alur tetap nyambung**.
-- **Map bug utama sudah di-address**; kalau masih aneh, catat: hitam permanen vs kedip, zona mana, dev tools atau portal.
+- **ESC sekarang bedain:** kalo dialog open → tutup dialog, gak toggle pause.
+- **Physics gak bakal resume** pas hitstop kalo inventory/pause/shop/dialog open.
+- **Boss phase HP bar** update langsung, gak nunggu 3 detik lagi.
+- **Save corrupt** (NaN stats) bakal ditangkep validasi, gak nge-crash game.
 - Lanjut paling enak: **P0 playtest** dulu, baru tambah choice di zona yang belum ada.
+- Asset minor: `village bg.jpeg` (spasi) + `footstep00.ogg` (orphan) + `hollow_beast` (dead config) — belum dibersihkan.
 
 ---
 
