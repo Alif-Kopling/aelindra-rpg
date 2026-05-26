@@ -20,6 +20,15 @@ export function enrichDialogueWithChoices(lines: DialogueLine[], sceneId: string
     case 'battlefield_entry':
       injectAtSpeaker(out, 'Alden', 0, getRandomChoices(battlefieldValtherChoices(), 'valther'));
       break;
+    case 'catacombs_entry':
+      injectAtSpeaker(out, 'Alden', 1, getRandomChoices(catacombsValtherTauntChoices(), 'valther'));
+      break;
+    case 'cathedral_entry':
+      injectAtSpeaker(out, 'Alden', 1, getRandomChoices(cathedralNunFaithChoices(), 'nun'));
+      break;
+    case 'mountain_entry':
+      injectAtSpeaker(out, 'Alden', 1, getRandomChoices(mountainResolveChoices(), 'nun'));
+      break;
     default:
       break;
   }
@@ -305,6 +314,150 @@ function battlefieldValtherChoices(): DialogueLine['choices'] {
   ];
 }
 
+function catacombsValtherTauntChoices(): DialogueLine['choices'] {
+  return [
+    {
+      text: 'Aku nggak peduli seberapa dalem ini.',
+      tone: 'determined',
+      npcId: 'valther',
+      trustDelta: 0,
+      aldenLine: 'Segel, jebakan, seluruh kerajaan — aku bakal gali sampe nemu kamu.',
+      cinematic: 'zoom',
+    },
+    {
+      text: 'Kenapa kamu ngikutin kegelapan?',
+      tone: 'calm',
+      npcId: 'valther',
+      trustDelta: 0,
+      aldenLine: 'Waktu kita sama-sama di medan perang, kamu ksatria paling berani. Apa yang ngubah kamu?',
+      cinematic: 'dramatic',
+    },
+    {
+      text: 'Kamu cuma setan pengecut di balik topeng.',
+      tone: 'sarcastic',
+      npcId: 'valther',
+      trustDelta: 0,
+      aldenLine: 'Bersembunyi di katakombe, ngirim mayat buat perangin perangmu. Sultan pengecut.',
+      cinematic: 'none',
+    },
+    {
+      text: 'Aku tau rasa sakit yang kamu bawa.',
+      tone: 'emotional',
+      npcId: 'valther',
+      trustDelta: 0,
+      flavorFlag: 'catacombs_valther_pity',
+      aldenLine: 'Aku tau rasanya dikhianati. Tapi kamu jadi pengkhianat, bukan korbannya.',
+      cinematic: 'dramatic',
+      pauseMs: 600,
+    },
+    {
+      text: '...',
+      tone: 'silent',
+      npcId: 'valther',
+      trustDelta: 0,
+      aldenLine: '*Alden menarik pedangnya sebagai jawaban.*',
+      cinematic: 'dramatic',
+      pauseMs: 700,
+    },
+  ];
+}
+
+function cathedralNunFaithChoices(): DialogueLine['choices'] {
+  return [
+    {
+      text: 'Aku butuh bimbinganmu.',
+      tone: 'calm',
+      npcId: 'nun',
+      trustDelta: 2,
+      aldenLine: 'Kamu udah liat lebih banyak dari aku. Ajarin aku liat apa yang kamu liat.',
+      cinematic: 'zoom',
+    },
+    {
+      text: 'Tempat ini ngerasa aneh.',
+      tone: 'sarcastic',
+      npcId: 'nun',
+      trustDelta: 0,
+      aldenLine: 'Abu suci, patung patah, altar palsu — Valther bener-bener dekor ulang tempat ibadah.',
+      cinematic: 'none',
+    },
+    {
+      text: 'Tunjukin aku jalan — atau minggir.',
+      tone: 'determined',
+      npcId: 'nun',
+      trustDelta: 2,
+      aldenLine: 'Diam dan liat. Aku bakal bersihin Katedral ini dari panggung sandiwaranya.',
+      cinematic: 'zoom',
+    },
+    {
+      text: 'Aku capek, Suster.',
+      tone: 'emotional',
+      npcId: 'nun',
+      trustDelta: 3,
+      flavorFlag: 'cathedral_nun_exhaustion',
+      aldenLine: 'Aku capek. Tapi aku nggak bisa berhenti. Ajarin aku caranya terus jalan.',
+      cinematic: 'dramatic',
+      pauseMs: 550,
+    },
+    {
+      text: '...',
+      tone: 'silent',
+      npcId: 'nun',
+      trustDelta: 1,
+      aldenLine: '*Alden menatap patung yang patah, tangannya gemetar.*',
+      cinematic: 'dramatic',
+      pauseMs: 750,
+    },
+  ];
+}
+
+function mountainResolveChoices(): DialogueLine['choices'] {
+  return [
+    {
+      text: 'Gunung ini nggak akan nahan aku.',
+      tone: 'determined',
+      npcId: 'nun',
+      trustDelta: 2,
+      aldenLine: 'Salju, es, tebing, apa aja. Aku tetep naik.',
+      cinematic: 'zoom',
+    },
+    {
+      text: 'Gunung ini dingin kayak hati Valther.',
+      tone: 'sarcastic',
+      npcId: 'nun',
+      trustDelta: 0,
+      aldenLine: 'Mungkin kalo aku bakar seluruh puncak ini, isinya juga bakal cair.',
+      cinematic: 'none',
+    },
+    {
+      text: 'Biar alam yang uji aku.',
+      tone: 'calm',
+      npcId: 'nun',
+      trustDelta: 2,
+      aldenLine: 'Gunung bisa uji fisik. Tapi dia nggak tau apa yang udah aku lewatin.',
+      cinematic: 'zoom',
+    },
+    {
+      text: 'Kadang aku takut nggak sampe.',
+      tone: 'emotional',
+      npcId: 'nun',
+      trustDelta: 3,
+      flavorFlag: 'mountain_nun_fear',
+      aldenLine: 'Bukan dinginnya, Suster. Tapi... apa yang bakal aku temuin di puncak.',
+      cinematic: 'dramatic',
+      pauseMs: 600,
+    },
+    {
+      text: '...',
+      tone: 'silent',
+      npcId: 'nun',
+      trustDelta: 1,
+      aldenLine: '*Alden mengikat tali di pinggangnya dan mulai mendaki.*',
+      cinematic: 'dramatic',
+      pauseMs: 800,
+    },
+  ];
+}
+
 export function sceneIdFromLines(lines: DialogueLine[]): string | null {
   const first = lines[0]?.text?.slice(0, 40) ?? '';
   if (first.includes('Harrowmere') || first.includes('Desa Harrowmere')) return 'village_entry';
@@ -312,5 +465,8 @@ export function sceneIdFromLines(lines: DialogueLine[]): string | null {
   if (first.includes('Puri Aelindra') || first.includes('castle')) return 'castle_entry';
   if (first.includes('Medan Perang') || first.includes('Battlefield')) return 'battlefield_entry';
   if (first.includes('Tam') && lines.some((l) => l.text.includes('jimat'))) return 'village_round2';
+  if (first.includes('Katakombe')) return 'catacombs_entry';
+  if (first.includes('Katedral Abu')) return 'cathedral_entry';
+  if (first.includes('Puncak Frostpeak')) return 'mountain_entry';
   return null;
 }

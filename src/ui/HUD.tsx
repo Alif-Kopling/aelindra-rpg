@@ -148,7 +148,7 @@ const HUD: React.FC = () => {
         )}
       </div>
 
-      {/* Idle Stats Dashboard (bottom-left) */}
+      {/* Idle Stats Dashboard (bottom-left) + Trust */}
       <div className="absolute bottom-24 left-4" style={{ pointerEvents: 'auto' }}>
         <div style={{
           fontSize: '8px',
@@ -160,6 +160,7 @@ const HUD: React.FC = () => {
           <div>EXP: {stats.exp}/{stats.expToNext}</div>
           <div>GOLD: {inventory.gold}</div>
           <div>KILLS: {killCount}</div>
+          <TrustBars />
         </div>
       </div>
 
@@ -348,6 +349,48 @@ const HUD: React.FC = () => {
     </div>
   );
 };
+
+function TrustBars() {
+  const npcTrust = useGameStore((s) => s.npcTrust);
+  const npcLabels: Record<string, string> = {
+    edric: 'Edric',
+    nun: 'Nun',
+    evelyne: 'Evelyne',
+    tam: 'Tam',
+  };
+  return (
+    <div style={{ marginTop: 8 }}>
+      {Object.entries(npcTrust).map(([id, val]) => (
+        <div key={id} className="flex items-center gap-1" style={{ marginBottom: 2 }}>
+          <span style={{
+            fontSize: '6px',
+            color: '#888',
+            width: 30,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+          }}>
+            {npcLabels[id] || id}
+          </span>
+          <div style={{
+            width: 50,
+            height: 3,
+            background: 'rgba(0,0,0,0.5)',
+            borderRadius: 2,
+            overflow: 'hidden',
+          }}>
+            <div style={{
+              width: `${val}%`,
+              height: '100%',
+              background: val < 35 ? '#cc3333' : val < 65 ? '#ccaa33' : '#33cc66',
+              borderRadius: 2,
+              transition: 'width 0.3s ease',
+            }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function getZoneName(zoneId: string): string {
   const names: Record<string, string> = {

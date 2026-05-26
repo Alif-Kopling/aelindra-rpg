@@ -192,6 +192,35 @@ const DEFAULT_REACTIONS: Record<
   },
 };
 
+export function getTrustDiscount(npcTrust: Record<string, number>, npcId: string): number {
+  const trust = npcTrust[npcId] ?? 50;
+  return Math.round(clampTrust(trust) / 100 * 25);
+}
+
+export function getTrustDefenseBuff(npcTrust: Record<string, number>, npcId: string): number {
+  const trust = npcTrust[npcId] ?? 50;
+  if (trust >= 80) return 15;
+  if (trust >= 60) return 8;
+  if (trust >= 40) return 3;
+  return 0;
+}
+
+export function getTrustHpRegen(npcTrust: Record<string, number>, npcId: string): number {
+  const trust = npcTrust[npcId] ?? 50;
+  if (trust >= 80) return 12;
+  if (trust >= 60) return 6;
+  if (trust >= 40) return 3;
+  return 0;
+}
+
+export function getTrustBossHint(npcTrust: Record<string, number>, npcId: string): string | null {
+  const trust = npcTrust[npcId] ?? 50;
+  if (trust >= 70) return 'dodge';
+  if (trust >= 45) return 'pattern';
+  if (trust >= 25) return 'basic';
+  return null;
+}
+
 export function applyNpcFlavorLine(
   lines: DialogueLine[],
   npcId: string,
