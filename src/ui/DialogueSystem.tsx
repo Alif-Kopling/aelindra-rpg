@@ -185,7 +185,7 @@ const DialogueSystem: React.FC = () => {
 
   return (
     <div
-      className="absolute inset-0 flex flex-col justify-end pb-8 pointer-events-none"
+      className="absolute inset-0 flex flex-col justify-end pb-4 sm:pb-8 pointer-events-none"
       style={{ zIndex: 100, opacity: lineFade ? 1 : 0, transition: 'opacity 220ms ease' }}
     >
       <div
@@ -212,7 +212,7 @@ const DialogueSystem: React.FC = () => {
       <div
         className="absolute inset-0 pointer-events-auto"
         style={{
-          background: sceneImage ? 'rgba(0,0,0,0.45)' : 'rgba(0,0,0,0.55)',
+          background: sceneImage ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0.65)',
           transition: 'background 0.5s ease',
         }}
         onClick={hasChoices ? undefined : handleAdvance}
@@ -226,38 +226,38 @@ const DialogueSystem: React.FC = () => {
       )}
 
       <div
-        className="relative mx-auto w-full max-w-3xl px-4 pointer-events-auto"
+        className="relative mx-auto w-full max-w-3xl px-2 sm:px-4 pointer-events-auto"
         onClick={hasChoices ? undefined : handleAdvance}
         style={{ cursor: hasChoices ? 'default' : 'pointer' }}
       >
         {isNarration ? (
-          <div className="flex flex-col items-center justify-center text-center py-12">
-            <div className="text-xs uppercase tracking-[0.3em] text-amber-600/60 font-serif mb-4">
+          <div className="flex flex-col items-center justify-center text-center py-8 sm:py-12">
+            <div className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-amber-600/60 font-serif mb-3 sm:mb-4">
               {currentLine.speaker}
             </div>
             <div
-              className="text-xl md:text-2xl italic font-serif leading-relaxed"
+              className="text-lg sm:text-xl md:text-2xl italic font-serif leading-relaxed px-2"
               style={{ color: '#c8a882', textShadow: '0 0 20px rgba(0,0,0,0.5)' }}
             >
               {displayText}
-              {isTyping && <span className="inline-block w-2 h-5 bg-amber-600 ml-1 animate-pulse" />}
+              {isTyping && <span className="inline-block w-1.5 h-4 sm:w-2 sm:h-5 bg-amber-600 ml-1 animate-pulse" />}
             </div>
           </div>
         ) : (
           <div
-            className="relative bg-zinc-950/95 border border-white/10 rounded-lg shadow-2xl overflow-hidden"
+            className="relative bg-zinc-950/95 border border-white/10 rounded-md sm:rounded-lg shadow-2xl overflow-hidden"
             style={{
               boxShadow: hasChoices
                 ? `0 0 40px ${portraitData.border}33, 0 12px 48px rgba(0,0,0,0.85)`
                 : '0 12px 48px rgba(0,0,0,0.85)',
             }}
           >
-            <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, ${portraitData.border}, transparent)` }} />
+            <div className="h-0.5 sm:h-1 w-full" style={{ background: `linear-gradient(90deg, ${portraitData.border}, transparent)` }} />
 
-            <div className="p-6 flex gap-6">
+            <div className="p-3 sm:p-4 md:p-6 flex gap-3 sm:gap-4 md:gap-6">
               <div className="flex-shrink-0 relative">
                 <div
-                  className="w-20 h-20 rounded border-2 border-white/20 bg-black overflow-hidden shadow-inner"
+                  className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded border-2 border-white/20 bg-black overflow-hidden shadow-inner"
                   style={{
                     borderColor: portraitData.border,
                     transform: portraitVisible ? 'scale(1)' : 'scale(0.85)',
@@ -268,35 +268,35 @@ const DialogueSystem: React.FC = () => {
                   {portraitData.img ? (
                     <img src={portraitData.img} alt={currentLine.speaker} className="w-full h-full object-cover object-top pixelated" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl">{portraitData.emoji}</div>
+                    <div className="w-full h-full flex items-center justify-center text-2xl sm:text-3xl md:text-4xl">{portraitData.emoji}</div>
                   )}
                 </div>
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-baseline justify-between mb-2">
-                  <span className="text-sm font-bold tracking-widest uppercase font-serif" style={{ color: portraitData.border }}>
+                <div className="flex items-baseline justify-between mb-1 sm:mb-2">
+                  <span className="text-xs sm:text-sm font-bold tracking-widest uppercase font-serif" style={{ color: portraitData.border }}>
                     {currentLine.speaker}
                   </span>
                   {emotion !== 'neutral' && (
-                    <span className="text-[10px] italic opacity-50 uppercase" style={{ color: textColor }}>
+                    <span className="text-[8px] sm:text-[10px] italic opacity-50 uppercase" style={{ color: textColor }}>
                       {emotion}
                     </span>
                   )}
                 </div>
-                <div className="text-base leading-relaxed font-serif min-h-[4rem]" style={{ color: textColor }}>
+                <div className="text-sm sm:text-base leading-relaxed font-serif min-h-[2.5rem] sm:min-h-[4rem]" style={{ color: textColor }}>
                   {displayText}
-                  {isTyping && <span className="inline-block w-1.5 h-4 bg-amber-600/80 ml-1 animate-pulse" />}
+                  {isTyping && <span className="inline-block w-1 sm:w-1.5 h-3 sm:h-4 bg-amber-600/80 ml-1 animate-pulse" />}
                 </div>
               </div>
             </div>
 
             {hasChoices && currentLine.choices && (
-              <div className="px-4 pb-4 pt-0 border-t border-white/5">
-                <div className="text-[10px] uppercase tracking-widest text-amber-600/50 mb-2 font-serif">
+              <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-0 border-t border-white/5">
+                <div className="text-[8px] sm:text-[10px] uppercase tracking-widest text-amber-600/50 mb-1.5 sm:mb-2 font-serif">
                   Bagaimana tanggapan Alden?
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5 sm:gap-2">
                   {currentLine.choices.map((choice, i) => {
                     const tone = choice.tone as DialogueTone;
                     const toneColor = TONE_COLORS[tone];
@@ -313,7 +313,7 @@ const DialogueSystem: React.FC = () => {
                         }}
                         className="text-left rounded-md transition-all duration-200"
                         style={{
-                          padding: '10px 14px',
+                          padding: '8px 10px',
                           border: `1px solid ${isSelected ? toneColor : 'rgba(255,255,255,0.12)'}`,
                           background: isSelected
                             ? `linear-gradient(90deg, ${toneColor}22, rgba(10,10,18,0.95))`
@@ -342,19 +342,19 @@ const DialogueSystem: React.FC = () => {
             )}
 
             {showContinue && !hasChoices && (
-              <div className="absolute bottom-2 right-4 flex items-center gap-2 animate-pulse">
-                <span className="text-[9px] uppercase tracking-widest text-white/30">
+              <div className="absolute bottom-1 sm:bottom-2 right-2 sm:right-4 flex items-center gap-1 sm:gap-2 animate-pulse">
+                <span className="text-[7px] sm:text-[9px] uppercase tracking-widest text-white/30">
                   {dialogue.currentIndex < dialogue.lines.length - 1 ? 'Lanjut' : 'Tutup'}
                 </span>
-                <div className="w-1.5 h-1.5 rotate-45 border-r-2 border-b-2" style={{ borderColor: portraitData.border }} />
+                <div className="w-1 sm:w-1.5 h-1 sm:h-1.5 rotate-45 border-r-[1.5px] sm:border-r-2 border-b-[1.5px] sm:border-b-2" style={{ borderColor: portraitData.border }} />
               </div>
             )}
 
-            <div className="absolute top-3 right-4 flex gap-1">
+            <div className="absolute top-2 sm:top-3 right-2 sm:right-4 flex gap-0.5 sm:gap-1">
               {dialogue.lines.map((_, i) => (
                 <div
                   key={i}
-                  className="w-1 h-1 rounded-full transition-colors duration-300"
+                  className="w-0.5 h-0.5 sm:w-1 sm:h-1 rounded-full transition-colors duration-300"
                   style={{ background: i <= dialogue.currentIndex ? portraitData.border : 'rgba(255,255,255,0.1)' }}
                 />
               ))}

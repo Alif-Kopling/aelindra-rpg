@@ -76,7 +76,7 @@ const GameOverScreen: React.FC = () => {
       ))}
 
       {/* Main content */}
-      <div className="relative z-10 text-center px-8" style={{ maxWidth: 560 }}>
+      <div className="relative z-10 text-center px-4 sm:px-8" style={{ maxWidth: 560 }}>
         {/* YOU DIED */}
         <div
           style={{
@@ -94,11 +94,11 @@ const GameOverScreen: React.FC = () => {
         </div>
 
         {/* Decorative line */}
-        <div style={{
-          width: 300,
+        <div className="mx-auto" style={{
+          width: 'min(60vw, 300px)',
           height: 1,
           background: 'linear-gradient(90deg, transparent, #8b0000, transparent)',
-          margin: '0 auto 24px',
+          marginBottom: 'clamp(12px, 3vw, 24px)',
         }} />
 
         {/* Quote */}
@@ -128,46 +128,46 @@ const GameOverScreen: React.FC = () => {
         </div>
 
         {/* Buttons */}
-        <div className="flex flex-col gap-3 items-center">
+        <div className="flex flex-col gap-2 sm:gap-3 items-center w-full px-4">
           <button
             onClick={handleRetry}
-            className="btn-fantasy py-4 px-12 rounded-sm"
+            className="btn-fantasy py-3 sm:py-4 px-8 sm:px-12 rounded-sm w-full sm:w-auto"
             style={{
               fontFamily: 'Cinzel, serif',
-              fontSize: 14,
+              fontSize: 'clamp(12px, 2.5vw, 14px)',
               letterSpacing: '2px',
               color: '#f4e4c1',
               borderColor: 'rgba(139,0,0,0.6)',
               boxShadow: '0 0 20px rgba(139,0,0,0.2)',
-              minWidth: 260,
+              maxWidth: 300,
             }}
           >
             ↺  Rise Again
           </button>
           <button
             onClick={handleLoadSave}
-            className="btn-fantasy py-3 px-10 rounded-sm"
+            className="btn-fantasy py-2 sm:py-3 px-6 sm:px-10 rounded-sm w-full sm:w-auto"
             style={{
               fontFamily: 'Cinzel, serif',
-              fontSize: 11,
+              fontSize: 'clamp(10px, 2vw, 11px)',
               letterSpacing: '2px',
               color: '#8fa8b8',
               borderColor: 'rgba(65,105,225,0.3)',
-              minWidth: 260,
+              maxWidth: 300,
             }}
           >
             💾  Load Last Save
           </button>
           <button
             onClick={() => setScreen('title')}
-            className="btn-fantasy py-3 px-10 rounded-sm"
+            className="btn-fantasy py-2 sm:py-3 px-6 sm:px-10 rounded-sm w-full sm:w-auto"
             style={{
               fontFamily: 'Cinzel, serif',
-              fontSize: 11,
+              fontSize: 'clamp(10px, 2vw, 11px)',
               letterSpacing: '2px',
               color: '#4a3a3a',
               borderColor: 'rgba(100,60,60,0.2)',
-              minWidth: 260,
+              maxWidth: 300,
             }}
           >
             Return to Title

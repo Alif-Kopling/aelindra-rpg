@@ -20,7 +20,9 @@ const PauseMenu: React.FC = () => {
 
       <div
         style={{
-          width: 520,
+          width: 'min(95vw, 520px)',
+          maxHeight: '90vh',
+          overflowY: 'auto',
           background: 'linear-gradient(160deg, rgba(8,5,14,0.99), rgba(14,8,22,0.99))',
           border: '1px solid rgba(184,134,11,0.4)',
           borderRadius: 6,
@@ -31,10 +33,10 @@ const PauseMenu: React.FC = () => {
         }}
       >
         {/* Title */}
-        <div className="text-center py-6" style={{ borderBottom: '1px solid rgba(184,134,11,0.2)' }}>
+        <div className="text-center py-3 sm:py-6" style={{ borderBottom: '1px solid rgba(184,134,11,0.2)' }}>
           <div style={{
             fontFamily: 'Cinzel Decorative, serif',
-            fontSize: 22,
+            fontSize: 'clamp(16px, 4vw, 22px)',
             fontWeight: 900,
             color: '#f4e4c1',
             textShadow: '0 0 20px rgba(184,134,11,0.4)',
@@ -42,21 +44,21 @@ const PauseMenu: React.FC = () => {
           }}>
             PAUSED
           </div>
-          <div style={{ fontFamily: 'Lora, serif', fontStyle: 'italic', fontSize: 11, color: '#8fa8b8', marginTop: 4 }}>
+          <div style={{ fontFamily: 'Lora, serif', fontStyle: 'italic', fontSize: 'clamp(9px, 1.8vw, 11px)', color: '#8fa8b8', marginTop: 4 }}>
             {player.name} · Level {player.stats.level}
           </div>
         </div>
 
         {/* Tab nav */}
-        <div className="flex border-b" style={{ borderColor: 'rgba(184,134,11,0.2)' }}>
+        <div className="flex border-b overflow-x-auto" style={{ borderColor: 'rgba(184,134,11,0.2)' }}>
           {(['main', 'skills', 'settings', 'controls', 'save', 'quests'] as PauseTab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className="flex-1 py-3 transition-all duration-200"
+              className="flex-1 py-2 sm:py-3 transition-all duration-200 whitespace-nowrap"
               style={{
                 fontFamily: 'Cinzel, serif',
-                fontSize: 9,
+                fontSize: 'clamp(7px, 1.4vw, 9px)',
                 letterSpacing: '1px',
                 color: tab === t ? '#ffd700' : '#8fa8b8',
                 background: tab === t ? 'rgba(184,134,11,0.1)' : 'transparent',
@@ -70,7 +72,7 @@ const PauseMenu: React.FC = () => {
         </div>
 
         {/* Tab content */}
-        <div style={{ minHeight: 300, padding: 24 }}>
+        <div style={{ minHeight: 'clamp(200px, 50vh, 300px)', padding: 'clamp(12px, 3vw, 24px)' }}>
           {tab === 'main' && (
             <MainTab togglePause={togglePause} setScreen={setScreen} setTab={setTab} />
           )}

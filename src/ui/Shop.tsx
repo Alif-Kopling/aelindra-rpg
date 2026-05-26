@@ -117,9 +117,9 @@ const Shop: React.FC = () => {
         </div>
 
         {/* Content Row */}
-        <div className="flex flex-1 gap-6 min-h-0">
+        <div className="flex flex-col sm:flex-row flex-1 gap-4 sm:gap-6 min-h-0">
           {/* Left Panel: Edric Portrait & Chat */}
-          <div className="w-1/3 flex flex-col items-center justify-center bg-black/35 rounded p-4 border border-yellow-900/20">
+          <div className="w-full sm:w-1/3 flex flex-col items-center justify-center bg-black/35 rounded p-3 sm:p-4 border border-yellow-900/20">
             <div
               className="w-24 h-24 rounded overflow-hidden mb-3 border-2 border-yellow-700/60"
               style={{

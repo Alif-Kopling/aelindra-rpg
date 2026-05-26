@@ -57,7 +57,9 @@ const Inventory: React.FC = () => {
       <div
         className="relative"
         style={{
-          width: 680,
+          width: 'min(95vw, 680px)',
+          maxHeight: '90vh',
+          overflowY: 'auto',
           background: 'linear-gradient(135deg, rgba(8,8,16,0.98), rgba(16,10,24,0.98))',
           border: '1px solid rgba(184,134,11,0.5)',
           borderRadius: 6,
@@ -66,28 +68,28 @@ const Inventory: React.FC = () => {
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid rgba(184,134,11,0.3)' }}>
+        <div className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-4" style={{ borderBottom: '1px solid rgba(184,134,11,0.3)' }}>
           <div>
-            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 18, fontWeight: 700, color: '#f4e4c1', letterSpacing: '3px' }}>
+            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 'clamp(14px, 3vw, 18px)', fontWeight: 700, color: '#f4e4c1', letterSpacing: '3px' }}>
               INVENTORY
             </h2>
-            <p style={{ fontFamily: 'Lora, serif', fontSize: 11, color: '#8fa8b8', fontStyle: 'italic', marginTop: 2 }}>
+            <p style={{ fontFamily: 'Lora, serif', fontSize: 'clamp(9px, 1.8vw, 11px)', color: '#8fa8b8', fontStyle: 'italic', marginTop: 2 }}>
               {inventory.items.length} / {inventory.maxSlots} items  ·  {inventory.gold} 💰 Gold
             </p>
           </div>
           <button
             onClick={toggleInventory}
-            className="btn-fantasy px-3 py-1"
-            style={{ fontSize: 11, borderRadius: 3 }}
+            className="btn-fantasy px-2 sm:px-3 py-1"
+            style={{ fontSize: 'clamp(9px, 1.8vw, 11px)', borderRadius: 3 }}
           >
             ✕ Close
           </button>
         </div>
 
-        <div className="flex">
+        <div className="flex flex-col sm:flex-row">
           {/* Grid */}
-          <div className="p-4 flex-1">
-            <div className="grid" style={{ gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
+          <div className="p-2 sm:p-4 flex-1">
+            <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(clamp(50px, 10vw, 72px), 1fr))', gap: 4 }}>
               {/* Filled slots */}
               {inventory.items.map((item, idx) => {
                 const rarity = RARITY_COLORS[item.rarity];
@@ -97,8 +99,9 @@ const Inventory: React.FC = () => {
                     key={item.id + '_' + idx}
                     className="relative cursor-pointer transition-transform duration-100 hover:scale-105"
                     style={{
-                      width: 72,
-                      height: 72,
+                      aspectRatio: '1',
+                      width: '100%',
+                      maxWidth: 'clamp(50px, 10vw, 72px)',
                       background: equipped
                         ? `linear-gradient(135deg, ${rarity.glow}, rgba(255,215,0,0.1))`
                         : `linear-gradient(135deg, rgba(20,15,30,0.9), rgba(10,8,16,0.9))`,
@@ -115,10 +118,10 @@ const Inventory: React.FC = () => {
                         <img
                           src={ITEM_IMAGES[item.id]}
                           alt={item.id}
-                          style={{ width: 32, height: 32, imageRendering: 'pixelated' }}
+                          style={{ width: 'clamp(20px, 5vw, 32px)', height: 'clamp(20px, 5vw, 32px)', imageRendering: 'pixelated' }}
                         />
                       ) : (
-                        <div style={{ width: 32, height: 32, background: 'rgba(60,60,80,0.3)', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#666' }}>?</div>
+                        <div style={{ width: 'clamp(20px, 5vw, 32px)', height: 'clamp(20px, 5vw, 32px)', background: 'rgba(60,60,80,0.3)', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#666' }}>?</div>
                       )}
                     </div>
 
@@ -169,10 +172,12 @@ const Inventory: React.FC = () => {
 
           {/* Side panel - Item detail */}
           <div
+            className="hidden sm:block"
             style={{
               width: 200,
               borderLeft: '1px solid rgba(184,134,11,0.2)',
               padding: 16,
+              flexShrink: 0,
             }}
           >
             {selectedItem ? (
@@ -191,11 +196,11 @@ const Inventory: React.FC = () => {
         </div>
 
         {/* Equipment row */}
-        <div style={{ borderTop: '1px solid rgba(184,134,11,0.2)', padding: '12px 16px' }}>
-          <div style={{ fontFamily: 'Cinzel, serif', fontSize: 10, color: '#b8860b', letterSpacing: '2px', marginBottom: 8 }}>
+        <div className="px-3 sm:px-4 py-2 sm:py-3" style={{ borderTop: '1px solid rgba(184,134,11,0.2)' }}>
+          <div style={{ fontFamily: 'Cinzel, serif', fontSize: 'clamp(8px, 1.6vw, 10px)', color: '#b8860b', letterSpacing: '2px', marginBottom: 6 }}>
             EQUIPPED
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             {[
               { slot: 'Weapon', id: player.equippedWeapon },
               { slot: 'Armor', id: player.equippedArmor },
@@ -205,13 +210,14 @@ const Inventory: React.FC = () => {
               return (
                 <div
                   key={slot}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-1 sm:gap-2"
                   style={{
                     background: 'rgba(20,15,10,0.8)',
                     border: '1px solid rgba(184,134,11,0.4)',
                     borderRadius: 4,
-                    padding: '6px 10px',
-                    minWidth: 120,
+                    padding: '4px 6px',
+                    minWidth: 0,
+                    flex: '1 0 auto',
                   }}
                 >
                   {item ? (
