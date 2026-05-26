@@ -6,6 +6,13 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.on('progress', (value: number) => {
+      this.game.events.emit('load-progress', value);
+    });
+    this.load.on('complete', () => {
+      this.game.events.emit('load-complete');
+    });
+
     this.load.image('player_sprite', 'assets/images/knight_player.png');
     this.load.image('player_walk', 'assets/images/player-walk.png');
     this.load.image('player_jump', 'assets/images/player-jump.png');

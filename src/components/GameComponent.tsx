@@ -11,11 +11,14 @@ import Notifications from '../ui/Notifications';
 import Shop from '../ui/Shop';
 import DevToolsPanel from '../ui/DevToolsPanel';
 import MobileControlsOverlay from '../ui/MobileControlsOverlay';
+import LoadingScreen from '../ui/LoadingScreen';
 import { playBGM, setBGMVolume } from '../utils/bgm';
 
 const GameComponent: React.FC = () => {
   const gameRef = React.useRef<Phaser.Game | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [loadProgress, setLoadProgress] = React.useState(0);
   const { isPaused, isInventoryOpen, dialogue, isShopOpen, currentZone, settings } = useGameStore();
 
   React.useEffect(() => {
@@ -23,8 +26,17 @@ const GameComponent: React.FC = () => {
 
     gameRef.current = createPhaserGame('game-canvas');
 
+    const game = gameRef.current;
+    const onProgress = (value: number) => setLoadProgress(Math.round(value * 100));
+    const onComplete = () => setLoading(false);
+
+    game.events.on('load-progress', onProgress);
+    game.events.on('load-complete', onComplete);
+
     return () => {
-      gameRef.current?.destroy(true);
+      game.events.off('load-progress', onProgress);
+      game.events.off('load-complete', onComplete);
+      game.destroy(true);
       gameRef.current = null;
     };
   }, []);
@@ -97,6 +109,8 @@ const GameComponent: React.FC = () => {
           background: '#0f0f1a',
         }}
       >
+        {loading && <LoadingScreen progress={loadProgress} />}
+
         <div
           id="game-canvas"
           ref={containerRef}
