@@ -1,0 +1,18 @@
+{
+  "name": "Aelindra: The Forsaken Knight",
+  "short_name": "Aelindra",
+  "description": "A Dark Fantasy Action RPG",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#050508",
+  "theme_color": "#050508",
+  "icons": [
+    {
+      "src": "/sword.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

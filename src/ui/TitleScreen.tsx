@@ -545,6 +545,15 @@ const CreditsPanel = React.memo(function CreditsPanel({ onClose }: { onClose: ()
 
 const TitleScreen: React.FC = () => {
   const { setScreen, addNotification } = useGameStore();
+
+  const requestFullscreen = React.useCallback(() => {
+    try {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        el.requestFullscreen();
+      }
+    } catch {} // silently fail on unsupported browsers
+  }, []);
   const [ready, setReady] = React.useState(false);
   const [showSettings, setShowSettings] = React.useState(false);
   const [showCredits, setShowCredits] = React.useState(false);
@@ -627,7 +636,7 @@ const TitleScreen: React.FC = () => {
           }}
         >
           <div className="flex flex-col gap-3 sm:max-w-[320px]" style={{ marginTop: 36 }}>
-            <PrimaryButton label="Begin New Journey" onClick={() => setScreen('prologue')} />
+            <PrimaryButton label="Begin New Journey" onClick={() => { requestFullscreen(); setScreen('prologue'); }} />
             <SecondaryButton label="Continue" onClick={continueGame} />
           </div>
 
