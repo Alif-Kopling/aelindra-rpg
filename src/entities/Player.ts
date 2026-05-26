@@ -11,6 +11,7 @@ import {
   canCancelAttackIntoDash,
   isFinisherCombo,
 } from '../systems/combatFeel';
+import { getTrustDefenseBuff } from '../systems/dialogueEngine';
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
   private keys!: {
@@ -252,17 +253,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (this.isDashing) {
       this.dashTimer -= delta;
-      body.setVelocityX(this.dashDirX * COMBAT_CONFIG.dashSpeed);
-      body.setVelocityY(this.keys.W.isDown ? -120 : this.keys.S.isDown ? 80 : 0);
+      const dashVx = this.dashDirX * COMBAT_CONFIG.dashSpeed;
+      const dashVy = (this.keys.W.isDown ? -180 : this.keys.S.isDown ? 150 : 0);
+      body.setVelocityX(dashVx);
+      body.setVelocityY(dashVy);
       body.allowGravity = false;
       this.invincibleTimer = Math.max(this.invincibleTimer, COMBAT_CONFIG.dashIFramesMs);
-      this.setAlpha(0.65);
+      this.setAlpha(0);
       this.updateFrame('dash', delta);
       if (this.dashTimer <= 0) {
         this.isDashing = false;
         body.allowGravity = true;
         store.setPlayerDashing(false);
         this.setAlpha(1);
+        this.spawnBlinkArrival();
       }
       this.updateAttackHitbox();
       this.clearCharge();
@@ -1158,6 +1162,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.dashDirX = vx >= 0 ? 1 : -1;
     if (vx !== 0) this.facingRight = vx > 0;
     this.spawnDashTrail();
+    this.spawnBlinkDeparture();
     this.playSfx('sfx_dash', 0.35, 0.9 + Math.random() * 0.2);
   }
 
@@ -1329,41 +1334,56 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   private spawnDashTrail() {
-    for (let i = 0; i < 6; i++) {
-      const ghost = this.scene.add.image(this.x - this.dashDirX * i * 12, this.y, this.texture.key);
-      ghost.setFlipX(this.flipX);
-      ghost.setScale(this.scaleX, this.scaleY);
-      ghost.setAlpha(0.35 - i * 0.05);
-      ghost.setTint(0x4169e1);
-      ghost.setDepth(9);
+    const dir = this.dashDirX;
+    const cx = this.x;
+    const cy = this.y;
 
-      this.scene.tweens.add({
-        targets: ghost, alpha: 0, duration: 350, ease: 'Linear',
-        onComplete: () => ghost.destroy(),
-      });
+    const speedLines = this.scene.add.graphics();
+    speedLines.lineStyle(2, 0x88ccff, 0.5);
+    for (let i = 0; i < 5; i++) {
+      const ly = cy + Phaser.Math.Between(-20, 20);
+      speedLines.lineBetween(
+        cx - dir * 10, ly,
+        cx - dir * 50, ly + Phaser.Math.Between(-8, 8)
+      );
     }
+    speedLines.setDepth(24);
+    this.scene.tweens.add({
+      targets: speedLines,
+      alpha: 0,
+      x: speedLines.x - dir * 30,
+      duration: 200,
+      onComplete: () => speedLines.destroy(),
+    });
 
     const trailGlow = this.scene.add.graphics();
-    trailGlow.fillStyle(0x4169e1, 0.3);
-    trailGlow.fillCircle(this.x, this.y, 12);
+    trailGlow.fillStyle(0x4169e1, 0.4);
+    trailGlow.fillCircle(cx, cy, 14);
     trailGlow.setDepth(8);
     this.scene.tweens.add({
       targets: trailGlow,
-      x: this.x + this.dashDirX * -60,
-      alpha: 0, scaleX: 0.5, scaleY: 0.5,
-      duration: 350,
+      x: cx + dir * -80,
+      alpha: 0,
+      scaleX: 0.3,
+      scaleY: 0.3,
+      duration: 250,
       onComplete: () => trailGlow.destroy(),
     });
 
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 8; i++) {
       const spark = this.scene.add.graphics();
-      spark.fillStyle(0x4169e1, 0.6);
+      spark.fillStyle(0x88ccff, 0.7);
       spark.fillCircle(0, 0, 1.5 + Math.random() * 2);
-      spark.setPosition(this.x + Phaser.Math.Between(-8, 8), this.y + Phaser.Math.Between(-12, 12));
-      spark.setDepth(8);
+      spark.setPosition(cx + Phaser.Math.Between(-6, 6), cy + Phaser.Math.Between(-14, 14));
+      spark.setDepth(24);
       this.scene.tweens.add({
-        targets: spark, alpha: 0, x: spark.x - this.dashDirX * Phaser.Math.Between(10, 30),
-        duration: 300, delay: i * 30, onComplete: () => spark.destroy(),
+        targets: spark,
+        alpha: 0,
+        x: spark.x - dir * Phaser.Math.Between(20, 60),
+        y: spark.y + Phaser.Math.Between(-10, 10),
+        duration: 200,
+        delay: i * 15,
+        onComplete: () => spark.destroy(),
       });
     }
   }
@@ -1492,7 +1512,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.lastDamageAt = now;
 
     const store = useGameStore.getState();
-    store.damagePlayer(amount);
+    const nunDefense = getTrustDefenseBuff(store.npcTrust, 'nun');
+    const reducedAmount = Math.max(1, amount - nunDefense);
+    store.damagePlayer(reducedAmount);
     this.invincibleTimer = COMBAT_CONFIG.dashIFramesMs + 180;
 
     this.playSfx('sfx_sword_hit_blood', 0.4, 0.8 + Math.random() * 0.4);
@@ -1524,6 +1546,96 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   getFacing(): boolean {
     return this.facingRight;
+  }
+
+  private spawnBlinkDeparture() {
+    const cx = this.x;
+    const cy = this.y;
+    const dir = this.dashDirX;
+
+    const flash = this.scene.add.graphics();
+    flash.fillStyle(0xffffff, 0.7);
+    flash.fillCircle(cx, cy, 18);
+    flash.setDepth(26);
+    this.scene.tweens.add({
+      targets: flash,
+      scaleX: 0.1,
+      scaleY: 0.1,
+      alpha: 0,
+      duration: 120,
+      onComplete: () => flash.destroy(),
+    });
+
+    for (let i = 0; i < 8; i++) {
+      const streak = this.scene.add.graphics();
+      streak.fillStyle(0x88ccff, 0.6);
+      streak.fillRect(-2, -6, 4, 12);
+      streak.setPosition(cx, cy + Phaser.Math.Between(-16, 16));
+      streak.setDepth(25);
+      streak.setAlpha(1);
+      this.scene.tweens.add({
+        targets: streak,
+        x: cx + dir * Phaser.Math.Between(40, 100),
+        alpha: 0,
+        scaleX: 0.1,
+        duration: 150,
+        delay: i * 10,
+        onComplete: () => streak.destroy(),
+      });
+    }
+  }
+
+  private spawnBlinkArrival() {
+    const cx = this.x;
+    const cy = this.y;
+    const dir = this.dashDirX;
+
+    const burst = this.scene.add.graphics();
+    burst.fillStyle(0xffffff, 0.5);
+    burst.fillCircle(cx, cy, 12);
+    burst.setDepth(26);
+    this.scene.tweens.add({
+      targets: burst,
+      scaleX: 3,
+      scaleY: 3,
+      alpha: 0,
+      duration: 200,
+      ease: 'Power2',
+      onComplete: () => burst.destroy(),
+    });
+
+    const ring = this.scene.add.graphics();
+    ring.lineStyle(2, 0x88ccff, 0.7);
+    ring.strokeCircle(cx, cy, 8);
+    ring.setDepth(25);
+    this.scene.tweens.add({
+      targets: ring,
+      scaleX: 4,
+      scaleY: 4,
+      alpha: 0,
+      duration: 250,
+      ease: 'Power2',
+      onComplete: () => ring.destroy(),
+    });
+
+    for (let i = 0; i < 6; i++) {
+      const spark = this.scene.add.graphics();
+      spark.fillStyle(0x4169e1, 0.8);
+      spark.fillCircle(0, 0, 2 + Math.random() * 2);
+      spark.setPosition(cx, cy);
+      spark.setDepth(25);
+      const angle = Math.random() * Math.PI * 2;
+      this.scene.tweens.add({
+        targets: spark,
+        x: cx + Math.cos(angle) * Phaser.Math.Between(20, 50),
+        y: cy + Math.sin(angle) * Phaser.Math.Between(20, 50),
+        alpha: 0,
+        duration: 200 + Math.random() * 100,
+        onComplete: () => spark.destroy(),
+      });
+    }
+
+    this.scene.cameras.main.flash(60, 100, 150, 255);
   }
 
   private spawnParticles(x: number, y: number, color: number, count: number = 8, speedMultiplier: number = 1) {

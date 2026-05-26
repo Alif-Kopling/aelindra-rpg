@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { useGameStore } from '../store/gameStore';
 import { EnemyStats } from '../utils/types';
 import { COMBAT_CONFIG } from '../systems/combatFeel';
+import { getTrustHpRegen } from '../systems/dialogueEngine';
 
 export interface EnemyConfig {
   key: string;
@@ -520,6 +521,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     store.gainExp(this.config.stats.exp);
     store.addGold(this.config.stats.gold);
     store.incrementKillCount();
+
+    const tamRegen = getTrustHpRegen(store.npcTrust, 'tam');
+    if (tamRegen > 0) {
+      store.healPlayer(tamRegen);
+    }
 
     if (this.scene.cache.audio.exists('sfx_undead')) {
       this.scene.sound.play('sfx_undead', { volume: 0.35, rate: 0.7 + Math.random() * 0.6 });

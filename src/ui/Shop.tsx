@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useGameStore } from '../store/gameStore';
+import { getTrustDiscount } from '../systems/dialogueEngine';
 
 const ITEM_IMAGES: Record<string, string> = {
   health_potion: '/assets/images/items/health_potion.png',
@@ -40,12 +41,15 @@ const Shop: React.FC = () => {
 
   if (!isShopOpen) return null;
 
+  const { npcTrust } = useGameStore();
+  const edricDiscount = getTrustDiscount(npcTrust, 'edric');
+
   const weaponLvl = player.weaponLevel || 1;
   const armorLvl = player.armorLevel || 1;
 
-  const weaponUpgradeCost = 60 + (weaponLvl - 1) * 30;
-  const armorUpgradeCost = 50 + (armorLvl - 1) * 25;
-  const potionCost = 30;
+  const weaponUpgradeCost = Math.max(10, (60 + (weaponLvl - 1) * 30) - edricDiscount);
+  const armorUpgradeCost = Math.max(10, (50 + (armorLvl - 1) * 25) - edricDiscount);
+  const potionCost = Math.max(10, 30 - edricDiscount);
 
   const handleWeaponUpgrade = () => {
     if (inventory.gold >= weaponUpgradeCost) {
@@ -133,6 +137,11 @@ const Shop: React.FC = () => {
             <div className="text-center">
               <h3 className="text-xs font-semibold text-yellow-600 uppercase tracking-widest">Old Edric</h3>
               <p className="text-xxs text-gray-500 italic mt-0.5">The Village Smithy</p>
+              {edricDiscount > 0 && (
+                <p className="text-xxs text-green-500 mt-1 font-bold">
+                  ✦ Trust Discount: -{edricDiscount}G
+                </p>
+              )}
             </div>
             <div className="mt-4 p-3 bg-black/50 border border-yellow-800/10 rounded text-center">
               <p className="text-xxs italic leading-relaxed text-yellow-100/70">

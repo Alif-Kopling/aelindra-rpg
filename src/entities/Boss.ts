@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { useGameStore } from '../store/gameStore';
+import { getTrustBossHint } from '../systems/dialogueEngine';
 
 export interface BossConfig {
   id: string;
@@ -33,6 +34,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
   private introComplete = false;
   private enrageMode = false;
   private timeAccumulator = 0;
+  private phaseScaleMultiplier = 1;
   private arenaLeft = 0;
   private arenaRight = 1920;
   private activeTimers: Phaser.Time.TimerEvent[] = [];
@@ -163,6 +165,44 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
       hold: 2000,
       onComplete: () => nameText.destroy(),
     });
+
+    const store = useGameStore.getState();
+    const hintLevel = getTrustBossHint(store.npcTrust, 'evelyne');
+    if (hintLevel) {
+      const hintTexts: Record<string, string> = {
+        basic: '"Valther pernah bilang — musuh punya irama. Dengarkan."',
+        pattern: '"Putri ingatkan: tiap pukulan punya celah. Cari di antara serangan."',
+        dodge: '"Kata Evelyne — musuh ini punya momen rentan setelah serangan besarnya."',
+      };
+      const hintText = scene.add.text(
+        scene.cameras.main.width / 2,
+        scene.cameras.main.height * 0.4,
+        hintTexts[hintLevel],
+        {
+          fontSize: '10px',
+          fontFamily: 'Cinzel, serif',
+          color: '#88bbff',
+          align: 'center',
+          stroke: '#000',
+          strokeThickness: 3,
+          fontStyle: 'italic',
+        }
+      );
+      hintText.setScrollFactor(0);
+      hintText.setDepth(100);
+      hintText.setOrigin(0.5);
+      hintText.setAlpha(0);
+
+      scene.tweens.add({
+        targets: hintText,
+        alpha: 1,
+        duration: 800,
+        delay: 500,
+        yoyo: true,
+        hold: 2500,
+        onComplete: () => hintText.destroy(),
+      });
+    }
   }
 
   setTarget(target: Phaser.Physics.Arcade.Sprite) {
