@@ -414,6 +414,7 @@ export class GameplayScene extends Phaser.Scene {
 
         if (killed) {
           this.bossGroup.remove(boss);
+          this.onEnemyKilled();
         }
       }
     );
