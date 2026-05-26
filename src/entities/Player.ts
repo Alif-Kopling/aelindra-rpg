@@ -62,6 +62,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private isOnGround = false;
   private footstepTimer = 0;
   private hitEntities = new Set<string>();
+  private ghostTimer = 0;
+  private unlimitedStaminaTimer = 0;
 
   private moveSpeed = 180;
   private jumpForce = -380;
@@ -112,6 +114,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.setupControls();
     this.createAnimations();
     this.createAttackHitbox();
+
+    window.addEventListener('player:unlimited-stamina', ((e: CustomEvent) => {
+      this.applyUnlimitedStamina(e.detail.duration);
+    }) as any);
   }
 
   private setupControls() {
@@ -200,6 +206,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.staminaRegenTimer += delta;
     this.ultimateCooldown = Math.max(0, this.ultimateCooldown - delta);
     this.frameTimer += delta;
+    this.unlimitedStaminaTimer = Math.max(0, this.unlimitedStaminaTimer - delta);
 
     this.isOnGround = body.blocked.down || body.touching.down;
 
@@ -222,7 +229,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.attackElapsedMs = 0;
     }
 
-    if (!this.isAttacking && this.staminaRegenTimer > 200 && stats.stamina < stats.maxStamina) {
+    if (this.unlimitedStaminaTimer > 0) {
+      if (stats.stamina < stats.maxStamina) {
+        store.restoreStamina(100); // Instantly refill during buff
+      }
+      // Visual feedback for unlimited stamina
+      if (this.timeAccumulator % 200 < 20) {
+        this.setTint(0x00ffff);
+      } else {
+        this.clearTint();
+      }
+    } else if (!this.isAttacking && this.staminaRegenTimer > 200 && stats.stamina < stats.maxStamina) {
       store.restoreStamina(2);
       this.staminaRegenTimer = 0;
     }
@@ -1643,6 +1660,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.scene.cameras.main.flash(60, 100, 150, 255);
   }
 
+  applyUnlimitedStamina(duration: number) {
+    this.unlimitedStaminaTimer = duration;
+    this.setTint(0x00ffff);
+    this.scene.time.delayedCall(500, () => this.clearTint());
+  }
+
   private spawnParticles(x: number, y: number, color: number, count: number = 8, speedMultiplier: number = 1) {
     const isRight = this.facingRight;
     const baseDir = isRight ? 1 : -1;
@@ -1684,21 +1707,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (count >= 10) {
       const glow = this.scene.add.graphics();
       glow.fillStyle(color, 0.25);
-      glow.fillCircle(x, y, 20);
-      glow.setDepth(24);
-      this.scene.tweens.add({
-        targets: glow,
-        scaleX: 3,
-        scaleY: 3,
-        alpha: 0,
-        duration: 350,
-        ease: 'Power2',
-        onComplete: () => glow.destroy(),
-      });
-    }
-  }
-}
-color, 0.25);
       glow.fillCircle(x, y, 20);
       glow.setDepth(24);
       this.scene.tweens.add({

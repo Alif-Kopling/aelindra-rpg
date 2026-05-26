@@ -681,12 +681,13 @@ export const useGameStore = create<GameStore>()(
               id: `notif_${Date.now()}`,
               type: 'success',
               title: 'Meminum Ramuan',
-              message: `HP pulih sebanyak ${healAmount} poin!`,
+              message: `HP pulih! Stamina tak terbatas selama 10 detik!`,
               icon: '🧪',
               duration: 2000,
               timestamp: Date.now()
             });
           });
+          window.dispatchEvent(new CustomEvent('player:unlimited-stamina', { detail: { duration: 10000 } }));
           window.dispatchEvent(new CustomEvent('sfx:play', { detail: { key: 'sfx_potion', volume: 0.5, rate: 1 } }));
         }
       } else {

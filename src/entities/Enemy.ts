@@ -550,7 +550,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       },
     });
 
-    if (!this.lootDropped && Math.random() < 0.3) {
+    if (!this.lootDropped && Math.random() < 0.12) {
       this.lootDropped = true;
       this.dropLoot();
     }
