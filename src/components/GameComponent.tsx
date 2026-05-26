@@ -128,9 +128,8 @@ const GameComponent: React.FC = () => {
 
         {/* Ambient bottom shadow to blend ground and obscure background watermarks */}
         <div
-          className="absolute bottom-0 left-0 right-0 pointer-events-none"
+          className="absolute bottom-0 left-0 right-0 pointer-events-none h-[60px] md:h-[80px] lg:h-[110px]"
           style={{
-            height: '110px',
             background: 'linear-gradient(to top, rgba(10,10,15,0.98) 0%, rgba(10,10,15,0.85) 15%, rgba(10,10,15,0.3) 60%, transparent 100%)',
             zIndex: 9,
           }}
