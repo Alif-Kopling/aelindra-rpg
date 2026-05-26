@@ -565,7 +565,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   }
 
   private dropLoot() {
-    const loot = this.scene.add.text(this.x, this.y, '💊', { fontSize: '20px' });
+    const offsetX = Phaser.Math.Between(-30, 30);
+    const offsetY = Phaser.Math.Between(-20, 0);
+    const loot = this.scene.add.text(this.x + offsetX, this.y + offsetY, '💊', { fontSize: '20px' });
     loot.setDepth(8);
     loot.setInteractive();
     loot.on('pointerdown', () => {

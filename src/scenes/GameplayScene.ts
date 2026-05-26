@@ -1349,7 +1349,8 @@ export class GameplayScene extends Phaser.Scene {
     }
 
     this.time.delayedCall(duration, () => {
-      if (!this.transitioningZone && !store.dialogue.isOpen) {
+      const currentStore = useGameStore.getState();
+      if (!this.transitioningZone && !currentStore.dialogue.isOpen && !currentStore.isPaused && !currentStore.isInventoryOpen && !currentStore.isShopOpen) {
         this.physics.world.resume();
       }
       this.isHitStopping = false;

@@ -1771,6 +1771,17 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
       duration: 4000,
     });
 
+    store.setBoss({
+      id: this.config.id,
+      name: this.config.name,
+      title: this.config.title,
+      hp: this.hp,
+      maxHp: this.maxHp,
+      phase: this.phase,
+      maxPhase: this.config.phases,
+      isActive: true,
+    });
+
     scene.time.delayedCall(3000, () => {
       this.isInvulnerable = false;
       this.phaseTransitioning = false;
@@ -1807,17 +1818,6 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
       body.setSize(bw, bh);
       const tex = this.texture.get();
       body.setOffset((tex.width - bw) / 2, tex.height - bh);
-
-      store.setBoss({
-        id: this.config.id,
-        name: this.config.name,
-        title: this.config.title,
-        hp: this.hp,
-        maxHp: this.maxHp,
-        phase: this.phase,
-        maxPhase: this.config.phases,
-        isActive: true,
-      });
     });
   }
 

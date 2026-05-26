@@ -222,7 +222,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.attackElapsedMs = 0;
     }
 
-    if (this.staminaRegenTimer > 200 && stats.stamina < stats.maxStamina) {
+    if (!this.isAttacking && this.staminaRegenTimer > 200 && stats.stamina < stats.maxStamina) {
       store.restoreStamina(2);
       this.staminaRegenTimer = 0;
     }
